@@ -1,12 +1,12 @@
 {
- "code": 16,
- "name": "1.0.16",
+ "code": 17,
+ "name": "1.0.17",
  "date": "2026-10-05",
- "apk": "https://btypenine.github.io/chamdom.apk?v=16",
+ "apk": "https://btypenine.github.io/chamdom.apk?v=17",
  "download": "https://btypenine.github.io/download.html",
  "notes": [
-  "새 버전이 나오면 앱에서 알려줘요 (업데이트 버튼)",
-  "알림 전체 켜기/끄기 · 알림 받는 시간(심야 끄기)",
-  "친구 공유용 다운로드 페이지"
+  "만든 사람·문의처 표시 (btypetrade@gmail.com)",
+  "새 버전이 나오면 앱에서 알려줘요",
+  "알림 받는 시간(심야 끄기) 설정"
  ]
 }

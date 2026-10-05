@@ -124,6 +124,9 @@ h1.logo{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:21p
 input[type=time]{background:#262a31;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:18px;font-weight:700;color-scheme:dark;width:100%}
 .tbox{flex:1}.tbox span{display:block;font-size:11px;color:var(--sub);margin-bottom:4px}
 .quiet{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:10px;font-size:13px}
+.maker{display:flex;gap:12px;align-items:center;background:var(--card);border-radius:14px;padding:14px;margin-top:22px;border:1px solid var(--line)}
+.maker .ic{font-size:28px}.maker b{font-size:15px}.maker .sub{line-height:1.5}
+a.mail{color:var(--blue);font-weight:700;text-decoration:none}
 .help .ex{background:#262a31;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.7;margin:8px 0}
 /* 테두리 경고등: 탑승(무지개 회전) / 하차(점멸) */
 @property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
@@ -237,6 +240,8 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
     · 휴대폰을 껐다 켜면 앱을 한 번 열어주세요 (감시가 다시 시작돼요)<br>
     · 감시 중엔 알림창에 “감시 중”이 계속 떠 있고 배터리를 조금 더 써요<br>
     · 모든 분석과 알림은 과거 흐름을 바탕으로 한 <b>참고용</b>이에요. 수익을 보장하지 않아요.</div>
+  <h3>✉️ 만든 사람 · 문의</h3>
+  <div class="maker"><div class="ic">🐟</div><div><b>참돔파닥파닥</b><div class="sub">개인이 만든 앱이에요. 궁금한 점·오류·제안은 메일로 보내주세요.<br><a class="mail" data-mail href="#">btypetrade@gmail.com</a></div></div></div>
   <div style="text-align:center;margin-top:20px"><button id="helpClose2">알겠어요, 시작할게요</button></div>
 </div>
 <div class="edge" id="edge"></div><div class="sig" id="sig"><div id="sigTxt" style="flex:1"></div><button id="sigOk">확인</button></div>
@@ -246,6 +251,7 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
 <main>
   <div id="err"></div>
   <div id="detail"><div class="card sub">처음 실행이라 5년치 시세를 받는 중이에요. 5~10분 정도 걸리고, 다음부터는 새로 생긴 날짜만 받아서 금방 끝나요.</div></div>
+  <div class="maker"><div class="ic">🐟</div><div><b>참돔파닥파닥</b><div class="sub">만든 사람 · 문의 <a class="mail" data-mail href="#">btypetrade@gmail.com</a></div></div></div>
   <div class="note">
     · 위 막대를 옆으로 넘겨 종목을 고르세요. 숫자는 규칙성 점수예요 (⭐ 관심 종목은 맨 앞)<br>
     · 점수 = 하루 진폭의 일정함 + 변동성의 안정성 + 급등락 빈도 + 박스권 성향을 종합 (높을수록 규칙적)<br>
@@ -963,6 +969,7 @@ function renderSettings() {
     </div>
     <div class="row" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)"><div><b>앱 버전</b><div class="sub">${window.Android ? 'v1.0.' + myVer() : '웹앱 (자동 업데이트)'}${latestVer && window.Android && latestVer.code > myVer() ? ` · <span class="up">새 버전 v${latestVer.name} 있음</span>` : ''}</div></div>
       <button data-set="ver" style="margin-left:auto;background:var(--line);color:var(--tx)">업데이트 확인</button></div>
+    <div class="row" style="margin-top:12px"><div><b>문의</b><div class="sub">오류·제안·궁금한 점</div></div><a class="mail" data-mail href="#" style="margin-left:auto">btypetrade@gmail.com</a></div>
     <div class="why" style="margin-top:12px">감시 종목 ${acfg.markets.length}개 · 목표 +${acfg.target.toFixed(2)}% · 손절 −${acfg.stop}% <span class="sub">(종목 화면에서 바꿔요)</span></div>`;
 }
 $('aset').addEventListener('click', e => {
@@ -1013,6 +1020,15 @@ async function checkVersion(manual) {
 $('ulater').onclick = () => { store.save('verLater', Date.now() + 24 * 3600 * 1000); $('umodal').classList.remove('show'); };   // 하루 뒤 다시 안내
 setTimeout(() => checkVersion(false), 4000);
 setInterval(() => checkVersion(false), 6 * 3600 * 1000);
+/* ---------- 문의 메일 ---------- */
+const CONTACT = 'btypetrade@gmail.com';
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-mail]'); if (!a) return;
+  e.preventDefault();
+  const ver = window.Android ? 'Android v1.0.' + myVer() : 'iPhone 웹앱';
+  const subject = encodeURIComponent('[참돔파닥파닥] 문의'), body = encodeURIComponent(`\n\n\n---\n앱: ${ver}`);
+  location.href = `mailto:${CONTACT}?subject=${subject}&body=${body}`;
+});
 /* ---------- 사용법 ---------- */
 const showHelp = on => { $('help').classList.toggle('show', on); if (on) $('help').scrollTop = 0; else store.save('helpSeen', 1); };
 const openHelp = () => { showHelp(true); history.pushState({help: 1}, ''); };   // 휴대폰 뒤로가기로 닫히게
