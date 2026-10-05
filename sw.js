@@ -1,5 +1,5 @@
 // 참돔파닥파닥 웹앱 서비스워커: 화면 파일 오프라인 보관 + 알림 눌렀을 때 해당 종목 열기
-const CACHE = 'chamdom-vd6165e2';
+const CACHE = 'chamdom-va51019f';
 const SHELL = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
