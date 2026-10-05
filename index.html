@@ -240,6 +240,8 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <div style="text-align:center;margin-top:20px"><button id="helpClose2">알겠어요, 시작할게요</button></div>
 </div>
 <div class="edge" id="edge"></div><div class="sig" id="sig"><div id="sigTxt" style="flex:1"></div><button id="sigOk">확인</button></div>
+<div class="modal" id="umodal"><div class="box" style="border-color:var(--g)"><div class="ic">🎉</div><h2 id="utitle"></h2><div id="unotes" style="text-align:left;font-size:14px;line-height:1.7;color:var(--tx);margin:0 0 16px"></div>
+  <button id="uok" style="background:var(--g);color:#0d2416"></button><button id="ulater" style="background:none;color:var(--sub);margin-top:6px">나중에</button></div></div>
 <div class="modal" id="modal"><div class="box" id="mbox"><div class="ic" id="mic"></div><h2 id="mtitle"></h2><p id="mtext"></p><button id="mok">확인 · 종목 보기</button></div></div>
 <main>
   <div id="err"></div>
@@ -959,12 +961,15 @@ function renderSettings() {
         <div class="why">${a.start} ~ ${a.end} 사이에만 알림이 와요. 그 밖의 시간엔 새 매수 신호를 내지 않고, 익절·손절은 조용히 내역에만 기록해요.</div>` : ''}
       <div class="quiet" style="background:${!acfg.on ? '#3a3d44' : ok ? '#1b2a22' : '#2a2440'}">${!acfg.on ? '🔕 알림이 꺼져 있어요' : ok ? '🔔 지금은 알림 받는 시간이에요' : `💤 지금은 쉬는 시간 · ${a.start}부터 다시 알려드려요`}</div>
     </div>
+    <div class="row" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)"><div><b>앱 버전</b><div class="sub">${window.Android ? 'v1.0.' + myVer() : '웹앱 (자동 업데이트)'}${latestVer && window.Android && latestVer.code > myVer() ? ` · <span class="up">새 버전 v${latestVer.name} 있음</span>` : ''}</div></div>
+      <button data-set="ver" style="margin-left:auto;background:var(--line);color:var(--tx)">업데이트 확인</button></div>
     <div class="why" style="margin-top:12px">감시 종목 ${acfg.markets.length}개 · 목표 +${acfg.target.toFixed(2)}% · 손절 −${acfg.stop}% <span class="sub">(종목 화면에서 바꿔요)</span></div>`;
 }
 $('aset').addEventListener('click', e => {
   const b = e.target.closest('[data-set]'); if (!b) return;
   const k = b.dataset.set, a = acfg.active || {on: false, start: '07:00', end: '23:00'};
   if (k === 'power') { acfg.on = !acfg.on; if (acfg.on && NATIVE && !BR.notifPermission()) BR.requestNotif(); if (acfg.on && !acfg.markets.length && sel) acfg.markets.push(sel); }
+  if (k === 'ver') { checkVersion(true).then(renderSettings); return; }
   if (k === 'always') a.on = false;
   if (k === 'window') a.on = true;
   if (k === 'night') Object.assign(a, {on: true, start: '07:00', end: '23:00'});
@@ -975,6 +980,39 @@ $('aset').addEventListener('change', e => {
   const a = acfg.active || {on: true}; a[e.target.id === 'tstart' ? 'start' : 'end'] = e.target.value || (e.target.id === 'tstart' ? '07:00' : '23:00');
   acfg.active = a; saveCfg(); renderSettings();
 });
+/* ---------- 새 버전 알림 (친구에게 공유한 앱도 업데이트 안내) ---------- */
+const SITE = 'https://btypenine.github.io/';
+let latestVer = null;
+const myVer = () => (window.Android && Android.appVersion) ? Android.appVersion() : 0;
+async function checkVersion(manual) {
+  try {
+    const r = await rawGet(SITE + 'version.json?t=' + Date.now());
+    if (r.status !== 200) throw new Error('HTTP ' + r.status);
+    const v = latestVer = JSON.parse(r.body), notes = (v.notes || []).map(n => '· ' + esc(n)).join('<br>');
+    if (window.Android) {
+      if (v.code > myVer()) {
+        if (!manual && (store.load('verLater') || 0) > Date.now()) return v;
+        $('utitle').textContent = `새 버전 v${v.name} 나왔어요`;
+        $('unotes').innerHTML = (notes || '') + '<div class="why" style="margin-top:10px">「지금 업데이트」 → 다운로드된 파일을 눌러 설치하면 기존 앱 위에 업데이트돼요 (설정·내역 그대로).</div>';
+        $('uok').textContent = '지금 업데이트'; $('uok').onclick = () => { Android.openUrl(v.apk || SITE + 'chamdom.apk'); $('umodal').classList.remove('show'); };
+        $('ulater').style.display = '';
+        $('umodal').classList.add('show');
+      } else if (manual) { $('utitle').textContent = `최신 버전이에요 (v${v.name})`; $('unotes').innerHTML = notes; $('uok').textContent = '확인'; $('uok').onclick = () => $('umodal').classList.remove('show'); $('ulater').style.display = 'none'; $('umodal').classList.add('show'); }
+    } else {
+      const seen = store.load('webVer');
+      if ((seen && v.code > seen) || manual) {     // 아이폰(웹앱)은 열 때 자동으로 새 버전이 적용됨 → 바뀐 내용만 안내
+        $('utitle').textContent = manual ? `최신 버전 v${v.name} 사용 중` : `v${v.name}로 업데이트됐어요`;
+        $('unotes').innerHTML = notes; $('uok').textContent = '확인'; $('uok').onclick = () => $('umodal').classList.remove('show');
+        $('ulater').style.display = 'none'; $('umodal').classList.add('show');
+      }
+      store.save('webVer', v.code);
+    }
+    return v;
+  } catch (e) { if (manual) { $('utitle').textContent = '버전을 확인하지 못했어요'; $('unotes').innerHTML = '인터넷 연결을 확인해 주세요.'; $('uok').textContent = '확인'; $('uok').onclick = () => $('umodal').classList.remove('show'); $('ulater').style.display = 'none'; $('umodal').classList.add('show'); } }
+}
+$('ulater').onclick = () => { store.save('verLater', Date.now() + 24 * 3600 * 1000); $('umodal').classList.remove('show'); };   // 하루 뒤 다시 안내
+setTimeout(() => checkVersion(false), 4000);
+setInterval(() => checkVersion(false), 6 * 3600 * 1000);
 /* ---------- 사용법 ---------- */
 const showHelp = on => { $('help').classList.toggle('show', on); if (on) $('help').scrollTop = 0; else store.save('helpSeen', 1); };
 const openHelp = () => { showHelp(true); history.pushState({help: 1}, ''); };   // 휴대폰 뒤로가기로 닫히게
