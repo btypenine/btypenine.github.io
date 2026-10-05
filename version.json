@@ -1,11 +1,11 @@
 {
- "code": 18,
- "name": "1.0.18",
+ "code": 19,
+ "name": "1.0.19",
  "date": "2026-10-06",
- "apk": "https://btypenine.github.io/chamdom.apk?v=18",
+ "apk": "https://btypenine.github.io/chamdom.apk?v=19",
  "download": "https://btypenine.github.io/download.html",
  "notes": [
-  "📈 차트 보기: 진입·익절·손절 지점을 화살표로 표시",
-  "알림 팝업·안내창·감시 현황·알림 내역에 차트 버튼"
+  "앱을 열 때마다 새 버전을 바로 확인해서 알려줘요",
+  "📈 차트 보기: 진입·익절·손절 화살표"
  ]
 }

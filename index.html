@@ -1009,8 +1009,8 @@ async function checkVersion(manual) {
     if (r.status !== 200) throw new Error('HTTP ' + r.status);
     const v = latestVer = JSON.parse(r.body), notes = (v.notes || []).map(n => '· ' + esc(n)).join('<br>');
     if (window.Android) {
+      if (!manual) return v;          // 자동 안내는 앱(네이티브)이 열 때마다 직접 띄움
       if (v.code > myVer()) {
-        if (!manual && (store.load('verLater') || 0) > Date.now()) return v;
         $('utitle').textContent = `새 버전 v${v.name} 나왔어요`;
         $('unotes').innerHTML = (notes || '') + '<div class="why" style="margin-top:10px">「지금 업데이트」 → 다운로드된 파일을 눌러 설치하면 기존 앱 위에 업데이트돼요 (설정·내역 그대로).</div>';
         $('uok').textContent = '지금 업데이트'; $('uok').onclick = () => { Android.openUrl(v.apk || SITE + 'chamdom.apk'); $('umodal').classList.remove('show'); };
