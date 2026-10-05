@@ -117,6 +117,13 @@ h1.logo{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:21p
 .hrow .t{font-size:11px;color:var(--sub)}
 .hrow .g{margin-left:auto;text-align:right;font-weight:800;font-size:16px}
 .hday{font-size:12px;color:var(--sub);margin:16px 2px 4px}
+.big-sw{font-size:16px;padding:12px 18px;min-width:110px}
+.seg{display:flex;background:#262a31;border-radius:12px;padding:3px;margin-top:10px}
+.seg button{flex:1;background:none;color:var(--sub);border-radius:10px;padding:9px 4px}
+.seg button.on{background:var(--blue);color:#0b1b33}
+input[type=time]{background:#262a31;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:18px;font-weight:700;color-scheme:dark;width:100%}
+.tbox{flex:1}.tbox span{display:block;font-size:11px;color:var(--sub);margin-bottom:4px}
+.quiet{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:10px;font-size:13px}
 .help .ex{background:#262a31;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.7;margin:8px 0}
 /* 테두리 경고등: 탑승(무지개 회전) / 하차(점멸) */
 @property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
@@ -166,14 +173,17 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <g fill="#5fd0ff" opacity=".9"><circle cx="27" cy="15" r="1.1"/><circle cx="33" cy="12.5" r="1"/><circle cx="31" cy="19" r="1.1"/><circle cx="38" cy="16" r="1"/><circle cx="24" cy="21" r=".9"/></g>
   <circle cx="53" cy="18" r="3" fill="#fff"/><circle cx="53.8" cy="18" r="1.6" fill="#1b1b1b"/>
   <path d="M60.5 22.5 q-2 1 -3.5 0" fill="none" stroke="#8a2420" stroke-width="1.2" stroke-linecap="round"/>
-</svg><span class="ttl"><span class="t1">참돔</span><span class="t2"><i style="--d:0.00s">파</i><i style="--d:0.09s">닥</i><i style="--d:0.18s">파</i><i style="--d:0.27s">닥</i></span></span></h1><button id="histBtn" class="ib" style="margin-left:auto" title="알림 내역" aria-label="알림 내역"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot" id="hdot"></span></button><button id="helpBtn" class="ib" title="사용법" aria-label="사용법"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button><button id="btn" class="ib ref" title="새로고침" aria-label="새로고침"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button></div>
+</svg><span class="ttl"><span class="t1">참돔</span><span class="t2"><i style="--d:0.00s">파</i><i style="--d:0.09s">닥</i><i style="--d:0.18s">파</i><i style="--d:0.27s">닥</i></span></span></h1><button id="histBtn" class="ib" style="margin-left:auto" title="알림 설정·내역" aria-label="알림 설정과 내역"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot" id="hdot"></span></button><button id="helpBtn" class="ib" title="사용법" aria-label="사용법"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button><button id="btn" class="ib ref" title="새로고침" aria-label="새로고침"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button></div>
   <div class="sub" id="upd">업비트 최근 5년 거래대금 상위 20종목</div>
   <div id="prog" style="display:none"><div class="sub" id="ptxt"></div><div class="bar"><i id="pbar" style="width:0;background:var(--blue)"></i></div></div>
   <div class="chips" id="chips"></div>
 </header>
 <div class="help" id="hist">
-  <div class="row"><h1>🔔 알림 내역</h1><button id="histClose" style="margin-left:auto">닫기</button></div>
-  <div class="sub" style="margin-top:4px">탑승 권고 · 익절 · 손절 알림이 온 기록이에요. 줄을 누르면 그 종목으로 가요.</div>
+  <div class="row"><h1>🔔 알림</h1><button id="histClose" style="margin-left:auto">닫기</button></div>
+  <h2>⚙ 알림 설정</h2>
+  <div class="card" id="aset"></div>
+  <h2>📜 알림 내역</h2>
+  <div class="sub" style="margin:0 2px">탑승 권고 · 익절 · 손절 알림이 온 기록이에요. 줄을 누르면 그 종목으로 가요.</div>
   <div class="chips" id="hfil" style="padding-top:12px"></div>
   <div class="card" id="hsum"></div>
   <div id="hlist"></div>
@@ -218,6 +228,7 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
     → 약 1,003원 되면 💰 알림 · 990원 되면 🛑 알림</div>
   <div class="step"><div class="n">💡</div><div>실제로 산 가격이 알림 가격과 다르면 <b>📡 감시 현황</b>에서 <b>매수가 수정</b>을 눌러 고쳐요. 이미 갖고 있는 코인도 매수가를 넣으면 바로 익절·손절 감시가 시작돼요.</div></div>
 
+  <div class="step"><div class="n">🌙</div><div><b>심야엔 알림 끄기</b>: 맨 위 🔔 버튼 → <b>알림 설정</b>에서 「🌙 심야 끄기」를 누르면 아침 7시~밤 11시에만 알림이 와요. 「시간 지정」으로 원하는 시간을 고를 수도 있고, 「알림 전체」로 한 번에 끄고 켤 수 있어요.</div></div>
   <div class="step"><div class="n">🔔</div><div>맨 위 <b>🔔 종 모양 버튼</b>을 누르면 지금까지 온 탑승·익절·손절 알림을 날짜별로 볼 수 있어요. 알림대로 사고팔았다면 얼마나 벌었을지(익절 비율·누적 수익)도 보여줘요.</div></div>
 
   <h3>⚠ 꼭 알아두세요</h3>
@@ -571,6 +582,14 @@ function render(res) {
   if (typeof updateEdge === 'function') updateEdge();
 }
 
+/* ---------- 알림 받는 시간대 (심야 쉬는 시간) ---------- */
+const hm = t => { const [h, m] = String(t || '0:0').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+function activeNow(cfg, d = new Date()) {
+  const a = cfg && cfg.active; if (!a || !a.on) return true;
+  const st = hm(a.start || '07:00'), en = hm(a.end || '23:00'), t = d.getHours() * 60 + d.getMinutes();
+  return st === en ? true : st < en ? t >= st && t < en : t >= st || t < en;
+}
+
 /* ---------- 아이폰(웹앱)용 알림 엔진: 안드로이드 서비스와 같은 규칙, 앱을 열어둔 동안 30초마다 ---------- */
 if (!window.Android) (function () {
   const FEE_W = 0.001, COOL = 30 * 60 * 1000;
@@ -603,7 +622,7 @@ if (!window.Android) (function () {
     try {
       const target = (cfg.target || 0.2) / 100, stop = (cfg.stop || 1) / 100, up = target + FEE_W;
       const look = Math.min(48, Math.max(12, Math.round(12 * (target * 100) / 0.5)));
-      const st = L('w_state') || {};
+      const st = L('w_state') || {}, allowed = activeNow(cfg);
       for (const m of cfg.markets || []) {
         const name = (cfg.names || {})[m] || m.slice(4), s = st[m] || {mode: 'watch'};
         try {
@@ -623,15 +642,15 @@ if (!window.Android) (function () {
           if (s.mode === 'hold') {
             const entry = s.entry || price, gain = price / entry - 1 - FEE_W; s.gain = gain;
             if (price >= entry * (1 + up)) {
-              notify(`💰 ${name} 목표 수익 도달!`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 수수료 빼고 ${pc(gain * 100)}`, m);
+              if (allowed) notify(`💰 ${name} 목표 수익 도달!`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 수수료 빼고 ${pc(gain * 100)}`, m);
               addHist({m, name, type: 'tp', price, entry, gain, since: s.entryAt || 0});
               Object.assign(s, {exitType: 'tp', exitLevel: entry * (1 + up), mode: 'watch', lastResult: '익절 ' + pc(gain * 100), lastSignal: now, alert: 'tp', alertAt: now}); delete s.fromSignal;
             } else if (price <= entry * (1 - stop)) {
-              notify(`🛑 ${name} 손절선 도달`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 ${pc(gain * 100)}`, m);
+              if (allowed) notify(`🛑 ${name} 손절선 도달`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 ${pc(gain * 100)}`, m);
               addHist({m, name, type: 'sl', price, entry, gain, since: s.entryAt || 0});
               Object.assign(s, {exitType: 'sl', exitLevel: entry * (1 - stop), mode: 'watch', lastResult: '손절 ' + pc(gain * 100), lastSignal: now, alert: 'sl', alertAt: now}); delete s.fromSignal;
             }
-          } else if (buyNow && now - (s.lastSignal || 0) > COOL) {
+          } else if (allowed && buyNow && now - (s.lastSignal || 0) > COOL) {
             Object.assign(s, {mode: 'hold', entry: price, entryAt: now, lastSignal: now, gain: -FEE_W, alert: 'buy', alertAt: now, fromSignal: true}); delete s.exitType;
             addHist({m, name, type: 'buy', price, hit, samples, target: cfg.target || 0.2, stop: cfg.stop || 1});
             notify(`🐟 ${name} 매수 타이밍`, `현재가 ${f(price)}원 · 비슷한 흐름 ${samples}번 중 ${Math.round(hit * 100)}%가 목표에 닿았어요`, m);
@@ -725,6 +744,8 @@ function renderAlert() {
   box.innerHTML = `<h2>🔔 실시간 알림</h2><div class="card">
     <div class="row"><div><b>알림 전체</b><div class="sub">${IS_WEB ? '앱을 열어둔 동안 30초마다 확인해요' : '앱을 닫아도 30초마다 확인해요'}</div></div>
       <button data-act="power" class="sw ${acfg.on ? 'on' : ''}" style="margin-left:auto">${acfg.on ? '켜짐' : '꺼짐'}</button></div>
+    ${acfg.on && !activeNow(acfg) ? `<div class="quiet" style="background:#2a2440">💤 알림 쉬는 시간 · ${acfg.active.start}부터 다시 알려드려요</div>` : ''}
+    ${acfg.active && acfg.active.on ? `<div class="sub" style="margin-top:6px">⏰ ${acfg.active.start} ~ ${acfg.active.end}에만 알림 <a href="#" data-act="openset" style="color:var(--blue)">시간 바꾸기</a></div>` : ''}
     <div class="row" style="margin-top:12px"><div><b>${esc(x.name)} 감시</b><div class="sub">감시 종목 ${acfg.markets.length}개</div></div>
       <button data-act="watch" class="sw ${watching ? 'on' : ''}" style="margin-left:auto">${watching ? '감시 중' : '감시 안 함'}</button></div>
     <div style="margin-top:16px"><div class="row"><b>목표 수익</b><span class="sub">수수료 빼고</span>
@@ -763,6 +784,7 @@ document.addEventListener('click', e => {
   if (act === 'tup' || act === 'tdn') { acfg.target = clampT(acfg.target + (act === 'tup' ? T_STEP : -T_STEP)); saveCfg(); setTargetUI(); return; }
   if (act === 'entry' && NATIVE) { const v = parseFloat(($('ent_' + a.dataset.m) || {}).value); if (v > 0) BR.setEntry(a.dataset.m, v); }
   if (act === 'clear' && NATIVE) BR.setEntry(a.dataset.m, 0);
+  if (act === 'openset') { e.preventDefault(); openHist(); return; }
   if (act === 'perm' && NATIVE) BR.requestNotif();
   if (act === 'batt' && NATIVE) BR.requestBattery();
   if (act === 'test' && NATIVE) { if (!BR.notifPermission()) BR.requestNotif(); else BR.testNotify(); return; }
@@ -903,7 +925,7 @@ function renderHist() {
     return `${head}<div class="hrow" data-hm="${esc(e.m)}"><div class="ic">${ic}</div><div><b>${ttl}</b><div class="t">${tm} · ${sub}</div></div>${g}</div>`;
   }).join('');
 }
-const openHist = () => { store.save('histSeenAt', Date.now()); updateBell(); hFilter = 'all'; renderHist(); $('hist').classList.add('show'); $('hist').scrollTop = 0; history.pushState({hist: 1}, ''); };
+const openHist = () => { store.save('histSeenAt', Date.now()); updateBell(); hFilter = 'all'; renderSettings(); renderHist(); $('hist').classList.add('show'); $('hist').scrollTop = 0; history.pushState({hist: 1}, ''); };
 const closeHist = () => $('hist').classList.remove('show');
 $('histBtn').onclick = openHist;
 function updateBell() {   // 안 본 새 알림이 있으면 빨간 점 + 종 흔들림
@@ -922,6 +944,37 @@ $('histClear').onclick = () => {
   if (b.dataset.sure) { if (NATIVE && BR.clearHistory) BR.clearHistory(); else store.save('demoHist', []); delete b.dataset.sure; b.textContent = '내역 모두 지우기'; renderHist(); }
   else { b.dataset.sure = 1; b.textContent = '한 번 더 누르면 지워져요'; setTimeout(() => { delete b.dataset.sure; b.textContent = '내역 모두 지우기'; }, 3000); }
 };
+/* ---------- 알림 설정 (전체 켜기/끄기 · 알림 받는 시간대) ---------- */
+function renderSettings() {
+  const a = acfg.active || {on: false, start: '07:00', end: '23:00'}, ok = activeNow(acfg);
+  $('aset').innerHTML = `
+    <div class="row"><div><b style="font-size:16px">알림 전체</b><div class="sub">끄면 모든 종목 감시와 알림이 멈춰요</div></div>
+      <button data-set="power" class="sw big-sw ${acfg.on ? 'on' : ''}" style="margin-left:auto">${acfg.on ? '🔔 켜짐' : '🔕 꺼짐'}</button></div>
+    <div style="margin-top:18px"><b style="font-size:16px">알림 받는 시간</b><div class="sub">심야에는 알림 없이 조용히 쉬어요</div>
+      <div class="seg"><button data-set="always" class="${a.on ? '' : 'on'}">24시간</button><button data-set="window" class="${a.on ? 'on' : ''}">시간 지정</button><button data-set="night">🌙 심야 끄기</button></div>
+      ${a.on ? `<div class="row" style="margin-top:12px;gap:10px">
+        <div class="tbox"><span>부터</span><input type="time" id="tstart" value="${a.start}"></div>
+        <div style="padding-top:18px;color:var(--sub)">~</div>
+        <div class="tbox"><span>까지만 알림</span><input type="time" id="tend" value="${a.end}"></div></div>
+        <div class="why">${a.start} ~ ${a.end} 사이에만 알림이 와요. 그 밖의 시간엔 새 매수 신호를 내지 않고, 익절·손절은 조용히 내역에만 기록해요.</div>` : ''}
+      <div class="quiet" style="background:${!acfg.on ? '#3a3d44' : ok ? '#1b2a22' : '#2a2440'}">${!acfg.on ? '🔕 알림이 꺼져 있어요' : ok ? '🔔 지금은 알림 받는 시간이에요' : `💤 지금은 쉬는 시간 · ${a.start}부터 다시 알려드려요`}</div>
+    </div>
+    <div class="why" style="margin-top:12px">감시 종목 ${acfg.markets.length}개 · 목표 +${acfg.target.toFixed(2)}% · 손절 −${acfg.stop}% <span class="sub">(종목 화면에서 바꿔요)</span></div>`;
+}
+$('aset').addEventListener('click', e => {
+  const b = e.target.closest('[data-set]'); if (!b) return;
+  const k = b.dataset.set, a = acfg.active || {on: false, start: '07:00', end: '23:00'};
+  if (k === 'power') { acfg.on = !acfg.on; if (acfg.on && NATIVE && !BR.notifPermission()) BR.requestNotif(); if (acfg.on && !acfg.markets.length && sel) acfg.markets.push(sel); }
+  if (k === 'always') a.on = false;
+  if (k === 'window') a.on = true;
+  if (k === 'night') Object.assign(a, {on: true, start: '07:00', end: '23:00'});
+  acfg.active = a; saveCfg(); renderSettings(); renderAlert();
+});
+$('aset').addEventListener('change', e => {
+  if (e.target.id !== 'tstart' && e.target.id !== 'tend') return;
+  const a = acfg.active || {on: true}; a[e.target.id === 'tstart' ? 'start' : 'end'] = e.target.value || (e.target.id === 'tstart' ? '07:00' : '23:00');
+  acfg.active = a; saveCfg(); renderSettings();
+});
 /* ---------- 사용법 ---------- */
 const showHelp = on => { $('help').classList.toggle('show', on); if (on) $('help').scrollTop = 0; else store.save('helpSeen', 1); };
 const openHelp = () => { showHelp(true); history.pushState({help: 1}, ''); };   // 휴대폰 뒤로가기로 닫히게
