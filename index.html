@@ -1069,7 +1069,7 @@ async function checkVersion(manual) {
       if (v.code > myVer()) {
         $('utitle').textContent = `새 버전 v${v.name} 나왔어요`;
         $('unotes').innerHTML = (notes || '') + '<div class="why" style="margin-top:10px">「지금 업데이트」 → 다운로드된 파일을 눌러 설치하면 기존 앱 위에 업데이트돼요 (설정·내역 그대로).</div>';
-        $('uok').textContent = '지금 업데이트'; $('uok').onclick = () => { Android.openUrl(v.apk || SITE + 'chamdom.apk'); $('umodal').classList.remove('show'); };
+        $('uok').textContent = '지금 업데이트'; $('uok').onclick = () => { $('umodal').classList.remove('show'); if (Android.updateNow) Android.updateNow(); else Android.openUrl(v.apk || SITE + 'chamdom.apk'); };
         $('ulater').style.display = '';
         $('umodal').classList.add('show');
       } else if (manual) { $('utitle').textContent = `최신 버전이에요 (v${v.name})`; $('unotes').innerHTML = notes; $('uok').textContent = '확인'; $('uok').onclick = () => $('umodal').classList.remove('show'); $('ulater').style.display = 'none'; $('umodal').classList.add('show'); }
