@@ -141,6 +141,13 @@ a.mail{color:var(--blue);font-weight:700;text-decoration:none}
 .chipset{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .chipset button{background:#262a31;color:var(--sub);padding:8px 12px;border-radius:10px;font-size:13px}
 .chipset button.on{background:var(--blue);color:#0b1b33}
+.rkrow{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:12px;margin:8px 0}
+.rkrow.me{outline:2px solid var(--blue)}
+.rkrow .no{width:30px;text-align:center;font-weight:900;font-size:16px;color:var(--sub)}
+.rkrow .r{margin-left:auto;text-align:right;white-space:nowrap}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff!important;color:#1f1f1f!important;font-weight:700}
+.gbtn svg{width:20px;height:20px}
+input.nick{width:100%;margin:8px 0 4px;font-size:17px;padding:12px}
 .help .ex{background:#262a31;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.7;margin:8px 0}
 /* 테두리 경고등: 탑승(무지개 회전) / 하차(점멸) */
 @property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
@@ -195,6 +202,17 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <div id="prog" style="display:none"><div class="sub" id="ptxt"></div><div class="bar"><i id="pbar" style="width:0;background:var(--blue)"></i></div></div>
   <div class="chips" id="chips"></div>
 </header>
+<div class="help" id="rank">
+  <div class="row"><h1>🏆 랭킹</h1><button id="rankClose" style="margin-left:auto">닫기</button></div>
+  <div class="sub" style="margin-top:4px">모의투자 실적으로 순위를 매겨요. 초기화한 판까지 모두 더한 <b>누적 손익</b>이 기준이라 초기화로 기록을 지울 수 없어요.</div>
+  <div class="card" id="rme"></div>
+  <div class="seg" id="rsort" style="margin-top:14px"><button data-rs="total" class="on">누적 손익</button><button data-rs="pct">이번 판 수익률</button></div>
+  <div id="rlist"></div>
+  <div class="why" style="margin-top:14px">· 랭킹은 앱을 열 때 자동으로 올라가요 (10분마다 갱신)<br>· 닉네임과 모의투자 실적만 저장해요. 메일 주소 등 다른 정보는 저장하지 않아요.</div>
+</div>
+<div class="modal" id="jmodal"><div class="box" style="text-align:left">
+  <div class="ic" style="text-align:center">🏆</div><h2 style="text-align:center" id="jtitle">랭킹 참여하기</h2>
+  <div id="jbody"></div></div></div>
 <div class="help" id="paper">
   <div class="row"><h1>💰 모의투자</h1><button id="paperClose" style="margin-left:auto">닫기</button></div>
   <div class="sub" style="margin-top:4px">가상의 100만원으로, 🌈 탑승 권고 알림 때 자동으로 사고 💰익절·🛑손절 알림 때 자동으로 팔아요. 진짜 돈은 쓰지 않아요.</div>
@@ -262,6 +280,9 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <div class="step"><div class="n">💰</div><div>화면 위 <b>💰 모의투자</b> 카드를 누르면 가상 지갑이 열려요. 🌈 탑승 권고 알림 때 <b>정해둔 금액만큼 자동으로 사고</b>, 💰익절·🛑손절 알림 때 <b>자동으로 팔아요</b>(수수료 반영). 진짜 돈은 안 써요.<br>
     <small>1회 투입 금액(10만~100만원)은 설정에서 바꿔요. 「100만원으로 초기화」를 누르면 그때의 손익이 <b>초기화 이력</b>에 남고(예: 43만원 손실 상태에서 초기화), 총 초기화 횟수와 손익 합계도 보여줘요.</small></div></div>
 
+  <h3>🏆 랭킹</h3>
+  <div class="step"><div class="n">🏆</div><div><b>🏆 랭킹</b> 카드 → 「Google로 로그인」(안드로이드) 또는 「닉네임만으로 참여」 → 닉네임 정하기. 친구들과 모의투자 실적을 겨뤄요.<br><small>순위는 초기화한 판까지 모두 더한 누적 손익 기준이에요. 닉네임과 실적만 저장해요.</small></div></div>
+
   <h3>⚠ 꼭 알아두세요</h3>
   <div class="ex">· 앱 안에 있을 때 볼륨 버튼은 목표 수익 조절용이라 소리 크기는 안 바뀌어요<br>
     · 같은 종목 매수 알림은 30분에 한 번까지만 와요<br>
@@ -284,6 +305,7 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
 <main>
   <div id="err"></div>
   <div id="wallet"></div>
+  <div id="rankcard"></div>
   <div id="detail"><div class="card sub">처음 실행이라 5년치 시세를 받는 중이에요. 5~10분 정도 걸리고, 다음부터는 새로 생긴 날짜만 받아서 금방 끝나요.</div></div>
   <div class="maker"><div class="ic">🐟</div><div><b>참돔파닥파닥</b><div class="sub">만든 사람 · 문의 <a class="mail" data-mail href="#">btypetrade@gmail.com</a></div></div></div>
   <div class="note">
@@ -623,6 +645,7 @@ function render(res) {
   renderAlert();
   if (typeof updateEdge === 'function') updateEdge();
   if (typeof renderWallet === 'function') renderWallet();
+  if (typeof renderRankCard === 'function') renderRankCard();
 }
 
 /* ---------- 알림 받는 시간대 (심야 쉬는 시간) ---------- */
@@ -1261,6 +1284,162 @@ $('pReset').onclick = () => {
   BR.paperReset(JSON.stringify(prices)); renderPaper(); renderWallet(); $('paper').scrollTop = $('prs').offsetTop - 120;
 };
 setInterval(() => { renderWallet(); if ($('paper').classList.contains('show')) renderPaper(); }, 5000);
+/* ---------- 🏆 랭킹 (Firebase: 로그인 + 실적 저장소) ---------- */
+const FB = {key: 'AIzaSyAdAuYD4DBRNG1jwP0mpb82J-PlF5j2k-w', project: 'chamdom-84047'};
+const FS = `https://firestore.googleapis.com/v1/projects/${FB.project}/databases/(default)/documents`;
+let fbReq = 0;
+function http(method, url, body, headers = {}) {     // 안드로이드는 앱(네이티브)이, 아이폰·웹은 브라우저가 서버와 통신
+  const b = body == null ? '' : typeof body === 'string' ? body : JSON.stringify(body);
+  if (body != null && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+  if (window.Android && Android.http) return new Promise(res => { const id = 'h' + (++fbReq); pending[id] = res; Android.http(id, method, url, JSON.stringify(headers), b); })
+    .then(r => ({status: r.status, json: (() => { try { return JSON.parse(r.body || '{}'); } catch (e) { return {}; } })()}));
+  return fetch(url, {method, headers, body: b || undefined}).then(async r => ({status: r.status, json: await r.json().catch(() => ({}))})).catch(e => ({status: 0, json: {error: {message: String(e)}}}));
+}
+const fbErr = r => (r.json && r.json.error && (r.json.error.message || r.json.error.status)) || ('HTTP ' + r.status);
+let auth = store.load('fbAuth');      // {uid, idToken, refreshToken, exp, provider, nick}
+const saveAuth = () => store.save('fbAuth', auth);
+function setAuth(j, provider) {
+  auth = Object.assign(auth || {}, {uid: j.localId || j.user_id, idToken: j.idToken || j.id_token, refreshToken: j.refreshToken || j.refresh_token,
+    exp: Date.now() + (+(j.expiresIn || j.expires_in || 3600) - 60) * 1000}, provider ? {provider} : {});
+  saveAuth();
+}
+async function token() {
+  if (!auth) throw new Error('로그인이 필요해요');
+  if (Date.now() < auth.exp) return auth.idToken;
+  const r = await http('POST', `https://securetoken.googleapis.com/v1/token?key=${FB.key}`, `grant_type=refresh_token&refresh_token=${encodeURIComponent(auth.refreshToken)}`, {'Content-Type': 'application/x-www-form-urlencoded'});
+  if (r.status !== 200) throw new Error('로그인이 만료됐어요: ' + fbErr(r));
+  setAuth(r.json); return auth.idToken;
+}
+async function signInAnon() {
+  const r = await http('POST', `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB.key}`, {returnSecureToken: true});
+  if (r.status !== 200) throw new Error(fbErr(r)); setAuth(r.json, 'anon');
+}
+async function signInGoogle(googleIdToken) {       // 익명으로 참여 중이었다면 같은 계정에 구글을 연결(기록 유지)
+  const body = {postBody: `id_token=${googleIdToken}&providerId=google.com`, requestUri: 'http://localhost', returnSecureToken: true, returnIdpCredential: true};
+  if (auth && auth.provider === 'anon') body.idToken = await token().catch(() => undefined);
+  let r = await http('POST', `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${FB.key}`, body);
+  if (r.status !== 200 && body.idToken) { delete body.idToken; r = await http('POST', `https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=${FB.key}`, body); }  // 이미 다른 기기에서 쓰던 구글 계정이면 그 계정으로
+  if (r.status !== 200) throw new Error(fbErr(r));
+  const prevUid = auth && auth.uid; setAuth(r.json, 'google');
+  if (prevUid && prevUid !== auth.uid) auth.nick = null;
+  const me = await fsGet('players/' + auth.uid); if (me && me.nick) auth.nick = me.nick; saveAuth();
+}
+const googleToken = () => new Promise((res, rej) => {
+  if (!(window.Android && Android.googleSignIn)) return rej(new Error('구글 로그인은 안드로이드 앱에서 돼요'));
+  window.__gsi = j => { const o = JSON.parse(j); o.token ? res(o.token) : rej(new Error(o.error || '취소됐어요')); };
+  Android.googleSignIn();
+});
+// Firestore 값 변환
+const toF = o => ({fields: Object.fromEntries(Object.entries(o).map(([k, v]) => [k, typeof v === 'string' ? {stringValue: v} : typeof v === 'boolean' ? {booleanValue: v}
+  : v instanceof Date ? {timestampValue: v.toISOString()} : Number.isInteger(v) ? {integerValue: String(v)} : {doubleValue: v}]))});
+const fromF = d => d && d.fields ? Object.fromEntries(Object.entries(d.fields).map(([k, v]) => [k, 'stringValue' in v ? v.stringValue : 'integerValue' in v ? +v.integerValue
+  : 'doubleValue' in v ? v.doubleValue : 'booleanValue' in v ? v.booleanValue : 'timestampValue' in v ? Date.parse(v.timestampValue) : null])) : null;
+async function fsGet(path) { const r = await http('GET', `${FS}/${path}`, null, {Authorization: 'Bearer ' + await token()}); return r.status === 200 ? fromF(r.json) : null; }
+const nickId = n => encodeURIComponent(n.toLowerCase());
+const nickOk = n => /^[가-힣a-zA-Z0-9_]{2,12}$/.test(n);
+async function claimNick(n) {
+  const t = await token(), H = {Authorization: 'Bearer ' + t};
+  let r = await http('PATCH', `${FS}/nicks/${nickId(n)}?currentDocument.exists=false`, toF({uid: auth.uid, nick: n}), H);
+  if (r.status !== 200) {
+    const cur = await fsGet('nicks/' + nickId(n));
+    if (!(cur && cur.uid === auth.uid)) throw new Error(cur ? '이미 다른 사람이 쓰는 닉네임이에요' : fbErr(r));
+  }
+  if (auth.nick && auth.nick.toLowerCase() !== n.toLowerCase()) await http('DELETE', `${FS}/nicks/${nickId(auth.nick)}`, null, H);
+  auth.nick = n; saveAuth(); await pushStats(true);
+}
+function myStats() {
+  const P = paper(); if (!P) return null;
+  const k = paperCalc(P), R = P.resets || [], all = (P.trades || []).filter(t => t.side === 'sell');
+  return {nick: auth.nick, total: Math.round(R.reduce((a, r) => a + r.pnl, 0) + k.pnl), pct: +k.pct.toFixed(2), equity: Math.round(k.eq),
+    resets: R.length, sells: all.length, wins: all.filter(t => t.pnl > 0).length, session: P.session, provider: auth.provider || 'anon',
+    platform: window.Android ? 'android' : 'web', updatedAt: new Date()};
+}
+let lastPush = 0;
+async function pushStats(force) {
+  if (!auth || !auth.nick || (!force && Date.now() - lastPush < 10 * 60e3)) return;
+  const st = myStats(); if (!st) return;
+  const r = await http('PATCH', `${FS}/players/${auth.uid}`, toF(st), {Authorization: 'Bearer ' + await token()});
+  if (r.status === 200) lastPush = Date.now(); else throw new Error('랭킹 저장 실패: ' + fbErr(r));
+}
+async function loadRanking(field) {
+  const q = {structuredQuery: {from: [{collectionId: 'players'}], orderBy: [{field: {fieldPath: field}, direction: 'DESCENDING'}], limit: 100}};
+  const r = await http('POST', `${FS}:runQuery`, q, {Authorization: 'Bearer ' + await token()});
+  if (r.status !== 200) throw new Error(fbErr(r));
+  return (Array.isArray(r.json) ? r.json : []).filter(x => x.document).map(x => Object.assign(fromF(x.document), {uid: x.document.name.split('/').pop()}));
+}
+const GLOGO = '<svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>';
+function renderRankCard() {
+  const c = $('rankcard'); if (!c) return;
+  c.innerHTML = `<div class="wal" data-rank="1" style="margin-top:0"><div class="ic">🏆</div><div><div class="sub">랭킹</div><b>${auth && auth.nick ? esc(auth.nick) + (myRank ? ` · ${myRank}위` : '') : '친구들과 실적 겨루기'}</b></div><div class="sub" style="margin-left:auto">${auth && auth.nick ? '보기 ›' : '참여하기 ›'}</div></div>`;
+}
+let myRank = null, rSort = 'total';
+function showJoin(step, msg) {
+  const m = $('jmodal'), b = $('jbody'); m.classList.add('show');
+  const and = !!(window.Android && Android.googleSignIn);
+  if (step === 'login') {
+    $('jtitle').textContent = '랭킹 참여하기';
+    b.innerHTML = `<div class="sub" style="text-align:center;margin-bottom:14px">닉네임만 정하면 돼요. 메일 주소 등 다른 정보는 저장하지 않아요.</div>
+      ${and ? `<button class="gbtn" data-j="google">${GLOGO} Google로 로그인</button><div class="sub" style="text-align:center;margin:6px 0 12px">폰을 바꿔도 기록이 이어져요</div>` : ''}
+      <button data-j="anon" style="background:var(--line);color:var(--tx)">닉네임만으로 참여</button>
+      <div class="sub" style="text-align:center;margin:6px 0 0">${and ? '앱을 지우면 기록을 다시 찾을 수 없어요 (나중에 구글 연결 가능)' : '아이폰은 닉네임으로 참여해요 · 앱(사파리 데이터)을 지우면 기록을 다시 찾을 수 없어요'}</div>
+      ${msg ? `<div class="warn" style="margin-top:10px">⚠ ${esc(msg)}</div>` : ''}<button data-j="close" style="background:none;color:var(--sub);margin-top:10px">닫기</button>`;
+  } else {
+    $('jtitle').textContent = auth && auth.nick ? '닉네임 바꾸기' : '닉네임 정하기';
+    b.innerHTML = `<div class="sub">한글·영문·숫자 2~12자, 다른 사람과 겹치면 안 돼요</div>
+      <input class="nick" id="nickIn" maxlength="12" placeholder="예: 참돔고수" value="${esc((auth && auth.nick) || '')}">
+      ${msg ? `<div class="warn">⚠ ${esc(msg)}</div>` : ''}<button data-j="nick" style="margin-top:10px">확인</button><button data-j="close" style="background:none;color:var(--sub);margin-top:6px">닫기</button>`;
+    setTimeout(() => $('nickIn') && $('nickIn').focus(), 100);
+  }
+}
+$('jmodal').addEventListener('click', async e => {
+  const b = e.target.closest('[data-j]'); if (!b) return;
+  const j = b.dataset.j;
+  if (j === 'close') { $('jmodal').classList.remove('show'); return; }
+  b.disabled = true; const old = b.innerHTML; b.textContent = '잠시만요…';
+  try {
+    if (j === 'google') { await signInGoogle(await googleToken()); if (auth.nick) { $('jmodal').classList.remove('show'); await pushStats(true); openRank(); } else showJoin('nick'); }
+    if (j === 'anon') { if (!auth) await signInAnon(); showJoin('nick'); }
+    if (j === 'nick') {
+      const n = ($('nickIn').value || '').trim();
+      if (!nickOk(n)) return showJoin('nick', '한글·영문·숫자·_ 로 2~12자로 정해주세요');
+      await claimNick(n); $('jmodal').classList.remove('show'); renderRankCard(); openRank();
+    }
+  } catch (err) { showJoin(j === 'nick' ? 'nick' : 'login', err.message); }
+  finally { b.disabled = false; if (b.isConnected) b.innerHTML = old; }
+});
+async function renderRank() {
+  const me = $('rme');
+  me.innerHTML = `<div class="row"><div><b style="font-size:17px">${esc(auth.nick)}</b><div class="sub">${auth.provider === 'google' ? 'Google 계정' : '닉네임 참여'} · ${window.Android ? '안드로이드' : '아이폰/웹'}</div></div>
+    <button class="cbtn sm" data-rk="nick" style="margin-left:auto">닉네임 변경</button></div>
+    ${auth.provider !== 'google' && window.Android && Android.googleSignIn ? `<button class="gbtn" data-rk="link" style="margin-top:10px">${GLOGO} Google 계정 연결 (기록 지키기)</button>` : ''}`;
+  $('rlist').innerHTML = '<div class="card sub">랭킹 불러오는 중…</div>';
+  try {
+    await pushStats(true);
+    const L = await loadRanking(rSort);
+    const i = L.findIndex(x => x.uid === auth.uid); myRank = i >= 0 && rSort === 'total' ? i + 1 : myRank; renderRankCard();
+    $('rlist').innerHTML = L.length ? L.map((x, n) => `<div class="rkrow ${x.uid === auth.uid ? 'me' : ''}"><div class="no">${n < 3 ? ['🥇', '🥈', '🥉'][n] : n + 1}</div>
+      <div><b>${esc(x.nick || '?')}</b><div class="sub">${x.session || 1}번째 판 · 초기화 ${x.resets || 0}회 · 승률 ${x.sells ? Math.round(x.wins / x.sells * 100) + '%' : '−'}</div></div>
+      <div class="r">${rSort === 'total' ? `<b class="${x.total >= 0 ? 'up' : 'dn'}">${sgnW(x.total || 0)}</b><div class="sub">이번 판 ${pct(x.pct || 0, 2)}</div>` : `<b class="${x.pct >= 0 ? 'up' : 'dn'}">${pct(x.pct || 0, 2)}</b><div class="sub">누적 ${sgnW(x.total || 0)}</div>`}</div></div>`).join('')
+      : '<div class="card sub">아직 참여한 사람이 없어요.</div>';
+  } catch (err) { $('rlist').innerHTML = `<div class="err">랭킹을 불러오지 못했어요: ${esc(err.message)}</div>`; }
+}
+const openRank = () => {
+  if (!auth || !auth.nick) return showJoin('login');
+  $('rank').classList.add('show'); $('rank').scrollTop = 0; history.pushState({rank: 1}, ''); renderRank();
+};
+const closeRank = () => $('rank').classList.remove('show');
+$('rankClose').onclick = () => history.state && history.state.rank ? history.back() : closeRank();
+window.addEventListener('popstate', () => { if (!(history.state && history.state.rank)) closeRank(); });
+document.addEventListener('click', e => { if (e.target.closest('[data-rank]')) openRank(); });
+$('rank').addEventListener('click', async e => {
+  const s = e.target.closest('[data-rs]'); if (s) { rSort = s.dataset.rs; [...$('rsort').children].forEach(x => x.classList.toggle('on', x === s)); renderRank(); return; }
+  const k = e.target.closest('[data-rk]'); if (!k) return;
+  if (k.dataset.rk === 'nick') showJoin('nick');
+  if (k.dataset.rk === 'link') { try { await signInGoogle(await googleToken()); if (!auth.nick) showJoin('nick'); else renderRank(); } catch (err) { alertBox(err.message); } }
+});
+const alertBox = m => { $('rlist').insertAdjacentHTML('afterbegin', `<div class="err">${esc(m)}</div>`); };
+setInterval(() => { if (!document.hidden) pushStats(false).catch(() => {}); }, 60e3);
+setTimeout(() => { renderRankCard(); pushStats(false).catch(() => {}); }, 2500);
 /* ---------- 문의 메일 ---------- */
 const CONTACT = 'btypetrade@gmail.com';
 document.addEventListener('click', e => {

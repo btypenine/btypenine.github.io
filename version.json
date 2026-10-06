@@ -1,11 +1,12 @@
 {
- "code": 21,
- "name": "1.0.21",
+ "code": 27,
+ "name": "1.0.27",
  "date": "2026-10-06",
- "apk": "https://btypenine.github.io/chamdom.apk?v=21",
+ "apk": "https://btypenine.github.io/chamdom.apk?v=27",
  "download": "https://btypenine.github.io/download.html",
  "notes": [
-  "업데이트를 앱 안에서 바로 받아 설치 (설치 버튼만 누르면 끝)",
-  "💰 모의투자: 가상 100만원 자동 매매 · 초기화 이력"
+  "🏆 랭킹: Google 로그인 또는 닉네임으로 참여해 친구들과 실적 겨루기",
+  "앱 안에서 바로 업데이트 설치",
+  "💰 모의투자 · 📈 차트 보기"
  ]
 }
