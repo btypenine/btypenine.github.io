@@ -134,6 +134,13 @@ a.mail{color:var(--blue);font-weight:700;text-decoration:none}
 #ctip{position:absolute;top:6px;left:8px;font-size:11px;color:var(--tx);background:#000a;padding:4px 7px;border-radius:8px;pointer-events:none;display:none;white-space:nowrap}
 .clegend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--sub);margin-top:8px}
 .clegend i{font-style:normal;font-weight:900}.clegend .dash{display:inline-block;width:14px;border-top:2px dashed;vertical-align:middle;margin-right:4px}
+.wal{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#232a36,#1d2026);border:1px solid #2e3746;border-radius:16px;padding:14px;margin:10px 0 4px}
+.wal .big{font-size:20px;font-weight:900}.wal .ic{font-size:30px}
+.prow{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:12px;padding:12px;margin:8px 0;font-size:13px}
+.prow .r{margin-left:auto;text-align:right;white-space:nowrap}.prow .r b{font-size:15px}
+.chipset{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chipset button{background:#262a31;color:var(--sub);padding:8px 12px;border-radius:10px;font-size:13px}
+.chipset button.on{background:var(--blue);color:#0b1b33}
 .help .ex{background:#262a31;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.7;margin:8px 0}
 /* 테두리 경고등: 탑승(무지개 회전) / 하차(점멸) */
 @property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
@@ -188,6 +195,16 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <div id="prog" style="display:none"><div class="sub" id="ptxt"></div><div class="bar"><i id="pbar" style="width:0;background:var(--blue)"></i></div></div>
   <div class="chips" id="chips"></div>
 </header>
+<div class="help" id="paper">
+  <div class="row"><h1>💰 모의투자</h1><button id="paperClose" style="margin-left:auto">닫기</button></div>
+  <div class="sub" style="margin-top:4px">가상의 100만원으로, 🌈 탑승 권고 알림 때 자동으로 사고 💰익절·🛑손절 알림 때 자동으로 팔아요. 진짜 돈은 쓰지 않아요.</div>
+  <div class="card" id="psum"></div>
+  <h2>⚙ 설정</h2><div class="card" id="popt"></div>
+  <h2>📦 보유 중</h2><div id="ppos"></div>
+  <h2>🧾 이번 판 거래 내역</h2><div id="ptr"></div>
+  <h2>🔄 초기화 이력</h2><div class="card" id="prsum"></div><div id="prs"></div>
+  <div style="text-align:center;margin-top:20px"><button id="pReset" style="background:var(--line);color:var(--r)">100만원으로 초기화</button></div>
+</div>
 <div class="help" id="hist">
   <div class="row"><h1>🔔 알림</h1><button id="histClose" style="margin-left:auto">닫기</button></div>
   <h2>⚙ 알림 설정</h2>
@@ -241,6 +258,10 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <div class="step"><div class="n">🌙</div><div><b>심야엔 알림 끄기</b>: 맨 위 🔔 버튼 → <b>알림 설정</b>에서 「🌙 심야 끄기」를 누르면 아침 7시~밤 11시에만 알림이 와요. 「시간 지정」으로 원하는 시간을 고를 수도 있고, 「알림 전체」로 한 번에 끄고 켤 수 있어요.</div></div>
   <div class="step"><div class="n">🔔</div><div>맨 위 <b>🔔 종 모양 버튼</b>을 누르면 지금까지 온 탑승·익절·손절 알림을 날짜별로 볼 수 있어요. 알림대로 사고팔았다면 얼마나 벌었을지(익절 비율·누적 수익)도 보여줘요.</div></div>
 
+  <h3>💰 모의투자 (가상 100만원)</h3>
+  <div class="step"><div class="n">💰</div><div>화면 위 <b>💰 모의투자</b> 카드를 누르면 가상 지갑이 열려요. 🌈 탑승 권고 알림 때 <b>정해둔 금액만큼 자동으로 사고</b>, 💰익절·🛑손절 알림 때 <b>자동으로 팔아요</b>(수수료 반영). 진짜 돈은 안 써요.<br>
+    <small>1회 투입 금액(10만~100만원)은 설정에서 바꿔요. 「100만원으로 초기화」를 누르면 그때의 손익이 <b>초기화 이력</b>에 남고(예: 43만원 손실 상태에서 초기화), 총 초기화 횟수와 손익 합계도 보여줘요.</small></div></div>
+
   <h3>⚠ 꼭 알아두세요</h3>
   <div class="ex">· 앱 안에 있을 때 볼륨 버튼은 목표 수익 조절용이라 소리 크기는 안 바뀌어요<br>
     · 같은 종목 매수 알림은 30분에 한 번까지만 와요<br>
@@ -262,6 +283,7 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
 <div class="modal" id="modal"><div class="box" id="mbox"><div class="ic" id="mic"></div><h2 id="mtitle"></h2><p id="mtext"></p><button id="mok">확인 · 종목 보기</button><button id="mchart" class="cbtn" style="margin-top:8px">📈 차트 보기</button></div></div>
 <main>
   <div id="err"></div>
+  <div id="wallet"></div>
   <div id="detail"><div class="card sub">처음 실행이라 5년치 시세를 받는 중이에요. 5~10분 정도 걸리고, 다음부터는 새로 생긴 날짜만 받아서 금방 끝나요.</div></div>
   <div class="maker"><div class="ic">🐟</div><div><b>참돔파닥파닥</b><div class="sub">만든 사람 · 문의 <a class="mail" data-mail href="#">btypetrade@gmail.com</a></div></div></div>
   <div class="note">
@@ -600,6 +622,7 @@ function render(res) {
   $('detail').innerHTML = card(x, i, prev) + '<div id="alert"></div>' + analysisHtml(x);
   renderAlert();
   if (typeof updateEdge === 'function') updateEdge();
+  if (typeof renderWallet === 'function') renderWallet();
 }
 
 /* ---------- 알림 받는 시간대 (심야 쉬는 시간) ---------- */
@@ -635,6 +658,31 @@ if (!window.Android) (function () {
       else new Notification(title, {body, icon: 'icon-192.png'});
     } catch (e) {}
   }
+  /* 💰 모의투자 (안드로이드 Paper와 같은 규칙) */
+  const PSEED = 1000000, PF = 0.0005;
+  const pLoad = () => { const o = L('w_paper'); return o && 'cash' in o ? o : {on: true, seed: PSEED, cash: PSEED, per: 200000, positions: {}, trades: [], resets: [], startedAt: Date.now(), session: 1}; };
+  const pTrade = (o, t) => { o.trades.push(Object.assign(t, {at: Date.now(), session: o.session})); o.trades = o.trades.slice(-500); };
+  const wonS = x => Math.abs(x) >= 10000 ? (x / 10000).toFixed(1) + '만원' : Math.round(x).toLocaleString() + '원';
+  function pBuy(m, name, price) {
+    const o = pLoad(); if (!o.on || o.positions[m]) return '';
+    const amt = Math.min(o.per, o.cash); if (amt < 5000) return ' · 💰 현금 부족';
+    const qty = amt * (1 - PF) / price; o.positions[m] = {name, qty, entry: price, cost: amt, at: Date.now()}; o.cash -= amt;
+    pTrade(o, {m, name, side: 'buy', price, qty, amount: amt, reason: 'signal'}); S('w_paper', o); return ` · 💰 ${wonS(amt)} 매수`;
+  }
+  function pSell(m, price, reason) {
+    const o = pLoad(), q = o.positions[m]; if (!q) return '';
+    const net = q.qty * price * (1 - PF), pnl = net - q.cost; o.cash += net; delete o.positions[m];
+    pTrade(o, {m, name: q.name, side: 'sell', price, qty: q.qty, amount: net, cost: q.cost, pnl, entry: q.entry, since: q.at, reason}); S('w_paper', o);
+    return ` · 💰 ${wonS(net)} 매도 (${pnl >= 0 ? '+' : '−'}${wonS(Math.abs(pnl))})`;
+  }
+  function pReset(prices) {
+    const o = pLoad(); let eq = o.cash;
+    for (const [m, q] of Object.entries(o.positions)) eq += q.qty * (prices[m] || q.entry) * (1 - PF);
+    const T = o.trades.filter(t => t.session === o.session), sells = T.filter(t => t.side === 'sell');
+    o.resets.push({at: Date.now(), startedAt: o.startedAt, session: o.session, equity: eq, pnl: eq - o.seed, pct: (eq / o.seed - 1) * 100,
+      buys: T.filter(t => t.side === 'buy').length, sells: sells.length, wins: sells.filter(t => t.pnl > 0).length, open: Object.keys(o.positions).length});
+    Object.assign(o, {cash: o.seed, positions: {}, startedAt: Date.now(), session: o.session + 1}); S('w_paper', o);
+  }
   function addHist(e) { const h = L('w_hist') || []; h.push(Object.assign(e, {at: Date.now()})); S('w_hist', h.slice(-500)); }
   let busy = false;
   async function tick() {
@@ -662,18 +710,21 @@ if (!window.Android) (function () {
           if (s.mode === 'hold') {
             const entry = s.entry || price, gain = price / entry - 1 - FEE_W; s.gain = gain;
             if (price >= entry * (1 + up)) {
-              if (allowed) notify(`💰 ${name} 목표 수익 도달!`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 수수료 빼고 ${pc(gain * 100)}`, m);
+              const pt = pSell(m, price, 'tp');
+              if (allowed) notify(`💰 ${name} 목표 수익 도달!`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 수수료 빼고 ${pc(gain * 100)}` + pt, m);
               addHist({m, name, type: 'tp', price, entry, gain, since: s.entryAt || 0});
               Object.assign(s, {exitType: 'tp', exitLevel: entry * (1 + up), mode: 'watch', lastResult: '익절 ' + pc(gain * 100), lastSignal: now, alert: 'tp', alertAt: now}); delete s.fromSignal;
             } else if (price <= entry * (1 - stop)) {
-              if (allowed) notify(`🛑 ${name} 손절선 도달`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 ${pc(gain * 100)}`, m);
+              const ps = pSell(m, price, 'sl');
+              if (allowed) notify(`🛑 ${name} 손절선 도달`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 ${pc(gain * 100)}` + ps, m);
               addHist({m, name, type: 'sl', price, entry, gain, since: s.entryAt || 0});
               Object.assign(s, {exitType: 'sl', exitLevel: entry * (1 - stop), mode: 'watch', lastResult: '손절 ' + pc(gain * 100), lastSignal: now, alert: 'sl', alertAt: now}); delete s.fromSignal;
             }
           } else if (allowed && buyNow && now - (s.lastSignal || 0) > COOL) {
             Object.assign(s, {mode: 'hold', entry: price, entryAt: now, lastSignal: now, gain: -FEE_W, alert: 'buy', alertAt: now, fromSignal: true}); delete s.exitType;
             addHist({m, name, type: 'buy', price, hit, samples, target: cfg.target || 0.2, stop: cfg.stop || 1});
-            notify(`🐟 ${name} 매수 타이밍`, `현재가 ${f(price)}원 · 비슷한 흐름 ${samples}번 중 ${Math.round(hit * 100)}%가 목표에 닿았어요`, m);
+            const pb = pBuy(m, name, price);
+            notify(`🐟 ${name} 매수 타이밍`, `현재가 ${f(price)}원 · 비슷한 흐름 ${samples}번 중 ${Math.round(hit * 100)}%가 목표에 닿았어요` + pb, m);
           }
           const ex = s.exitType, lv = s.exitLevel || 0;
           const sellNow = s.mode === 'watch' && ((ex === 'tp' && price >= lv) || (ex === 'sl' && price <= lv));
@@ -704,6 +755,10 @@ if (!window.Android) (function () {
     batteryOk: () => true, requestBattery: () => {},
     testNotify: () => notify('🐟 참돔파닥파닥 테스트 알림', '알림이 잘 와요! 매수·익절·손절 때 이렇게 알려드릴게요.'),
     takePendingMarket: () => pend,
+    paperState: () => JSON.stringify(pLoad()),
+    paperOpts: (on, per) => { const o = pLoad(); o.on = on; o.per = Math.max(5000, per); S('w_paper', o); },
+    paperReset: j => pReset(JSON.parse(j || '{}')),
+    paperSell: (m, p) => pSell(m, p, 'manual'),
     web: true
   };
   setInterval(tick, 30000);
@@ -1004,6 +1059,7 @@ const SITE = 'https://btypenine.github.io/';
 let latestVer = null;
 const myVer = () => (window.Android && Android.appVersion) ? Android.appVersion() : 0;
 async function checkVersion(manual) {
+  if (window.Android && !manual) return;   // 안드로이드는 앱(네이티브)이 열 때마다 직접 확인
   try {
     const r = await rawGet(SITE + 'version.json?t=' + Date.now());
     if (r.status !== 200) throw new Error('HTTP ' + r.status);
@@ -1132,6 +1188,79 @@ document.addEventListener('click', e => {
 }, true);
 $('sigChart').onclick = () => openChart(sel);
 $('mchart').onclick = () => { const m = popM && popM[0]; $('mok').click(); if (m) setTimeout(() => openChart(m), 350); };
+/* ---------- 💰 모의투자 화면 ---------- */
+const paper = () => { try { return JSON.parse(BR && BR.paperState ? BR.paperState() : 'null'); } catch (e) { return null; } };
+const wonK = x => (x < 0 ? '−' : '') + Math.round(Math.abs(x)).toLocaleString() + '원';
+const sgnW = x => (x >= 0 ? '+' : '−') + Math.round(Math.abs(x)).toLocaleString() + '원';
+function paperCalc(P) {
+  const S = ast(); let val = 0;
+  const pos = Object.entries(P.positions || {}).map(([m, q]) => { const pr = (S[m] && S[m].price) || q.entry, v = q.qty * pr * 0.9995; val += v; return {m, q, pr, v, pnl: v - q.cost}; });
+  const eq = P.cash + val; return {pos, val, eq, pnl: eq - P.seed, pct: (eq / P.seed - 1) * 100};
+}
+function renderWallet() {
+  const P = paper(), w = $('wallet'); if (!w) return;
+  if (!P) { w.innerHTML = ''; return; }
+  const k = paperCalc(P);
+  w.innerHTML = `<div class="wal" data-paper="1"><div class="ic">💰</div><div><div class="sub">모의투자 ${P.on ? '' : '(꺼짐)'} · ${P.session}번째 판</div><div class="big">${wonK(k.eq)}</div></div>
+    <div style="margin-left:auto;text-align:right"><b class="${k.pnl >= 0 ? 'up' : 'dn'}" style="font-size:16px">${pct(k.pct, 2)}</b><div class="sub">${sgnW(k.pnl)} ›</div></div></div>`;
+}
+const PER_OPTS = [100000, 200000, 300000, 500000, 1000000];
+function renderPaper() {
+  const P = paper(); if (!P) return;
+  const k = paperCalc(P), T = (P.trades || []).filter(t => t.session === P.session).reverse(), sells = T.filter(t => t.side === 'sell');
+  const wins = sells.filter(t => t.pnl > 0).length, days = Math.max(1, Math.round((Date.now() - P.startedAt) / 864e5));
+  $('psum').innerHTML = `<div class="sub">총 평가금액 · ${P.session}번째 판 (${new Date(P.startedAt).toLocaleDateString('ko-KR')} 시작, ${days}일째)</div>
+    <div style="font-size:30px;font-weight:900;margin:4px 0">${wonK(k.eq)}</div>
+    <div class="${k.pnl >= 0 ? 'up' : 'dn'}" style="font-weight:800">${sgnW(k.pnl)} (${pct(k.pct, 2)})</div>
+    <div class="grid"><div class="m"><b>${wonK(P.cash)}</b><span>현금</span></div><div class="m"><b>${wonK(k.val)}</b><span>코인 평가</span></div>
+    <div class="m"><b>${sells.length ? Math.round(wins / sells.length * 100) + '%' : '−'}</b><span>승률 ${wins}/${sells.length}</span></div></div>`;
+  $('popt').innerHTML = `<div class="row"><div><b>자동 투자</b><div class="sub">알림 올 때 자동으로 사고팔기</div></div><button data-p="on" class="sw ${P.on ? 'on' : ''}" style="margin-left:auto">${P.on ? '켜짐' : '꺼짐'}</button></div>
+    <div style="margin-top:14px"><b>1회 투입 금액</b><div class="sub">탑승 권고 한 번에 넣을 돈 (현금이 모자라면 남은 만큼)</div>
+    <div class="chipset">${PER_OPTS.map(v => `<button data-per="${v}" class="${P.per === v ? 'on' : ''}">${v / 10000}만원</button>`).join('')}</div></div>`;
+  $('ppos').innerHTML = k.pos.length ? k.pos.map(x => `<div class="prow"><div><b>${esc(x.q.name || x.m.slice(4))}</b><div class="sub">${won(x.q.entry)}에 ${wonK(x.q.cost)} 매수 · 현재 ${won(x.pr)}</div></div>
+      <div class="r"><b class="${x.pnl >= 0 ? 'up' : 'dn'}">${sgnW(x.pnl)}</b><div class="sub">${pct((x.v / x.q.cost - 1) * 100, 2)}</div></div>
+      <button class="cbtn sm" data-psell="${esc(x.m)}" data-pp="${x.pr}">지금 팔기</button></div>`).join('') : '<div class="card sub">보유 중인 코인이 없어요. 탑승 권고 알림이 오면 자동으로 사요.</div>';
+  $('ptr').innerHTML = T.length ? T.slice(0, 60).map(t => { const d = new Date(t.at).toLocaleString('ko-KR', {month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+      return t.side === 'buy'
+        ? `<div class="prow"><div style="font-size:20px">🛒</div><div><b>${esc(t.name || t.m.slice(4))} 매수</b><div class="sub">${d} · ${won(t.price)} · ${wonK(t.amount)}</div></div></div>`
+        : `<div class="prow"><div style="font-size:20px">${t.reason === 'tp' ? '💰' : t.reason === 'sl' ? '🛑' : '✋'}</div><div><b>${esc(t.name || t.m.slice(4))} ${t.reason === 'tp' ? '익절' : t.reason === 'sl' ? '손절' : '직접'} 매도</b><div class="sub">${d} · ${won(t.entry)} → ${won(t.price)}</div></div>
+           <div class="r"><b class="${t.pnl >= 0 ? 'up' : 'dn'}">${sgnW(t.pnl)}</b><div class="sub">${pct((t.amount / t.cost - 1) * 100, 2)}</div></div></div>`; }).join('')
+    : '<div class="card sub">이번 판에는 아직 거래가 없어요.</div>';
+  const R = P.resets || [], tot = R.reduce((a, r) => a + r.pnl, 0);
+  $('prsum').innerHTML = `<div class="grid" style="margin-top:0"><div class="m"><b>${R.length}번</b><span>총 초기화</span></div>
+    <div class="m"><b class="${tot >= 0 ? 'up' : 'dn'}">${R.length ? sgnW(tot) : '−'}</b><span>초기화한 판들 손익 합계</span></div>
+    <div class="m"><b class="${tot + k.pnl >= 0 ? 'up' : 'dn'}">${sgnW(tot + k.pnl)}</b><span>지금 판 포함 전체</span></div></div>`;
+  $('prs').innerHTML = R.slice().reverse().map(r => {
+    const d = new Date(r.at).toLocaleString('ko-KR', {year: '2-digit', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+    const span = Math.max(1, Math.round((r.at - r.startedAt) / 864e5));
+    const state = r.pnl >= 0 ? `<span class="up">${(r.pnl / 10000).toFixed(1)}만원 이익</span>` : `<span class="dn">${(-r.pnl / 10000).toFixed(1)}만원 손실</span>`;
+    return `<div class="prow"><div style="font-size:20px">🔄</div><div><b>${r.session}번째 판 · ${state} 상태에서 초기화</b>
+      <div class="sub">${d} · ${span}일 운용 · 평가 ${wonK(r.equity)} (${pct(r.pct, 2)}) · 매수 ${r.buys}회, 매도 ${r.sells}회(이익 ${r.wins}회)${r.open ? ` · 보유 ${r.open}개 정리` : ''}</div></div></div>`; }).join('') || '<div class="card sub">아직 초기화한 적이 없어요.</div>';
+}
+const openPaper = () => { renderPaper(); $('paper').classList.add('show'); $('paper').scrollTop = 0; history.pushState({paper: 1}, ''); };
+const closePaper = () => $('paper').classList.remove('show');
+$('paperClose').onclick = () => history.state && history.state.paper ? history.back() : closePaper();
+window.addEventListener('popstate', () => { if (!(history.state && history.state.paper)) closePaper(); });
+document.addEventListener('click', e => { if (e.target.closest('[data-paper]')) openPaper(); });
+$('paper').addEventListener('click', e => {
+  const P = paper(); if (!P) return;
+  const t = e.target.closest('[data-p],[data-per],[data-psell]'); if (!t) return;
+  if (t.dataset.p === 'on') BR.paperOpts(!P.on, P.per);
+  if (t.dataset.per) BR.paperOpts(P.on, +t.dataset.per);
+  if (t.dataset.psell) {
+    if (!t.dataset.sure) { t.dataset.sure = 1; t.textContent = '정말 팔기'; setTimeout(() => { delete t.dataset.sure; t.textContent = '지금 팔기'; }, 3000); return; }
+    BR.paperSell(t.dataset.psell, +t.dataset.pp);
+  }
+  renderPaper(); renderWallet();
+});
+$('pReset').onclick = () => {
+  const b = $('pReset');
+  if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = '한 번 더 누르면 초기화돼요 (이력은 남아요)'; setTimeout(() => { delete b.dataset.sure; b.textContent = '100만원으로 초기화'; }, 3500); return; }
+  delete b.dataset.sure; b.textContent = '100만원으로 초기화';
+  const S = ast(), prices = {}; Object.keys(S).forEach(m => { if (S[m].price) prices[m] = S[m].price; });
+  BR.paperReset(JSON.stringify(prices)); renderPaper(); renderWallet(); $('paper').scrollTop = $('prs').offsetTop - 120;
+};
+setInterval(() => { renderWallet(); if ($('paper').classList.contains('show')) renderPaper(); }, 5000);
 /* ---------- 문의 메일 ---------- */
 const CONTACT = 'btypetrade@gmail.com';
 document.addEventListener('click', e => {
