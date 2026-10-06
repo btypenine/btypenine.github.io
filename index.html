@@ -148,6 +148,9 @@ a.mail{color:var(--blue);font-weight:700;text-decoration:none}
 .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff!important;color:#1f1f1f!important;font-weight:700}
 .gbtn svg{width:20px;height:20px}
 input.nick{width:100%;margin:8px 0 4px;font-size:17px;padding:12px}
+.dec{background:#262a31;border-radius:14px;padding:12px;margin:0 0 12px;text-align:left}
+#toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#000d;color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;z-index:60;opacity:0;transition:.25s;pointer-events:none;max-width:86%;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .help .ex{background:#262a31;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.7;margin:8px 0}
 /* 테두리 경고등: 탑승(무지개 회전) / 하차(점멸) */
 @property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
@@ -215,9 +218,10 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <div id="jbody"></div></div></div>
 <div class="help" id="paper">
   <div class="row"><h1>💰 모의투자</h1><button id="paperClose" style="margin-left:auto">닫기</button></div>
-  <div class="sub" style="margin-top:4px">가상의 100만원으로, 🌈 탑승 권고 알림 때 자동으로 사고 💰익절·🛑손절 알림 때 자동으로 팔아요. 진짜 돈은 쓰지 않아요.</div>
+  <div class="sub" style="margin-top:4px">가상의 100만원으로 연습해요. 🌈 탑승 권고 알림이 오면 <b>살지</b>, 💰익절·🛑손절 알림이 오면 <b>팔지</b> 직접 골라요. 진짜 돈은 쓰지 않아요.</div>
   <div class="card" id="psum"></div>
   <h2>⚙ 설정</h2><div class="card" id="popt"></div>
+  <div id="poff"></div>
   <h2>📦 보유 중</h2><div id="ppos"></div>
   <h2>🧾 이번 판 거래 내역</h2><div id="ptr"></div>
   <h2>🔄 초기화 이력</h2><div class="card" id="prsum"></div><div id="prs"></div>
@@ -277,8 +281,8 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <div class="step"><div class="n">🔔</div><div>맨 위 <b>🔔 종 모양 버튼</b>을 누르면 지금까지 온 탑승·익절·손절 알림을 날짜별로 볼 수 있어요. 알림대로 사고팔았다면 얼마나 벌었을지(익절 비율·누적 수익)도 보여줘요.</div></div>
 
   <h3>💰 모의투자 (가상 100만원)</h3>
-  <div class="step"><div class="n">💰</div><div>화면 위 <b>💰 모의투자</b> 카드를 누르면 가상 지갑이 열려요. 🌈 탑승 권고 알림 때 <b>정해둔 금액만큼 자동으로 사고</b>, 💰익절·🛑손절 알림 때 <b>자동으로 팔아요</b>(수수료 반영). 진짜 돈은 안 써요.<br>
-    <small>1회 투입 금액(10만~100만원)은 설정에서 바꿔요. 「100만원으로 초기화」를 누르면 그때의 손익이 <b>초기화 이력</b>에 남고(예: 43만원 손실 상태에서 초기화), 총 초기화 횟수와 손익 합계도 보여줘요.</small></div></div>
+  <div class="step"><div class="n">💰</div><div>화면 위 <b>💰 모의투자</b> 카드를 누르면 가상 지갑이 열려요. 🌈 탑승 권고 알림이 오면 <b>[사기]/[패스]</b>, 💰익절·🛑손절 알림이 오면 <b>[팔기]/[계속 보유]</b> 버튼으로 직접 골라요(알림 버튼·앱 팝업·모의투자 화면 어디서든). 수수료 반영, 진짜 돈은 안 써요.<br>
+    <small>설정에서 「자동 매매」로 바꾸면 알아서 사고팔아요. 1회 투입 금액(10만~100만원)도 설정에서 바꿔요. 「100만원으로 초기화」를 누르면 그때의 손익이 <b>초기화 이력</b>에 남고(예: 43만원 손실 상태에서 초기화), 총 초기화 횟수와 손익 합계도 보여줘요.</small></div></div>
 
   <h3>🏆 랭킹</h3>
   <div class="step"><div class="n">🏆</div><div><b>🏆 랭킹</b> 카드 → 「Google로 로그인」(안드로이드) 또는 「닉네임만으로 참여」 → 닉네임 정하기. 친구들과 모의투자 실적을 겨뤄요.<br><small>순위는 초기화한 판까지 모두 더한 누적 손익 기준이에요. 닉네임과 실적만 저장해요.</small></div></div>
@@ -301,7 +305,7 @@ main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
   <div id="cwrap" style="position:relative;margin-top:10px"><canvas id="chart"></canvas><div id="ctip"></div></div>
   <div class="clegend"><span><i style="color:#4cd964">▲</i> 진입</span><span><i style="color:#ffd54a">▼</i> 익절</span><span><i style="color:#ff6bd6">▼</i> 손절</span><span><i class="dash" style="border-color:#4cd964"></i>진입가</span><span><i class="dash" style="border-color:#ffd54a"></i>목표</span><span><i class="dash" style="border-color:#ff6bd6"></i>손절</span></div>
   <div class="grid" id="cstats" style="margin-top:10px"></div></div></div>
-<div class="modal" id="modal"><div class="box" id="mbox"><div class="ic" id="mic"></div><h2 id="mtitle"></h2><p id="mtext"></p><button id="mok">확인 · 종목 보기</button><button id="mchart" class="cbtn" style="margin-top:8px">📈 차트 보기</button></div></div>
+<div class="modal" id="modal"><div class="box" id="mbox"><div class="ic" id="mic"></div><h2 id="mtitle"></h2><p id="mtext"></p><div id="mdec"></div><button id="mok">확인 · 종목 보기</button><button id="mchart" class="cbtn" style="margin-top:8px">📈 차트 보기</button></div></div>
 <main>
   <div id="err"></div>
   <div id="wallet"></div>
@@ -698,6 +702,26 @@ if (!window.Android) (function () {
     pTrade(o, {m, name: q.name, side: 'sell', price, qty: q.qty, amount: net, cost: q.cost, pnl, entry: q.entry, since: q.at, reason}); S('w_paper', o);
     return ` · 💰 ${wonS(net)} 매도 (${pnl >= 0 ? '+' : '−'}${wonS(Math.abs(pnl))})`;
   }
+  const asking = o => (o.mode || 'ask') !== 'auto';
+  function pOffer(m, f) { const o = pLoad(); o.offers = o.offers || {}; o.offers[m] = Object.assign(f, {at: Date.now()}); S('w_paper', o); }
+  function pSignalBuy(m, name, price) {
+    const o = pLoad(); if (!o.on || o.positions[m]) return '';
+    if (!asking(o)) return pBuy(m, name, price);
+    if (o.cash < 5000) return ' · 💰 현금 부족';
+    pOffer(m, {type: 'buy', name, price}); return ' · 💰 모의투자로 살지 앱에서 골라주세요';
+  }
+  function pSignalSell(m, price, reason) {
+    const o = pLoad(), q = o.positions[m]; if (!q) return '';
+    if (!asking(o)) return pSell(m, price, reason);
+    pOffer(m, {type: 'sell', name: q.name, price, reason}); return ' · 💰 보유분을 팔지 앱에서 골라주세요';
+  }
+  function pDecide(m, accept, price) {
+    const o = pLoad(), f = (o.offers || {})[m]; if (!f) return '이미 처리됐어요';
+    delete o.offers[m]; S('w_paper', o);
+    if (!accept) return f.type === 'buy' ? '패스했어요' : '계속 보유해요 (모의투자 화면에서 언제든 팔 수 있어요)';
+    const p = price > 0 ? price : f.price;
+    return (f.type === 'buy' ? pBuy(m, f.name, p) : pSell(m, p, f.reason || 'manual')).replace(/^ · /, '') || '처리할 수 없었어요';
+  }
   function pReset(prices) {
     const o = pLoad(); let eq = o.cash;
     for (const [m, q] of Object.entries(o.positions)) eq += q.qty * (prices[m] || q.entry) * (1 - PF);
@@ -733,12 +757,12 @@ if (!window.Android) (function () {
           if (s.mode === 'hold') {
             const entry = s.entry || price, gain = price / entry - 1 - FEE_W; s.gain = gain;
             if (price >= entry * (1 + up)) {
-              const pt = pSell(m, price, 'tp');
+              const pt = pSignalSell(m, price, 'tp');
               if (allowed) notify(`💰 ${name} 목표 수익 도달!`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 수수료 빼고 ${pc(gain * 100)}` + pt, m);
               addHist({m, name, type: 'tp', price, entry, gain, since: s.entryAt || 0});
               Object.assign(s, {exitType: 'tp', exitLevel: entry * (1 + up), mode: 'watch', lastResult: '익절 ' + pc(gain * 100), lastSignal: now, alert: 'tp', alertAt: now}); delete s.fromSignal;
             } else if (price <= entry * (1 - stop)) {
-              const ps = pSell(m, price, 'sl');
+              const ps = pSignalSell(m, price, 'sl');
               if (allowed) notify(`🛑 ${name} 손절선 도달`, `현재가 ${f(price)}원 · 기준가 ${f(entry)}원 대비 ${pc(gain * 100)}` + ps, m);
               addHist({m, name, type: 'sl', price, entry, gain, since: s.entryAt || 0});
               Object.assign(s, {exitType: 'sl', exitLevel: entry * (1 - stop), mode: 'watch', lastResult: '손절 ' + pc(gain * 100), lastSignal: now, alert: 'sl', alertAt: now}); delete s.fromSignal;
@@ -746,7 +770,7 @@ if (!window.Android) (function () {
           } else if (allowed && buyNow && now - (s.lastSignal || 0) > COOL) {
             Object.assign(s, {mode: 'hold', entry: price, entryAt: now, lastSignal: now, gain: -FEE_W, alert: 'buy', alertAt: now, fromSignal: true}); delete s.exitType;
             addHist({m, name, type: 'buy', price, hit, samples, target: cfg.target || 0.2, stop: cfg.stop || 1});
-            const pb = pBuy(m, name, price);
+            const pb = pSignalBuy(m, name, price);
             notify(`🐟 ${name} 매수 타이밍`, `현재가 ${f(price)}원 · 비슷한 흐름 ${samples}번 중 ${Math.round(hit * 100)}%가 목표에 닿았어요` + pb, m);
           }
           const ex = s.exitType, lv = s.exitLevel || 0;
@@ -780,6 +804,8 @@ if (!window.Android) (function () {
     takePendingMarket: () => pend,
     paperState: () => JSON.stringify(pLoad()),
     paperOpts: (on, per) => { const o = pLoad(); o.on = on; o.per = Math.max(5000, per); S('w_paper', o); },
+    paperMode: md => { const o = pLoad(); o.mode = md === 'auto' ? 'auto' : 'ask'; S('w_paper', o); },
+    paperDecide: (m, a, p) => pDecide(m, a, p),
     paperReset: j => pReset(JSON.parse(j || '{}')),
     paperSell: (m, p) => pSell(m, p, 'manual'),
     web: true
@@ -963,6 +989,10 @@ function popup() {
              sl: ['🛑', `${nm} 하차! 손절선 도달`, `${esc(s.lastResult || '')}<br>더 큰 손실을 막으려면 매도하세요.`, 'var(--r)']}[s.alert];
   $('mic').textContent = T[0]; $('mtitle').innerHTML = T[1]; $('mtext').innerHTML = T[2];
   $('mok').style.background = T[3]; $('mbox').style.borderColor = T[3];
+  const P = paper(), f = P && P.offers && P.offers[m];
+  $('mdec').innerHTML = f ? decHtml(m, f, P) : '';
+  $('mok').textContent = f ? '나중에 고를게요 · 종목 보기' : '확인 · 종목 보기';
+  $('mok').style.background = f ? 'var(--line)' : T[3]; $('mok').style.color = f ? 'var(--tx)' : '';
   $('modal').classList.add('show');
 }
 $('mok').onclick = () => {
@@ -1224,7 +1254,7 @@ function renderWallet() {
   const P = paper(), w = $('wallet'); if (!w) return;
   if (!P) { w.innerHTML = ''; return; }
   const k = paperCalc(P);
-  w.innerHTML = `<div class="wal" data-paper="1"><div class="ic">💰</div><div><div class="sub">모의투자 ${P.on ? '' : '(꺼짐)'} · ${P.session}번째 판</div><div class="big">${wonK(k.eq)}</div></div>
+  w.innerHTML = `<div class="wal" data-paper="1"><div class="ic">💰</div><div><div class="sub">모의투자 ${P.on ? '' : '(꺼짐)'}${Object.keys(P.offers || {}).length ? ` · <span style="color:var(--y)">🔔 결정 대기 ${Object.keys(P.offers).length}</span>` : ''} · ${P.session}번째 판</div><div class="big">${wonK(k.eq)}</div></div>
     <div style="margin-left:auto;text-align:right"><b class="${k.pnl >= 0 ? 'up' : 'dn'}" style="font-size:16px">${pct(k.pct, 2)}</b><div class="sub">${sgnW(k.pnl)} ›</div></div></div>`;
 }
 const PER_OPTS = [100000, 200000, 300000, 500000, 1000000];
@@ -1237,12 +1267,17 @@ function renderPaper() {
     <div class="${k.pnl >= 0 ? 'up' : 'dn'}" style="font-weight:800">${sgnW(k.pnl)} (${pct(k.pct, 2)})</div>
     <div class="grid"><div class="m"><b>${wonK(P.cash)}</b><span>현금</span></div><div class="m"><b>${wonK(k.val)}</b><span>코인 평가</span></div>
     <div class="m"><b>${sells.length ? Math.round(wins / sells.length * 100) + '%' : '−'}</b><span>승률 ${wins}/${sells.length}</span></div></div>`;
-  $('popt').innerHTML = `<div class="row"><div><b>자동 투자</b><div class="sub">알림 올 때 자동으로 사고팔기</div></div><button data-p="on" class="sw ${P.on ? 'on' : ''}" style="margin-left:auto">${P.on ? '켜짐' : '꺼짐'}</button></div>
+  const md = !P.on ? 'off' : (P.mode || 'ask');
+  $('popt').innerHTML = `<b>알림이 오면</b><div class="sub">탑승 권고·익절·손절 알림 때 모의투자를 어떻게 할지</div>
+    <div class="seg"><button data-md="ask" class="${md === 'ask' ? 'on' : ''}">물어보기</button><button data-md="auto" class="${md === 'auto' ? 'on' : ''}">자동 매매</button><button data-md="off" class="${md === 'off' ? 'on' : ''}">끄기</button></div>
+    <div class="why">${md === 'ask' ? '알림에 뜨는 [사기]/[패스], [팔기]/[계속 보유] 버튼으로 직접 골라요' : md === 'auto' ? '알림 때 자동으로 사고팔아요' : '모의투자를 쉬어요 (보유분은 그대로)'}</div>
     <div style="margin-top:14px"><b>1회 투입 금액</b><div class="sub">탑승 권고 한 번에 넣을 돈 (현금이 모자라면 남은 만큼)</div>
     <div class="chipset">${PER_OPTS.map(v => `<button data-per="${v}" class="${P.per === v ? 'on' : ''}">${v / 10000}만원</button>`).join('')}</div></div>`;
   $('ppos').innerHTML = k.pos.length ? k.pos.map(x => `<div class="prow"><div><b>${esc(x.q.name || x.m.slice(4))}</b><div class="sub">${won(x.q.entry)}에 ${wonK(x.q.cost)} 매수 · 현재 ${won(x.pr)}</div></div>
       <div class="r"><b class="${x.pnl >= 0 ? 'up' : 'dn'}">${sgnW(x.pnl)}</b><div class="sub">${pct((x.v / x.q.cost - 1) * 100, 2)}</div></div>
-      <button class="cbtn sm" data-psell="${esc(x.m)}" data-pp="${x.pr}">지금 팔기</button></div>`).join('') : '<div class="card sub">보유 중인 코인이 없어요. 탑승 권고 알림이 오면 자동으로 사요.</div>';
+      <button class="cbtn sm" data-psell="${esc(x.m)}" data-pp="${x.pr}">지금 팔기</button></div>`).join('') : `<div class="card sub">보유 중인 코인이 없어요. 탑승 권고 알림이 오면 ${(P.mode || 'ask') === 'auto' ? '자동으로 사요' : '살지 물어봐요'}.</div>`;
+  const offs = Object.entries(P.offers || {});
+  $('poff').innerHTML = offs.length ? '<h2>🔔 결정 기다리는 중</h2>' + offs.map(([m, f]) => `<div class="card" style="padding:12px"><b>${f.type === 'buy' ? '🌈' : f.reason === 'sl' ? '🛑' : '💰'} ${esc(f.name || m.slice(4))}</b> <span class="sub">${new Date(f.at).toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})} 알림</span>${decHtml(m, f, P).replace('class="dec"', 'class="dec" style="margin:8px 0 0"')}</div>`).join('') : '';
   $('ptr').innerHTML = T.length ? T.slice(0, 60).map(t => { const d = new Date(t.at).toLocaleString('ko-KR', {month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'});
       return t.side === 'buy'
         ? `<div class="prow"><div style="font-size:20px">🛒</div><div><b>${esc(t.name || t.m.slice(4))} 매수</b><div class="sub">${d} · ${won(t.price)} · ${wonK(t.amount)}</div></div></div>`
@@ -1267,8 +1302,8 @@ window.addEventListener('popstate', () => { if (!(history.state && history.state
 document.addEventListener('click', e => { if (e.target.closest('[data-paper]')) openPaper(); });
 $('paper').addEventListener('click', e => {
   const P = paper(); if (!P) return;
-  const t = e.target.closest('[data-p],[data-per],[data-psell]'); if (!t) return;
-  if (t.dataset.p === 'on') BR.paperOpts(!P.on, P.per);
+  const t = e.target.closest('[data-md],[data-per],[data-psell]'); if (!t) return;
+  if (t.dataset.md) { if (t.dataset.md === 'off') BR.paperOpts(false, P.per); else { BR.paperOpts(true, P.per); BR.paperMode(t.dataset.md); } }
   if (t.dataset.per) BR.paperOpts(P.on, +t.dataset.per);
   if (t.dataset.psell) {
     if (!t.dataset.sure) { t.dataset.sure = 1; t.textContent = '정말 팔기'; setTimeout(() => { delete t.dataset.sure; t.textContent = '지금 팔기'; }, 3000); return; }
@@ -1440,6 +1475,31 @@ $('rank').addEventListener('click', async e => {
 const alertBox = m => { $('rlist').insertAdjacentHTML('afterbegin', `<div class="err">${esc(m)}</div>`); };
 setInterval(() => { if (!document.hidden) pushStats(false).catch(() => {}); }, 60e3);
 setTimeout(() => { renderRankCard(); pushStats(false).catch(() => {}); }, 2500);
+/* ---------- 💰 모의투자: 알림 때 살지·팔지 고르기 ---------- */
+function decHtml(m, f, P) {
+  const nm = esc(f.name || m.slice(4)), cur = ((ast())[m] || {}).price || f.price;
+  if (f.type === 'buy') {
+    const amt = Math.min(P.per, P.cash);
+    return `<div class="dec"><div class="sub">💰 모의투자로 살까요? · ${nm} 지금 ${won(cur)}</div>
+      <div class="row" style="gap:8px;margin-top:8px"><button data-dec="yes" data-dm="${esc(m)}" style="flex:2;background:var(--g);color:#0d2416">🛒 사기 (${wonK(amt)})</button><button data-dec="no" data-dm="${esc(m)}" style="flex:1;background:var(--line);color:var(--tx)">패스</button></div></div>`;
+  }
+  const q = (P.positions || {})[m], val = q ? q.qty * cur * 0.9995 : 0, pnl = q ? val - q.cost : 0;
+  return `<div class="dec"><div class="sub">💰 모의투자 보유분을 팔까요? · ${nm} ${q ? `${wonK(q.cost)} → ${wonK(val)} (<b class="${pnl >= 0 ? 'up' : 'dn'}">${sgnW(pnl)}</b>)` : ''}</div>
+    <div class="row" style="gap:8px;margin-top:8px"><button data-dec="yes" data-dm="${esc(m)}" style="flex:2;background:${f.reason === 'sl' ? 'var(--r)' : 'var(--y)'};color:#111">${f.reason === 'sl' ? '🛑' : '💰'} 팔기</button><button data-dec="no" data-dm="${esc(m)}" style="flex:1;background:var(--line);color:var(--tx)">계속 보유</button></div></div>`;
+}
+function toast(msg) {
+  let t = $('toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.className = 'show'; clearTimeout(toast.h); toast.h = setTimeout(() => t.className = '', 3200);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-dec]'); if (!b || !BR || !BR.paperDecide) return;
+  e.stopPropagation();
+  const m = b.dataset.dm, price = ((ast())[m] || {}).price || 0;
+  const r = BR.paperDecide(m, b.dataset.dec === 'yes', price);
+  toast(r.startsWith('💰') ? r : '💰 ' + r);
+  if (b.closest('#mdec')) $('mok').click();
+  renderWallet(); if ($('paper').classList.contains('show')) renderPaper();
+}, true);
 /* ---------- 문의 메일 ---------- */
 const CONTACT = 'btypetrade@gmail.com';
 document.addEventListener('click', e => {

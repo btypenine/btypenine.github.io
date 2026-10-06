@@ -1,12 +1,12 @@
 {
- "code": 27,
- "name": "1.0.27",
+ "code": 30,
+ "name": "1.0.30",
  "date": "2026-10-06",
- "apk": "https://btypenine.github.io/chamdom.apk?v=27",
+ "apk": "https://btypenine.github.io/chamdom.apk?v=30",
  "download": "https://btypenine.github.io/download.html",
  "notes": [
-  "🏆 랭킹: Google 로그인 또는 닉네임으로 참여해 친구들과 실적 겨루기",
-  "앱 안에서 바로 업데이트 설치",
-  "💰 모의투자 · 📈 차트 보기"
+  "💰 모의투자: 알림이 오면 [사기]/[패스], [팔기]/[계속 보유]로 직접 선택",
+  "설정에서 '자동 매매'로도 바꿀 수 있어요",
+  "🏆 랭킹 · 📈 차트"
  ]
 }
