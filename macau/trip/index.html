@@ -6,6 +6,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>돼지사냥꾼 가족들 · 마카오</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 100'%3E%3Crect x='1' y='1' width='62' height='98' rx='6' fill='%23b3122a'/%3E%3Crect x='6' y='6' width='52' height='88' rx='3' fill='%23f3e6c8'/%3E%3Cellipse cx='32' cy='66' rx='18' ry='11' fill='%232b1c18'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d4ea6">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="돼지사냥꾼">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -147,6 +152,35 @@ th{color:var(--muted);font-weight:500}
 .dotk.ok{background:var(--jade)} .dotk.wait{background:var(--ochre)}
 .audio{display:flex;gap:6px;flex-wrap:wrap}
 footer{font-size:12px;color:var(--muted)}
+.go .dest{font-size:17px;font-weight:600;line-height:1.35}
+.go .meta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.go .meta div{background:var(--paper);border-radius:10px;padding:8px;text-align:center}
+.go .meta b{display:block;font-family:var(--mono);font-weight:500;font-size:16px}
+.go .meta small{font-size:11px;color:var(--muted)}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.btn{flex:1;min-width:0;text-align:center;text-decoration:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 6px;font-size:14px;font-weight:600}
+.btn.pri{background:var(--azul);border-color:var(--azul);color:#fff}
+.gps{font-size:12px;color:var(--muted);margin-top:8px}
+.recs{display:flex;flex-direction:column}
+.rec{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.rec:first-child{border-top:0}
+.rec .em{font-size:26px;line-height:1.1;text-align:center}
+.rec b{font-weight:600;display:block;line-height:1.35}
+.rec small{display:block;color:var(--muted);font-size:13px;line-height:1.45}
+.rec .pr{font-family:var(--mono);font-size:13px;text-align:right;white-space:nowrap}
+.rec .pr i{display:block;font-style:normal;color:var(--muted);font-size:11px}
+.rec .tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;margin-right:4px;vertical-align:1px}
+.tag.eat{background:var(--ochre-soft);color:var(--ochre)} .tag.buy{background:var(--azul-soft);color:var(--azul)} .tag.see{background:var(--jade-soft);color:var(--jade)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--line);padding:4px;border-radius:12px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:7px 0;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600}
+.price td:nth-child(2),.price td:nth-child(3){font-family:var(--mono);white-space:nowrap;text-align:right}
+.price th:nth-child(2),.price th:nth-child(3){text-align:right}
+.inst{display:none;align-items:center;gap:10px;background:var(--azul-soft);color:var(--ink);border-radius:14px;padding:12px 14px;font-size:14px}
+.inst.on{display:flex}
+.inst b{font-weight:600}
+.inst button{flex:none;border:0;background:var(--azul);color:#fff;border-radius:10px;padding:8px 12px;font-weight:600}
+.inst .x{background:none;color:var(--muted);padding:4px 6px}
 </style>
 </head>
 <body>
@@ -165,12 +199,22 @@ footer{font-size:12px;color:var(--muted)}
   </header>
 
   <nav class="bar" aria-label="바로가기">
-    <a href="#s-now">지금</a><a href="#s-plan">일정</a><a href="#s-wx">날씨</a><a href="#s-taxi">택시·말</a><a href="#s-money">돈·장부</a><a href="#s-info">알아둘 것</a><a href="#s-sos">긴급</a>
+    <a href="#s-now">지금</a><a href="#s-go">길·추천</a><a href="#s-plan">일정</a><a href="#s-wx">날씨</a><a href="#s-taxi">택시·말</a><a href="#s-money">환율·물가</a><a href="#s-ledger">장부</a><a href="#s-info">알아둘 것</a><a href="#s-sos">긴급</a>
   </nav>
+
+  <div class="inst" id="inst"><div style="flex:1"><b>앱처럼 쓰기</b><br><span id="instTx">홈 화면에 추가하면 아이콘으로 바로 열려요.</span></div><button type="button" id="instBtn">설치</button><button type="button" class="x" id="instX" aria-label="닫기">✕</button></div>
 
   <section id="s-now">
     <div class="sh"><h2>지금</h2><small id="nowDate"></small></div>
     <div class="card now" id="now"></div>
+  </section>
+
+  <section id="s-go">
+    <div class="sh"><h2>길 안내</h2><small id="goWhen"></small></div>
+    <div class="card go" id="go"></div>
+    <div class="sh" style="margin-top:6px"><h2>꼭 먹고 사기</h2><small id="recHint"></small></div>
+    <div class="seg" id="recSeg" role="tablist"></div>
+    <div class="card"><div class="recs" id="recs"></div></div>
   </section>
 
   <section id="s-plan">
@@ -202,13 +246,16 @@ footer{font-size:12px;color:var(--muted)}
   </section>
 
   <section id="s-money">
-    <div class="sh"><h2>환율 계산</h2><small>1 MOP ≈ <input id="rate" type="number" inputmode="decimal" value="170" style="width:58px;border:1px dashed var(--line);background:var(--card);border-radius:6px;padding:1px 4px;font-family:var(--mono)"> 원</small></div>
+    <div class="sh"><h2>환율 계산</h2><small><span id="rateSrc">1 MOP ≈</span> <input id="rate" type="number" inputmode="decimal" value="170" style="width:58px;border:1px dashed var(--line);background:var(--card);border-radius:6px;padding:1px 4px;font-family:var(--mono)"> 원</small></div>
     <div class="card calc">
       <label>파타카 (MOP)<input id="mop" type="number" inputmode="decimal" placeholder="0"></label>
       <span aria-hidden="true">⇄</span>
       <label>원 (KRW)<input id="krw" type="number" inputmode="decimal" placeholder="0"></label>
     </div>
-    <div class="sh" style="margin-top:6px"><h2>공동경비 장부</h2><small>세 가족이 같이 보는 장부</small></div>
+    <div class="sh" style="margin-top:6px"><h2>물가 안내</h2><small>원화는 실시간 환율로 계산</small></div>
+    <div class="card"><table class="price" id="price"><tr><th>항목</th><th>MOP</th><th>원</th></tr></table>
+      <small style="display:block;color:var(--muted);font-size:12px;margin-top:6px">'약'이 붙은 값은 대략적인 가격이에요. 택시는 낮(8~23시) 기준이고, 밤 11시부터 아침 8시까지는 1.5배예요. 길거리 택시는 대부분 카드가 안 되니 현금(MOP·HKD)을 준비하세요.</small></div>
+    <div class="sh" id="s-ledger" style="margin-top:6px;scroll-margin-top:52px"><h2>공동경비 장부</h2><small>세 가족이 같이 보는 장부</small></div>
     <div class="card ledger">
       <div class="fams" id="fams"></div>
       <form id="addExp" style="margin-top:10px">
@@ -281,7 +328,7 @@ const DAYS = [
  {d:"2026-10-15",w:"목",title:"콜로안, 타이파, 그리고 반도",hotel:"아티젠",items:[
   ["09:00","안다즈 체크아웃","갤럭시에 짐 보관"],
   ["10:00","콜로안 관광","에그타르트, 커피","Coloane Village Macau",["tip:택시 15분"]],
-  ["12:00","점심 · 신무이 굴국수","","San Hou Lei Taipa Macau",["cash:현금만"]],
+  ["12:00","점심 · 신무이 굴국수","타이파 주택가 · 간판 사진을 기사님께","신무이 굴국수 마카오",["cash:현금만"]],
   ["13:00","타이파 관광","간식: 망고모찌, 에그타르트","Taipa Village Macau"],
   ["15:00","아티젠 체크인","레이트 체크아웃 물어보기","Artyzen Grand Lapa Macau",["tip:레이트 체크아웃"]],
   ["17:00","성 도미니크 성당 · 성 바울 성당","택시 이동","Ruins of St. Paul's Macau"],
@@ -322,7 +369,8 @@ const TAXI = [
  ["타이파 빌리지","氹仔舊城區","Taipa Village"],
  ["콜로안 빌리지","路環市區","Coloane Village"],
  ["마카오 공항","澳門國際機場","Macau International Airport"],
- ["외항 페리터미널","外港客運碼頭","Outer Harbour Ferry Terminal"]
+ ["외항 페리터미널","外港客運碼頭","Outer Harbour Ferry Terminal"],
+ ["파리지앵","澳門巴黎人","The Parisian Macao"]
 ];
 const SAY = [
  ["감사합니다","唔該","음꺼이 (부탁·감사 둘 다)"],
@@ -436,8 +484,8 @@ TAXI.forEach(([ko, zh, en]) => { const b = el("button","big"); b.type = "button"
 SAY.forEach(([ko, zh, rd]) => { const b = el("button","big"); b.type = "button"; b.append(el("b", null, ko), el("span", null, zh), el("small", null, rd)); b.onclick = () => show(zh, rd, ko); $("#say").append(b); });
 
 // ---------- rate calc ----------
-let rate = LS.get("dw-rate", 170); $("#rate").value = rate;
-$("#rate").oninput = () => { rate = +$("#rate").value || 170; LS.set("dw-rate", rate); if ($("#mop").value) $("#krw").value = Math.round($("#mop").value * rate); renderLedger(); };
+let rate = LS.get("dw-rate", 165); $("#rate").value = rate;
+$("#rate").oninput = () => { rate = +$("#rate").value || 165; LS.set("dw-rate", rate); if ($("#mop").value) $("#krw").value = Math.round($("#mop").value * rate); renderLedger(); };
 $("#mop").oninput = () => { $("#krw").value = $("#mop").value ? Math.round($("#mop").value * rate) : ""; };
 $("#krw").oninput = () => { $("#mop").value = $("#krw").value ? (Math.round($("#krw").value / rate * 10) / 10) : ""; };
 
@@ -517,13 +565,160 @@ $("#addExp").onsubmit = e => { e.preventDefault(); const amt = +$("#eAmt").value
   change("exp", id, { who: $("#eWho").value, amt, cur: $("#eCur").value, what: $("#eWhat").value.trim(), split: $("#eSplit").value, c: Date.now() });
   $("#eAmt").value = ""; $("#eWhat").value = ""; };
 
+
+// ---------- places ----------
+const GEO = {
+ "Macau International Airport":[22.1561,113.5877],"Andaz Macau":[22.1455,113.5566],"Galaxy Macau food court":[22.1493,113.5545],
+ "Wynn Palace SkyCab":[22.1481,113.5695],"Grand Resort Deck Galaxy Macau":[22.1473,113.5543],"City of Dreams Macau":[22.1492,113.5667],
+ "Songhuahu Dumplings City of Dreams Macau":[22.1489,113.5670],"The House of Dancing Water Macau":[22.1492,113.5667],
+ "Coloane Village Macau":[22.1181,113.5513],"신무이 굴국수 마카오":[22.1535,113.5570],"Taipa Village Macau":[22.1535,113.5570],
+ "Artyzen Grand Lapa Macau":[22.1923,113.5533],"Ruins of St. Paul's Macau":[22.1975,113.5409],"Senado Square Macau":[22.1935,113.5398],
+ "My Bistro Macau":[22.1909,113.5520],"Royal Supermarket Macau":[22.1913,113.5411],"Rethink Coffee Macau":[22.1911,113.5527],
+ "Macau Outer Harbour Ferry Terminal":[22.1971,113.5590],"The Venetian Macao food court":[22.1480,113.5605],"The Parisian Macao":[22.1437,113.5620]
+};
+// [id, day(1-5 or 0=any), kind, emoji, name, why, mop(null|number|string), query, lat, lng]
+const RECS = [
+ ["r-lounge",1,"eat","🍪","안다즈 라운지 아몬드 쿠키","라운지 간식으로 나오는 아몬드 쿠키가 맛있다는 후기가 많아요. 해피아워는 19시까지.",null,"Andaz Macau",22.1455,113.5566],
+ ["r-goose",1,"eat","🦆","갤럭시 푸드코트 로스트 구스","'Tastes of Asia' 광둥식 바비큐 코너의 거위 다리 덮밥이 인기. 호텔 안이라 시내보다는 비싸요.","약 80~120","Tastes of Asia Galaxy Macau",22.1493,113.5545],
+ ["r-skycab",1,"see","🚡","윈 팰리스 스카이캡 + 분수쇼","무료. 16~22시 운행. 바깥 줄이 길면 2층 탑승구가 덜 붐벼요. 분수쇼는 약 20분 간격.",0,"Wynn Palace SkyCab",22.1481,113.5695],
+ ["r-guard",1,"see","💂","런더너 근위병 교대식","화~목 19:30 · 21:30, 크리스탈 팰리스 메인 로비. 빅벤 앞에서 가족 사진도 꼭.",0,"The Londoner Macao",22.1458,113.5654],
+ ["r-wave",2,"see","🌊","그랜드 리조트 덱 파도풀","세계 최대급 루프탑 파도풀과 575m 유수풀. 11~20시. 번개가 치면 문을 닫아요.",20,"Grand Resort Deck Galaxy Macau",22.1473,113.5543],
+ ["r-dump",2,"eat","🥟","송화호수교 만두 · 꿔바로우","중국 동북요리. 양이 많으니 10명이면 조금씩 나눠 시키세요. 마늘·고추 소스가 맛있대요.","약 80~150/인","Songhuahu Dumplings City of Dreams Macau",22.1489,113.5670],
+ ["r-lordstow",3,"eat","🥧","로드스토우 에그타르트 (콜로안 본점)","마카오 에그타르트의 원조. 갓 구운 걸 바로 드세요. 오전에 가면 줄이 짧아요. 7~21시.","약 12/개","Lord Stow's Bakery Coloane",22.1181,113.5513],
+ ["r-porkbun",3,"eat","🥪","쭈빠빠오 (포크찹 번) · 신호리 新好利","타이파 구도심 차찬텡. 두툼한 돼지갈비 빵과 에그타르트, 파인애플번. 7:15~18:15.","약 40~60","San Hou Lei Taipa Macau",22.1533,113.5561],
+ ["r-mochi",3,"eat","🥭","모찌마카오 망고모찌","망고 반 개가 통째로. 줄이 길어도 빨리 빠져요. 12시부터.",22,"Mochi Macau Taipa",22.1534,113.5572],
+ ["r-koikei",3,"buy","🎁","쿤하 거리 Koi Kei 아몬드 쿠키","대표 마카오 선물. 시식해 보고 고르세요. 카드 결제 돼요. 육포는 한국 반입 불가라 사지 마세요.","약 60~150/상자","Koi Kei Bakery Rua do Cunha Taipa",22.1540,113.5567],
+ ["r-makau",3,"buy","🧲","타이파 기념품 가게 MAKAU520","마카오 감성 소품·마그넷. 아이들 기념품 고르기 좋아요.",null,"MAKAU520 Taipa",22.1535,113.5570],
+ ["r-margaret",3,"eat","🥧","마가렛 카페 에그타르트","세나도 광장 근처. 1개 11 · 6개 65 MOP. 수요일 휴무, 평일 16:30 마감이라 일찍 가야 해요.",11,"Margaret's Cafe e Nata Macau",22.1918,113.5419],
+ ["r-lemon",3,"eat","🍋","레몬첼로 젤라또","성 바울 성당 내려오는 길. 1스쿱 30 · 2스쿱 45 MOP. 레몬·구아바·블랙망고 추천. 21시까지.",30,"lemon cello Macau",22.1953,113.5407],
+ ["r-jerky",3,"see","🥓","육포 거리 (성 바울 성당 앞)","시식만 즐기세요. 육포는 한국으로 가져올 수 없어요.",null,"Ruins of St. Paul's Macau",22.1975,113.5409],
+ ["r-royal",3,"buy","🛒","로얄 슈퍼마켓","현지 과자·차·컵라면, 다음 날 아침거리 장보기. 21:45까지.",null,"Royal Supermarket Macau",22.1913,113.5411],
+ ["r-rethink",4,"eat","☕","리띵크 커피 마카니즈 라떼","아티젠 근처. 크림치즈 타르트와 샌드위치도 맛있대요. 8~18시.","약 35~50","Rethink Coffee Macau",22.1911,113.5527],
+ ["r-venfood",4,"eat","🍜","베네시안 푸드코트 (3층)","메뉴가 다양해 아이들 고르기 좋아요. 음료는 비싸니 물은 챙겨 가세요.","약 70~130","The Venetian Macao food court",22.1480,113.5605],
+ ["r-eiffel",4,"see","🗼","파리지앵 에펠탑 야경","해 지면 불이 들어와요. 베네시안에서 걸어서 연결돼요.",0,"The Parisian Macao",22.1437,113.5620],
+ ["r-leftmop",5,"buy","💸","남은 파타카 다 쓰기","파타카는 한국에서 환전이 안 돼요. 공항 가기 전에 간식·선물로 털고 오세요.",null,"Macau International Airport",22.1561,113.5877]
+];
+const PRICES = [
+ ["택시 기본요금 (1.6km까지)",21],["택시 220m마다",2],["택시 트렁크 짐 1개",3],["버스 1회 (현금)",6],
+ ["에그타르트 1개 (마가렛)",11],["망고모찌",22],["젤라또 1스쿱 (레몬첼로)",30],["수영장 락커",20],
+ ["안다즈 조식 성인",262],["안다즈 조식 아동",131],["푸드코트 한 끼 (약)","70~130"],["생수 편의점 (약)","5~10"],["아몬드 쿠키 상자 (약)","60~150"]
+];
+const toRad = d => d * Math.PI / 180;
+const dist = (a, b) => { const R = 6371e3, dl = toRad(b[0]-a[0]), dn = toRad(b[1]-a[1]); const x = Math.sin(dl/2)**2 + Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin(dn/2)**2; return 2*R*Math.asin(Math.sqrt(x)); };
+const taxiFare = m => { const road = m * 1.35; return 21 + Math.max(0, Math.ceil((road - 1600) / 220)) * 2; };
+const fmtD = m => m < 1000 ? Math.round(m/10)*10 + "m" : (m/1000).toFixed(1) + "km";
+const dirUrl = (q, ll, mode) => "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(ll ? ll.join(",") : q) + "&travelmode=" + mode;
+const fmtMop = v => v === null || v === undefined ? "" : (typeof v === "number" ? (v === 0 ? "무료" : v + " MOP") : v + " MOP");
+const krwOf = v => { if (typeof v === "number") return v ? "≈ " + Math.round(v * rate).toLocaleString("ko-KR") + "원" : ""; if (typeof v === "string") { const n = v.match(/[\d.]+/g); if (!n) return ""; return "≈ " + n.map(x => (Math.round(x * rate / 100) * 100).toLocaleString("ko-KR")).join("~") + "원"; } return ""; };
+let me = null, geoOn = LS.get("dw-geo", false), geoErr = "", watchId = null;
+function startGeo(){
+  if (!navigator.geolocation) { geoErr = "이 휴대폰은 위치를 지원하지 않아요"; renderGo(); return; }
+  geoOn = true; LS.set("dw-geo", true); geoErr = "위치 찾는 중…"; renderGo();
+  watchId = navigator.geolocation.watchPosition(p => { me = [p.coords.latitude, p.coords.longitude]; geoErr = ""; renderGo(); renderRecs(); },
+    e => { geoErr = e.code === 1 ? "위치 권한이 꺼져 있어요. 브라우저 설정에서 위치를 허용해 주세요." : "위치를 못 찾았어요. 잠시 후 다시 눌러 주세요."; geoOn = e.code !== 1; renderGo(); },
+    { enableHighAccuracy: true, maximumAge: 60000, timeout: 20000 });
+}
+function targetEvent(){
+  const E = events(), now = Date.now(); let ci = -1; E.forEach((e,i) => { if (e.t <= now) ci = i; });
+  const cand = [E[ci], E[ci+1]].filter(Boolean); // prefer next stop with a place; if current has a place and started <45min ago use current
+  const cur = E[ci], next = E[ci+1];
+  if (cur && cur.it[3] && now - cur.t < 45*6e4) return { e: cur, label: "지금 일정 장소" };
+  for (let k = ci+1; k < E.length; k++) if (E[k].it[3]) return { e: E[k], label: "다음 목적지" };
+  return null;
+}
+function renderGo(){
+  const G = $("#go"); G.innerHTML = ""; const T = targetEvent();
+  if (!T) { G.append(el("div","s","남은 이동 일정이 없어요.")); return; }
+  const e = T.e, q = e.it[3], ll = GEO[q];
+  $("#goWhen").textContent = T.label;
+  G.append(el("div","t", `${e.D.d.slice(5).replace("-","/")} ${e.D.w} · ${e.it[0]} · ${e.t <= Date.now() ? "진행 중" : leftText(e.t - Date.now())}`));
+  G.append(el("div","dest", e.it[1]));
+  if (e.it[2]) G.append(el("div","s", e.it[2]));
+  if (me && ll) {
+    const m = dist(me, ll), walk = Math.round(m * 1.3 / 75), fare = taxiFare(m);
+    if (m < 120) { G.append(el("div","left","📍 이미 도착했어요")); }
+    const mt = el("div","meta");
+    const box = (v, l) => { const d = el("div"); d.append(el("b", null, v), el("small", null, l)); return d; };
+    mt.append(box(fmtD(m), "직선 거리"), box(walk > 90 ? "택시 추천" : "걸어서 " + walk + "분", "도보"), box(m < 700 ? "걸어가요" : "약 " + fare + " MOP", m < 700 ? "택시" : "택시 · " + krwOf(fare).replace("≈ ","")));
+    G.append(mt);
+  }
+  const bt = el("div","btns");
+  const a1 = el("a","btn pri","길찾기"); a1.href = dirUrl(q, ll, me && ll && dist(me, ll) < 1500 ? "walking" : "driving"); a1.target = "_blank"; a1.rel = "noopener";
+  const a2 = el("a","btn","대중교통"); a2.href = dirUrl(q, ll, "transit"); a2.target = "_blank"; a2.rel = "noopener";
+  bt.append(a1, a2);
+  const TM = {"Macau International Airport":11,"Andaz Macau":0,"Galaxy Macau food court":2,"Grand Resort Deck Galaxy Macau":2,"Wynn Palace SkyCab":4,"City of Dreams Macau":3,"Songhuahu Dumplings City of Dreams Macau":3,"The House of Dancing Water Macau":3,"Coloane Village Macau":10,"신무이 굴국수 마카오":9,"Taipa Village Macau":9,"Artyzen Grand Lapa Macau":1,"Ruins of St. Paul's Macau":8,"Senado Square Macau":7,"Macau Outer Harbour Ferry Terminal":12,"The Venetian Macao food court":5,"The Parisian Macao":13};
+  const tx = TAXI[TM[q]];
+  if (tx) { const b3 = el("button","btn","택시 카드"); b3.type = "button"; b3.onclick = () => show(tx[1], tx[2], "여기로 가 주세요 · 唔該去呢度"); bt.append(b3); }
+  G.append(bt);
+  const gp = el("div","gps");
+  if (!geoOn || (!me && geoErr && !geoErr.includes("찾는"))) { const b = el("button","btn", me ? "내 위치 새로고침" : "📍 내 위치 켜고 거리·택시비 보기"); b.type = "button"; b.style.marginTop = "8px"; b.style.width = "100%"; b.onclick = startGeo; G.append(b); }
+  gp.textContent = geoErr || (me ? "내 위치 기준 · 택시비는 도로 거리를 대략 잡은 예상치예요" : "");
+  G.append(gp);
+}
+let recDay = (() => { const i = DAYS.findIndex(x => x.d === moDate()); return i >= 0 ? i + 1 : 1; })(), recMode = "day";
+function renderRecs(){
+  const S = $("#recSeg"); S.innerHTML = "";
+  [["day","오늘 코스"],["near","내 근처"],["all","전체"]].forEach(([k, l]) => { const b = el("button", null, l); b.type = "button"; b.setAttribute("aria-pressed", recMode === k);
+    b.onclick = () => { recMode = k; if (k === "near" && !me) startGeo(); renderRecs(); }; S.append(b); });
+  let list = RECS.slice();
+  if (recMode === "day") list = list.filter(r => r[1] === recDay || r[1] === 0);
+  if (recMode === "near") { if (me) list = list.map(r => [...r, dist(me, [r[8], r[9]])]).filter(r => r[10] < 2500).sort((a,b) => a[10] - b[10]); else list = []; }
+  $("#recHint").textContent = recMode === "day" ? `Day ${recDay} 코스` : recMode === "near" ? (me ? "2.5km 안" : "위치를 켜 주세요") : "5일 전체";
+  const R = $("#recs"); R.innerHTML = "";
+  if (!list.length) R.append(el("div","s", recMode === "near" ? (me ? "근처 2.5km 안에는 추천 목록이 없어요. '오늘 코스'를 보세요." : "위치를 켜면 가까운 곳부터 보여드려요.") : "이날은 추천이 없어요."));
+  list.forEach(r => {
+    const a = el("a","rec"); a.href = mapUrl(r[7]); a.target = "_blank"; a.rel = "noopener";
+    a.append(el("span","em", r[3]));
+    const b = el("div"); const tt = el("b"); const tg = el("span","tag " + r[2], { eat: "먹기", buy: "사기", see: "보기" }[r[2]]); tt.append(tg, document.createTextNode(r[4])); b.append(tt, el("small", null, r[5]));
+    if (recMode !== "day") b.append(el("small", null, `Day ${r[1]}` + (r[10] != null ? ` · 여기서 ${fmtD(r[10])}` : "")));
+    const pr = el("span","pr", fmtMop(r[6])); const k = krwOf(r[6]); if (k) pr.append(el("i", null, k));
+    a.append(b, pr); R.append(a);
+  });
+}
+function renderPrice(){
+  const T = $("#price"); T.querySelectorAll("tr:not(:first-child)").forEach(x => x.remove());
+  PRICES.forEach(([n, v]) => { const tr = el("tr"); tr.append(el("td", null, n), el("td", null, String(v)), el("td", null, krwOf(v).replace("≈ ",""))); T.append(tr); });
+}
+// ---------- live exchange rate ----------
+let rateAuto = LS.get("dw-rate-auto", true), rateInfo = LS.get("dw-rate-info", null);
+async function liveRate(){
+  try { const r = await fetch("https://open.er-api.com/v6/latest/MOP", { cache: "no-store" }); if (!r.ok) return; const j = await r.json();
+    if (j.result !== "success" || !j.rates || !j.rates.KRW) return;
+    rateInfo = { krw: j.rates.KRW, hkd: j.rates.HKD, upd: j.time_last_update_unix * 1000 }; LS.set("dw-rate-info", rateInfo); applyRate();
+  } catch(e) {}
+}
+function applyRate(){
+  if (rateInfo && rateAuto) { rate = Math.round(rateInfo.krw * 10) / 10; $("#rate").value = rate; }
+  if (rateInfo) { const d = new Date(rateInfo.upd + 8*3600e3); $("#rateSrc").textContent = (rateAuto ? "실시간 " : "직접 입력 · 실시간 " + (Math.round(rateInfo.krw*10)/10) + "원 · ") + `${d.getUTCMonth()+1}/${d.getUTCDate()} 기준 · 1 MOP =`; }
+  renderPrice(); renderRecs(); renderGo(); renderLedger();
+}
+$("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
+$("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
+// ---------- install as app ----------
+let deferredPrompt = null;
+const isStandalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; showInstall(); });
+function showInstall(){
+  if (isStandalone() || LS.get("dw-inst-x", false)) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (ios) { $("#instTx").textContent = "아이폰: 아래 공유 버튼(□↑) → '홈 화면에 추가'를 누르면 앱처럼 열려요."; $("#instBtn").style.display = "none"; }
+  else if (!deferredPrompt) { $("#instTx").textContent = "크롬 메뉴(⋮) → '앱 설치' 또는 '홈 화면에 추가'를 누르세요."; $("#instBtn").style.display = "none"; }
+  else { $("#instBtn").style.display = ""; }
+  $("#inst").classList.add("on");
+}
+$("#instBtn").onclick = async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $("#inst").classList.remove("on"); };
+$("#instX").onclick = () => { LS.set("dw-inst-x", true); $("#inst").classList.remove("on"); };
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(() => {});
+setTimeout(showInstall, 2500);
+
 // ---------- boot ----------
 merge(); clocks(); renderNow(); renderDays(); renderDay(); renderWx(); renderLedger(); syncText(); liveWx();
+applyRate(); liveRate(); if (geoOn) startGeo();
 (async () => { await pull(); if (pending) push(); })();
-setInterval(() => { clocks(); renderNow(); }, 30000);
+setInterval(() => { clocks(); renderNow(); renderGo(); }, 30000);
 setInterval(() => { if (document.visibilityState === "visible" && !pushing && !document.activeElement.matches("input")) { pending ? push() : pull(); } }, 8000);
 setInterval(() => { renderDay(); }, 120000);
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { clocks(); renderNow(); pending ? push() : pull(); liveWx(); } });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { clocks(); renderNow(); renderGo(); pending ? push() : pull(); liveWx(); liveRate(); } });
 window.addEventListener("online", () => pending ? push() : pull());
 </script>
 </body>

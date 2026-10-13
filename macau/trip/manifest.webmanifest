@@ -1,0 +1,15 @@
+{
+  "name": "돼지사냥꾼 가족들 · 마카오",
+  "short_name": "돼지사냥꾼",
+  "description": "마카오 4박 5일 여행 도우미 — 지금 일정, 길 안내, 환율·물가, 추천, 공동경비",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1d4ea6",
+  "theme_color": "#1d4ea6",
+  "lang": "ko",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
