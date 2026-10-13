@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>돼지사냥꾼 가족들 · 마카오</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 100'%3E%3Crect x='1' y='1' width='62' height='98' rx='6' fill='%23b3122a'/%3E%3Crect x='6' y='6' width='52' height='88' rx='3' fill='%23f3e6c8'/%3E%3Cellipse cx='32' cy='66' rx='18' ry='11' fill='%232b1c18'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#f4f6fb; --card:#fff; --ink:#132038; --muted:#5a6680; --line:#dde3ee;
+  --azul:#1d4ea6; --azul-soft:#e5ecfa; --hero:#1d4ea6; --jade:#17725f; --jade-soft:#e0f2ec;
+  --rose:#b3122a; --rose-soft:#fbe4e8; --ochre:#a86f0a; --ochre-soft:#fbf1dc;
+  --display:"Song Myung",Georgia,serif;
+  --body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0b1020; --card:#131b30; --ink:#e7ecf7; --muted:#97a3bd; --line:#26324e;
+  --azul:#7ba3ff; --azul-soft:#1a2747; --hero:#17306e; --jade:#55c7ad; --jade-soft:#11302a;
+  --rose:#ff7a8e; --rose-soft:#3a1620; --ochre:#f0c266; --ochre-soft:#2e2615; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0b1020; --card:#131b30; --ink:#e7ecf7; --muted:#97a3bd; --line:#26324e;
+  --azul:#7ba3ff; --azul-soft:#1a2747; --hero:#17306e; --jade:#55c7ad; --jade-soft:#11302a;
+  --rose:#ff7a8e; --rose-soft:#3a1620; --ochre:#f0c266; --ochre-soft:#2e2615; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px 80px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;font-weight:400}
+h2{font-family:var(--display);font-size:24px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--azul)}
+:focus-visible{outline:2px solid var(--azul);outline-offset:2px}
+.hero{margin:0 -16px;padding:22px 16px 18px;background:var(--hero);color:#fff;position:relative;overflow:hidden}
+.hero .tiles{position:absolute;inset:0;opacity:.13;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='white' stroke-width='1.3'%3E%3Crect x='1' y='1' width='54' height='54'/%3E%3Cpath d='M28 4 L52 28 L28 52 L4 28Z'/%3E%3Ccircle cx='28' cy='28' r='8'/%3E%3C/g%3E%3C/svg%3E")}
+.hero>*:not(.tiles){position:relative}
+.hero .top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:rgba(255,255,255,.75)}
+.hero h1{font-family:var(--display);font-size:clamp(28px,8vw,38px);line-height:1.15;margin-top:4px;word-break:keep-all}
+.boar{width:46px;flex:none;transform:rotate(8deg);filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.clocks{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.clocks span{background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;font-size:13px}
+.clocks b{font-family:var(--mono);font-weight:500}
+.ppl{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.ppl i{font-style:normal;font-size:11px;padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
+.bar{position:sticky;top:0;z-index:5;margin:0 -16px;padding:8px 16px;background:var(--paper);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.bar::-webkit-scrollbar{display:none}
+.bar a{flex:none;text-decoration:none;color:var(--muted);font-size:13px;padding:6px 11px;border-radius:999px}
+.bar a:active{background:var(--line)}
+section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:52px}
+.sh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sh small{color:var(--muted);font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.now{display:grid;gap:10px}
+.now .row{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:start}
+.now .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;border-radius:6px;padding:3px 0;text-align:center}
+.now .lbl.n{background:var(--rose);color:#fff}
+.now .lbl.x{background:var(--azul-soft);color:var(--azul)}
+.now .t{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.now .w{font-size:17px;font-weight:600;line-height:1.35}
+.now .s{font-size:13px;color:var(--muted)}
+.now .left{font-size:12px;color:var(--rose);font-weight:600}
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:var(--line);padding:4px;border-radius:12px}
+.days button{border:0;background:transparent;border-radius:9px;padding:6px 0;font-size:12px;color:var(--muted);line-height:1.25}
+.days button b{display:block;font-size:15px;font-weight:600}
+.days button[aria-pressed="true"]{background:var(--card);color:var(--ink)}
+.days button.today b::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--rose);margin-left:4px;vertical-align:3px}
+.dayhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dayhead h3{font-family:var(--display);font-size:21px}
+.dayhead span{font-size:12px;color:var(--muted)}
+.tl{display:flex;flex-direction:column}
+.ev{display:grid;grid-template-columns:52px 18px 1fr;gap:6px;align-items:start;padding:8px 0}
+.ev .tm{font-family:var(--mono);font-size:13px;color:var(--muted);padding-top:2px}
+.ev .dot{width:12px;height:12px;border-radius:50%;margin-top:5px;border:2px solid var(--azul);background:var(--card);position:relative}
+.ev.past{opacity:.5}
+.ev.cur .dot{background:var(--rose);border-color:var(--rose);box-shadow:0 0 0 4px var(--rose-soft)}
+.ev .bd b{font-weight:600;display:block;line-height:1.35}
+.ev .bd small{display:block;color:var(--muted);font-size:13px}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.chip{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);text-decoration:none;background:var(--card)}
+.chip.cash{background:var(--ochre-soft);color:var(--ochre);border-color:transparent}
+.chip.book{background:var(--rose-soft);color:var(--rose);border-color:transparent}
+.chip.tip{background:var(--jade-soft);color:var(--jade);border-color:transparent}
+.chip.map{color:var(--azul);border-color:var(--azul-soft)}
+.tips{display:flex;flex-direction:column}
+.tipi{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:start;padding:8px 0;border-top:1px solid var(--line)}
+.ck{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--muted);background:none;padding:0;display:grid;place-items:center}
+.ck svg{width:14px;height:14px;stroke:#fff;stroke-width:3;fill:none;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .25s}
+.tipi.done .ck{background:var(--jade);border-color:var(--jade)} .tipi.done .ck svg{stroke-dashoffset:0}
+.tipi.done span{color:var(--muted);text-decoration:line-through}
+.tipi .imp{color:var(--rose);font-size:11px;font-weight:700;margin-left:6px}
+.wxrow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.wx{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 2px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1px}
+.wx.today{border-color:var(--rose)}
+.wx.wet{background:var(--azul-soft)}
+.wx .d{font-size:11px;color:var(--muted)}
+.wx .ic{font-size:22px;line-height:1.3}
+.wx .hi{font-family:var(--mono);color:var(--rose);font-weight:500}
+.wx .lo{font-family:var(--mono);color:var(--azul);font-size:12px}
+.wx .r{font-size:11px;color:var(--muted)}
+.src{font-size:11px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.big{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:2px;min-height:76px}
+.big b{font-weight:600;font-size:14px}
+.big span{font-size:18px;line-height:1.3;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+.big small{font-size:11px;color:var(--muted)}
+.show{position:fixed;inset:0;z-index:20;background:#fff;color:#111;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:18px}
+.show.on{display:flex}
+.show .zh{font-size:clamp(40px,13vw,84px);font-weight:700;line-height:1.2;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;word-break:break-all}
+.show .ko{font-size:18px;color:#555}
+.show .sub{font-size:20px;color:#333;font-family:"Noto Sans TC","PingFang TC",sans-serif}
+.show button{border:1px solid #ccc;background:#f4f4f4;border-radius:999px;padding:10px 22px;font-size:16px}
+.ledger form{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ledger input,.ledger select{width:100%;min-width:0;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 10px;font-size:15px}
+.ledger form .full{grid-column:1/-1}
+.ledger form button{grid-column:1/-1;border:0;background:var(--azul);color:#fff;border-radius:10px;padding:10px;font-weight:600}
+.tot{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.tot div{background:var(--paper);border-radius:10px;padding:8px;text-align:center}
+.tot b{display:block;font-family:var(--mono);font-weight:500;font-size:16px}
+.tot small{font-size:11px;color:var(--muted)}
+.settle{font-size:14px;display:flex;flex-direction:column;gap:3px}
+.exp{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.exp small{display:block;color:var(--muted);font-size:12px}
+.exp .amt{font-family:var(--mono)}
+.exp button{border:1px solid var(--line);background:var(--card);border-radius:999px;font-size:11px;padding:3px 8px;color:var(--muted)}
+.exp button[data-arm]{color:var(--rose);border-color:var(--rose)}
+.fams{display:flex;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--muted);align-items:center}
+.fams input{width:96px;border:1px dashed var(--line);background:var(--card);border-radius:8px;padding:4px 8px;font-size:13px}
+.calc{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.calc label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:3px}
+.calc input{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 10px;font-family:var(--mono);font-size:17px;width:100%;min-width:0}
+.note{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.note:first-child{border-top:0;padding-top:0}
+.note b{font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:4px}
+td,th{text-align:left;padding:5px 4px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500}
+.sos a{display:flex;justify-content:space-between;align-items:center;text-decoration:none;color:var(--ink);padding:10px 0;border-top:1px solid var(--line)}
+.sos a:first-child{border-top:0}
+.sos a span{font-size:13px;color:var(--muted)}
+.sos a b{font-family:var(--mono);font-weight:500;color:var(--rose)}
+.sync{font-size:12px;color:var(--muted)}
+.dotk{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-right:5px}
+.dotk.ok{background:var(--jade)} .dotk.wait{background:var(--ochre)}
+.audio{display:flex;gap:6px;flex-wrap:wrap}
+footer{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="tiles" aria-hidden="true"></div>
+    <div class="top">
+      <div>
+        <div class="eyebrow">MACAU · 2026.10.13 – 10.17</div>
+        <h1>돼지사냥꾼 가족들<br>마카오 4박 5일</h1>
+      </div>
+      <svg class="boar" viewBox="0 0 64 100" aria-hidden="true"><rect x="1" y="1" width="62" height="98" rx="5" fill="#b3122a"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#f3e6c8"/><g stroke="#b3122a" stroke-width="2.4" fill="none"><path d="M40 12 l8 -3 M44 18 l9 -2 M36 22 l7 -5"/></g><path d="M12 70 C12 58 22 50 34 50 C44 50 52 56 54 64 L58 66 L54 70 C52 78 44 82 34 82 C22 82 12 78 12 70Z" fill="#2b1c18"/><circle cx="48" cy="62" r="1.6" fill="#f3e6c8"/><path d="M53 69 l5 3" stroke="#f3e6c8" stroke-width="1.6"/><path d="M18 82 v6 M28 82 v7 M40 82 v7 M48 80 v7" stroke="#2b1c18" stroke-width="3"/></svg>
+    </div>
+    <div class="clocks"><span>마카오 <b id="cMo">--:--</b></span><span>서울 <b id="cSe">--:--</b></span><span id="dday">여행 중</span></div>
+    <div class="ppl" aria-label="일행"><i>어른 43</i><i>어른 43</i><i>어른 43</i><i>어른 43</i><i>어른 45</i><i>16</i><i>12</i><i>11</i><i>10</i><i>10</i></div>
+  </header>
+
+  <nav class="bar" aria-label="바로가기">
+    <a href="#s-now">지금</a><a href="#s-plan">일정</a><a href="#s-wx">날씨</a><a href="#s-taxi">택시·말</a><a href="#s-money">돈·장부</a><a href="#s-info">알아둘 것</a><a href="#s-sos">긴급</a>
+  </nav>
+
+  <section id="s-now">
+    <div class="sh"><h2>지금</h2><small id="nowDate"></small></div>
+    <div class="card now" id="now"></div>
+  </section>
+
+  <section id="s-plan">
+    <div class="sh"><h2>일정</h2><small>장소를 누르면 구글 지도가 열려요</small></div>
+    <div class="days" id="days" role="tablist"></div>
+    <div class="card">
+      <div class="dayhead"><h3 id="dTitle"></h3><span id="dHotel"></span></div>
+      <div class="tl" id="tl"></div>
+    </div>
+    <div class="card">
+      <div class="sh"><b style="font-weight:600">이날 챙길 것</b><small class="sync"><span class="dotk" id="dot"></span><span id="sync">연결 중…</span></small></div>
+      <div class="tips" id="tips"></div>
+    </div>
+  </section>
+
+  <section id="s-wx">
+    <div class="sh"><h2>날씨</h2><small id="wxSrc"></small></div>
+    <div class="wxrow" id="wx"></div>
+  </section>
+
+  <section id="s-taxi">
+    <div class="sh"><h2>택시 기사님께 보여주기</h2><small>누르면 크게</small></div>
+    <div class="grid2" id="taxi"></div>
+    <div class="sh" style="margin-top:6px"><h2>한마디</h2><small>누르면 크게</small></div>
+    <div class="grid2" id="say"></div>
+    <div class="card"><b style="font-weight:600">송화호수교 예약 때 쓴 음성</b><div class="audio" style="margin-top:8px">
+      <audio controls preload="none" src="audio/yue-1.mp3" style="width:100%"></audio></div>
+      <small style="color:var(--muted);font-size:12px">광둥어 · 10/14 17:30, 10명 예약 요청</small></div>
+  </section>
+
+  <section id="s-money">
+    <div class="sh"><h2>환율 계산</h2><small>1 MOP ≈ <input id="rate" type="number" inputmode="decimal" value="170" style="width:58px;border:1px dashed var(--line);background:var(--card);border-radius:6px;padding:1px 4px;font-family:var(--mono)"> 원</small></div>
+    <div class="card calc">
+      <label>파타카 (MOP)<input id="mop" type="number" inputmode="decimal" placeholder="0"></label>
+      <span aria-hidden="true">⇄</span>
+      <label>원 (KRW)<input id="krw" type="number" inputmode="decimal" placeholder="0"></label>
+    </div>
+    <div class="sh" style="margin-top:6px"><h2>공동경비 장부</h2><small>세 가족이 같이 보는 장부</small></div>
+    <div class="card ledger">
+      <div class="fams" id="fams"></div>
+      <form id="addExp" style="margin-top:10px">
+        <select id="eWho" aria-label="낸 가족"></select>
+        <input id="eAmt" type="number" inputmode="decimal" placeholder="금액" aria-label="금액">
+        <input id="eWhat" class="full" type="text" placeholder="어디에 썼나요 (예: 송화호수교 저녁)" maxlength="40" aria-label="내용">
+        <select id="eCur" aria-label="통화"><option value="MOP">MOP</option><option value="KRW">원</option><option value="HKD">HKD</option></select>
+        <select id="eSplit" aria-label="나누는 방법"><option value="fam">3가족 똑같이</option><option value="me">우리 가족만</option></select>
+        <button type="submit">장부에 적기</button>
+      </form>
+      <div class="tot" id="tot" style="margin-top:12px"></div>
+      <div class="settle" id="settle" style="margin-top:10px"></div>
+      <div id="exps" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <section id="s-info">
+    <div class="sh"><h2>알아둘 것</h2></div>
+    <div class="card">
+      <div class="note"><b>런더너 근위병 교대식 · 크리스탈 팰리스 메인 로비</b>
+        <table><tr><th>요일</th><th>시간</th></tr><tr><td>화 ~ 목</td><td>19:30 · 21:30</td></tr><tr><td>금 ~ 일</td><td>16:00 · 19:30 · 21:30</td></tr></table>
+        <small style="color:var(--muted)">첫날 저녁 먹고 가면 21:30 회차예요.</small></div>
+      <div class="note"><b>현금이나 알리페이만 되는 곳</b>신무이 굴국수(타이파)는 현금만, 그랜드 리조트 덱 수영장 락커는 20 MOP 현금·알리페이. 현금은 마카오공항 HSBC ATM에서 트래블로그 카드로 뽑으면 돼요.</div>
+      <div class="note"><b>돈</b>홍콩달러(HKD)도 거의 1:1로 받지만, 거스름돈은 파타카(MOP)로 줘요. 파타카는 한국에서 못 바꾸니 마지막 날엔 다 쓰고 오세요.</div>
+      <div class="note"><b>이동</b>공항 셔틀은 크리스탈 로비에서 내린 뒤 안다즈 셔틀로 갈아타요. 갤럭시 셔틀에서 내리면 갤럭시 멤버십부터 만드세요. 아티젠은 후문에서 샌즈 셔틀, 외항터미널도 샌즈 셔틀로 가요. 콜로안은 택시로 15분이에요.</div>
+      <div class="note"><b>입국 확인 종이는 끝까지 보관</b>입국 심사 때 받은 종이(Arrival Card)는 여권에 끼워 두세요. 나갈 때 보여달라고 할 수 있어요.</div>
+      <div class="note"><b>카지노는 만 21세 이상만</b>여권이 있어야 들어가요. 그 시간에 아이들을 누가 볼지 미리 정해 두세요. 카지노는 샌즈보다 윈이나 스타월드가 좋아요.</div>
+      <div class="note"><b>전자담배 반입·사용 금지</b>기기와 액상 모두 걸리면 벌금이에요.</div>
+      <div class="note"><b>귀국할 때</b>면세 한도는 1인 미화 800달러예요. 육포 같은 육류 가공품과 생과일은 한국으로 가져올 수 없어요.</div>
+      <div class="note"><b>숙소</b>안다즈 마카오 (10/13~15) · <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Andaz+Macau">지도</a><br>아티젠 그랜드 라파 (10/15~17) · <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Artyzen+Grand+Lapa+Macau">지도</a></div>
+      <div class="note"><b>구씨네 짐 체크리스트</b><a href="../">btypenine.github.io/macau</a></div>
+    </div>
+  </section>
+
+  <section id="s-sos">
+    <div class="sh"><h2>긴급할 때</h2><small>누르면 바로 전화</small></div>
+    <div class="card sos">
+      <a href="tel:999"><div>경찰 · 구급차 · 소방<br><span>마카오 긴급번호</span></div><b>999</b></a>
+      <a href="tel:+85328333000"><div>마카오 관광 위기관리 핫라인<br><span>24시간 · 영어</span></div><b>+853 2833 3000</b></a>
+      <a href="tel:+82232100404"><div>외교부 영사콜센터<br><span>24시간 · 한국어 · 여권 분실, 사건·사고</span></div><b>+82 2 3210 0404</b></a>
+    </div>
+  </section>
+
+  <footer>일정과 정보는 공유받은 엑셀(2026년 마카오 세부일정)과 준비 과정에서 정리한 내용을 모았어요. 체크와 경비 장부는 이 링크를 연 모든 사람에게 몇 초 안에 같이 보여요.</footer>
+</div>
+
+<div class="show" id="show" role="dialog" aria-modal="true"><div class="zh" id="shZh"></div><div class="sub" id="shSub"></div><div class="ko" id="shKo"></div><button type="button" id="shX">닫기</button></div>
+
+<script>
+const MO = 8;
+const DAYS = [
+ {d:"2026-10-13",w:"화",title:"출발, 그리고 코타이의 밤",hotel:"안다즈",items:[
+  ["11:00","인천공항 집결",""],
+  ["14:00","인천 → 마카오 비행",""],
+  ["17:00","마카오 도착 · 입국 → HSBC ATM 출금 → 호텔 셔틀","입국 확인 종이는 여권에 · 크리스탈 로비 하차 후 안다즈 셔틀","Macau International Airport",["tip:ATM 출금"]],
+  ["18:00","안다즈 체크인","19시까지 라운지 해피아워","Andaz Macau",["tip:해피아워 ~19시"]],
+  ["19:30","저녁 · 갤럭시 푸드코트","","Galaxy Macau food court"],
+  ["20:00","윈팰리스 스카이캡 → 런더너 근위병 교대식 → 호텔투어","교대식은 21:30 회차","Wynn Palace SkyCab"],
+  ["23:00","카지노 · 맥주 한잔 · 취침",""]],
+  tips:[["c-arrival","입국확인증 버리지 않기",1],["c-atm","마카오공항 HSBC ATM에서 트래블로그 출금",1],["c-shuttle","공항셔틀은 크리스탈 로비 하차 → 안다즈 셔틀"],["c-galaxy","갤럭시 셔틀 하차 후 멤버십 만들기",1],["c-casino","카지노는 샌즈보다 윈이나 스타월드"]]},
+ {d:"2026-10-14",w:"수",title:"물놀이와 댄싱워터",hotel:"안다즈",items:[
+  ["08:00","아침 · 안다즈 조식","성인 262 / 아동 131 MOP","Andaz Macau"],
+  ["11:00","그랜드 리조트 덱 물놀이","락커 20 MOP","Grand Resort Deck Galaxy Macau",["cash:락커 현금/알리페이"]],
+  ["13:00","점심 · 풀사이드 바",""],
+  ["17:00","COD(시티오브드림) 이동","","City of Dreams Macau"],
+  ["17:30","저녁 · 송화호수교 (松花湖)","SOHO 2층 · 10명 예약 · +853 2885 5155","Songhuahu Dumplings City of Dreams Macau",["book:예약"]],
+  ["19:30","하우스 오브 댄싱워터","","The House of Dancing Water Macau",["book:티켓"]],
+  ["23:00","카지노 · 맥주 한잔 · 취침",""]],
+  tips:[["c-locker","수영장 락커 20 MOP · 현금이나 알리페이만",1],["c-bf","안다즈 조식 성인 262 · 아동 131 MOP"],["c-wet","젖은 수영복용 지퍼백·방수팩 챙기기"],["c-jacket","공연장 냉방 · 얇은 겉옷 챙기기"]]},
+ {d:"2026-10-15",w:"목",title:"콜로안, 타이파, 그리고 반도",hotel:"아티젠",items:[
+  ["09:00","안다즈 체크아웃","갤럭시에 짐 보관"],
+  ["10:00","콜로안 관광","에그타르트, 커피","Coloane Village Macau",["tip:택시 15분"]],
+  ["12:00","점심 · 신무이 굴국수","","San Hou Lei Taipa Macau",["cash:현금만"]],
+  ["13:00","타이파 관광","간식: 망고모찌, 에그타르트","Taipa Village Macau"],
+  ["15:00","아티젠 체크인","레이트 체크아웃 물어보기","Artyzen Grand Lapa Macau",["tip:레이트 체크아웃"]],
+  ["17:00","성 도미니크 성당 · 성 바울 성당","택시 이동","Ruins of St. Paul's Macau"],
+  ["17:30","세나도 광장","레몬첼로 · 택시 이동","Senado Square Macau"],
+  ["19:00","저녁 · 마이비스트로 (한식)","","My Bistro Macau"],
+  ["20:00","로얄 슈퍼마켓 · 산미우 마트 장보기","","Royal Supermarket Macau"],
+  ["23:00","카지노 · 맥주 한잔 · 취침",""]],
+  tips:[["c-late","아티젠 체크인 때 레이트 체크아웃 물어보기",1],["c-cash15","굴국수집은 현금만 · 현금 챙기기",1],["c-lordstow","콜로안 로드스토우 본점 · 평일 9시~18시"],["c-coloane","콜로안 도서관 · 성 프란시스 하비에르 성당"],["c-gift","타이파빌리지 기념품 가게 MAKAU520"],["c-tart","고트 베이커스 에그타르트"],["c-mochi","모찌마카오 망고모찌 22 MOP"],["c-kunlam","아티젠 주변 쿤람 놀이터"]]},
+ {d:"2026-10-16",w:"금",title:"수영장, 그리고 나이트투어",hotel:"아티젠",items:[
+  ["08:00","아침 · 리띵크 커피","","Rethink Coffee Macau"],
+  ["10:00","아티젠 수영장 물놀이","","Artyzen Grand Lapa Macau"],
+  ["18:00","마카오 외항터미널로 이동","샌즈 호텔 셔틀","Macau Outer Harbour Ferry Terminal"],
+  ["19:00","나이트투어",""],
+  ["20:00","저녁 · 베네시안 푸드코트","3층","The Venetian Macao food court"],
+  ["21:00","베네시안 → 파리지앵 호텔투어","","The Parisian Macao"],
+  ["23:00","카지노 · 맥주 한잔 · 취침",""]],
+  tips:[["c-sands","샌즈 호텔 셔틀 타고 외항터미널 가기"],["c-food3","베네시안 푸드코트는 3층"],["c-umb","오후 소나기 예보 · 우산 챙기기",1]]},
+ {d:"2026-10-17",w:"토",title:"집으로",hotel:"",items:[
+  ["11:00","아티젠 체크아웃",""],
+  ["12:00","점심 · 쏸라펀",""],
+  ["16:00","마카오공항 도착","","Macau International Airport"],
+  ["18:00","마카오 → 인천 비행",""]],
+  tips:[["c-checkout","아티젠 체크아웃 시간 확인 후 정하기",1],["c-arr2","입국 확인 종이·여권 10개 챙기기",1],["c-mop","남은 파타카 다 쓰기"],["c-batt","보조배터리는 기내로"]]}
+];
+const WX0 = [
+ {d:"2026-10-13",hi:32,lo:26,rain:2,code:1},{d:"2026-10-14",hi:31,lo:26,rain:25,code:2},{d:"2026-10-15",hi:30,lo:26,rain:5,code:2},
+ {d:"2026-10-16",hi:30,lo:26,rain:61,code:80},{d:"2026-10-17",hi:31,lo:25,rain:2,code:2}];
+const TAXI = [
+ ["안다즈 호텔","澳門安達仕酒店","Andaz Macau · 銀河綜合度假城"],
+ ["아티젠 그랜드 라파","澳門雅辰酒店","Artyzen Grand Lapa Macau"],
+ ["갤럭시","澳門銀河","Galaxy Macau"],
+ ["시티오브드림","新濠天地","City of Dreams"],
+ ["윈 팰리스","永利皇宮","Wynn Palace"],
+ ["베네시안","澳門威尼斯人","The Venetian Macao"],
+ ["런더너","澳門倫敦人","The Londoner Macao"],
+ ["세나도 광장","議事亭前地","Senado Square"],
+ ["성 바울 성당","大三巴牌坊","Ruins of St. Paul's"],
+ ["타이파 빌리지","氹仔舊城區","Taipa Village"],
+ ["콜로안 빌리지","路環市區","Coloane Village"],
+ ["마카오 공항","澳門國際機場","Macau International Airport"],
+ ["외항 페리터미널","外港客運碼頭","Outer Harbour Ferry Terminal"]
+];
+const SAY = [
+ ["감사합니다","唔該","음꺼이 (부탁·감사 둘 다)"],
+ ["계산해 주세요","埋單，唔該","마이단, 음꺼이"],
+ ["이거 주세요","要呢個","이우 니꺼"],
+ ["화장실 어디예요?","洗手間喺邊度？","사이싸우깐 하이 삔또우?"],
+ ["얼마예요?","幾多錢？","께이또 친?"],
+ ["10명이에요","我哋十個人","응오데이 삽꺼 얀"],
+ ["안 맵게 해 주세요","唔要辣","음이우 랏"],
+ ["영수증 주세요","可唔可以俾張單我？","호음호이 뻬이 쩡딴 응오?"]
+];
+const STORE = "https://textdb.dev/api/data/dwaeji-macau-trip-cb6b956a-ba43-4f31-bcea-ce6ae77aea24";
+
+const $ = s => document.querySelector(s);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const LS = { get(k,d){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } }, set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
+const at = (date, hm) => { const [y,m,d] = date.split("-").map(Number); const [h,mi] = hm.split(":").map(Number); return Date.UTC(y, m-1, d, h - MO, mi); };
+const moNow = () => new Date(Date.now() + MO*3600e3);
+const moDate = () => moNow().toISOString().slice(0,10);
+const pad = n => String(n).padStart(2,"0");
+const mapUrl = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+const CHK = '<svg viewBox="0 0 14 14"><path d="M2 7.5 L5.5 11 L12 3"/></svg>';
+
+// ---------- clocks & now ----------
+function clocks(){
+  const m = moNow(); $("#cMo").textContent = pad(m.getUTCHours()) + ":" + pad(m.getUTCMinutes());
+  const s = new Date(Date.now() + 9*3600e3); $("#cSe").textContent = pad(s.getUTCHours()) + ":" + pad(s.getUTCMinutes());
+  const d = moDate(), i = DAYS.findIndex(x => x.d === d);
+  $("#dday").textContent = i >= 0 ? `여행 ${i+1}일차 · ${DAYS[i].w}요일` : (d < DAYS[0].d ? "출발 전" : "여행 끝 · 수고했어요");
+}
+function events(){ const out = []; DAYS.forEach((D,di) => D.items.forEach(it => out.push({ di, D, it, t: at(D.d, it[0]) }))); return out; }
+function renderNow(){
+  const E = events(), now = Date.now(); const N = $("#now"); N.innerHTML = "";
+  let ci = -1; E.forEach((e,i) => { if (e.t <= now) ci = i; });
+  const cur = ci >= 0 ? E[ci] : null, next = E[ci+1] || null;
+  const m = moNow(); $("#nowDate").textContent = `${m.getUTCMonth()+1}/${m.getUTCDate()} 마카오 시간`;
+  const row = (lbl, cls, e, extra) => {
+    const r = el("div","row"); r.append(el("span","lbl " + cls, lbl));
+    const b = el("div"); b.append(el("div","t", `${e.D.d.slice(5).replace("-","/")} ${e.D.w} · ${e.it[0]}`), el("div","w", e.it[1]));
+    if (e.it[2]) b.append(el("div","s", e.it[2]));
+    if (extra) b.append(extra);
+    if (e.it[3]) { const a = el("a","chip map","지도 열기"); a.href = mapUrl(e.it[3]); a.target = "_blank"; a.rel = "noopener"; const c = el("div","chips"); c.append(a); b.append(c); }
+    r.append(b); N.append(r);
+  };
+  if (!cur && next) { row("다음", "x", next, el("div","left", leftText(next.t - now))); return; }
+  if (cur) row("지금", "n", cur);
+  if (next) row("다음", "x", next, el("div","left", leftText(next.t - now)));
+  if (!next) N.append(el("div","s","일정이 모두 끝났어요. 조심히 들어가세요!"));
+}
+const leftText = ms => { const h = Math.floor(ms/36e5), mi = Math.floor(ms%36e5/6e4); return h >= 24 ? `${Math.floor(h/24)}일 뒤` : (h ? `${h}시간 ${mi}분 뒤` : `${mi}분 뒤`); };
+
+// ---------- days ----------
+let sel = Math.max(0, DAYS.findIndex(x => x.d === moDate()));
+function renderDays(){
+  const B = $("#days"); B.innerHTML = ""; const today = moDate();
+  DAYS.forEach((D,i) => { const b = el("button", D.d === today ? "today" : ""); b.type = "button"; b.setAttribute("aria-pressed", i === sel);
+    b.innerHTML = `<b>${+D.d.slice(8)}일</b>${D.w}`; b.onclick = () => { sel = i; renderDays(); renderDay(); }; B.append(b); });
+}
+function renderDay(){
+  const D = DAYS[sel]; $("#dTitle").textContent = `Day ${sel+1} · ${D.title}`; $("#dHotel").textContent = D.hotel ? D.hotel + " 숙박" : "귀국";
+  const T = $("#tl"); T.innerHTML = ""; const now = Date.now(); const E = D.items.map(it => at(D.d, it[0]));
+  D.items.forEach((it,i) => {
+    const r = el("div","ev"); const st = E[i], en = E[i+1] || st + 2*36e5;
+    if (en <= now) r.classList.add("past"); else if (st <= now) r.classList.add("cur");
+    r.append(el("span","tm", it[0]), el("span","dot"));
+    const b = el("div","bd"); b.append(el("b", null, it[1])); if (it[2]) b.append(el("small", null, it[2]));
+    const c = el("div","chips");
+    (it[4] || []).forEach(t => { const [k, v] = t.split(":"); c.append(el("span","chip " + k, v)); });
+    if (it[3]) { const a = el("a","chip map","지도"); a.href = mapUrl(it[3]); a.target = "_blank"; a.rel = "noopener"; c.append(a); }
+    if (c.childNodes.length) b.append(c);
+    r.append(b); T.append(r);
+  });
+  renderTips();
+}
+function renderTips(){
+  const P = $("#tips"); P.innerHTML = "";
+  DAYS[sel].tips.forEach(([id, txt, imp]) => {
+    const st = state.chk[id] || {}; const r = el("div","tipi" + (st.done ? " done" : ""));
+    const b = el("button","ck"); b.type = "button"; b.innerHTML = CHK; b.setAttribute("aria-pressed", !!st.done); b.setAttribute("aria-label", txt);
+    b.onclick = () => change("chk", id, { done: !st.done });
+    const s = el("span", null, txt); if (imp) s.append(el("span","imp","중요"));
+    r.append(b, s); P.append(r);
+  });
+}
+
+// ---------- weather ----------
+let WX = LS.get("dw-wx", null) || { src: "10/11 예보", days: WX0 };
+const icon = (c, r) => (c >= 51 || r >= 50) ? "🌦️" : c <= 1 ? "☀️" : "⛅";
+function renderWx(){
+  const W = $("#wx"); W.innerHTML = ""; const today = moDate();
+  WX.days.forEach(d => { const dt = new Date(d.d + "T12:00:00Z"); const c = el("div","wx" + (d.d === today ? " today" : "") + (d.rain >= 50 ? " wet" : ""));
+    c.append(el("span","d", `${dt.getUTCMonth()+1}/${dt.getUTCDate()} ${"일월화수목금토"[dt.getUTCDay()]}`), el("span","ic", icon(d.code, d.rain)), el("span","hi", Math.round(d.hi) + "°"), el("span","lo", Math.round(d.lo) + "°"), el("span","r", "비 " + Math.round(d.rain) + "%"));
+    W.append(c); });
+  $("#wxSrc").textContent = WX.src;
+}
+async function liveWx(){
+  try { const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=22.17&longitude=113.56&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FMacau&start_date=2026-10-13&end_date=2026-10-17", { cache: "no-store" });
+    if (!r.ok) return; const j = await r.json(), D = j.daily; if (!D || !D.time) return;
+    const days = D.time.map((t,i) => ({ d: t, hi: D.temperature_2m_max[i], lo: D.temperature_2m_min[i], rain: (D.precipitation_probability_max || [])[i] ?? 0, code: D.weather_code[i] }));
+    if (days.some(x => x.hi == null)) return;
+    const m = moNow(); WX = { src: `실시간 예보 · ${m.getUTCMonth()+1}/${m.getUTCDate()} ${pad(m.getUTCHours())}:${pad(m.getUTCMinutes())}`, days }; LS.set("dw-wx", WX); renderWx();
+  } catch(e) {}
+}
+
+// ---------- show cards ----------
+function show(zh, sub, ko){ $("#shZh").textContent = zh; $("#shSub").textContent = sub || ""; $("#shKo").textContent = ko || ""; $("#show").classList.add("on"); $("#shX").focus(); }
+$("#shX").onclick = () => $("#show").classList.remove("on");
+$("#show").onclick = e => { if (e.target.id === "show") $("#show").classList.remove("on"); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") $("#show").classList.remove("on"); });
+TAXI.forEach(([ko, zh, en]) => { const b = el("button","big"); b.type = "button"; b.append(el("b", null, ko), el("span", null, zh), el("small", null, en)); b.onclick = () => show(zh, en, "여기로 가 주세요 · 唔該去呢度"); $("#taxi").append(b); });
+SAY.forEach(([ko, zh, rd]) => { const b = el("button","big"); b.type = "button"; b.append(el("b", null, ko), el("span", null, zh), el("small", null, rd)); b.onclick = () => show(zh, rd, ko); $("#say").append(b); });
+
+// ---------- rate calc ----------
+let rate = LS.get("dw-rate", 170); $("#rate").value = rate;
+$("#rate").oninput = () => { rate = +$("#rate").value || 170; LS.set("dw-rate", rate); if ($("#mop").value) $("#krw").value = Math.round($("#mop").value * rate); renderLedger(); };
+$("#mop").oninput = () => { $("#krw").value = $("#mop").value ? Math.round($("#mop").value * rate) : ""; };
+$("#krw").oninput = () => { $("#mop").value = $("#krw").value ? (Math.round($("#krw").value / rate * 10) / 10) : ""; };
+
+// ---------- shared store ----------
+const FAM0 = { f1: "구씨네", f2: "가족 2", f3: "가족 3" };
+let remote = LS.get("dw-remote", { chk: {}, exp: {}, fam: {} }), local = LS.get("dw-local", { chk: {}, exp: {}, fam: {} });
+let state = { chk: {}, exp: {}, fam: {} }, online = null, pending = LS.get("dw-pending", false), lastSync = 0;
+const newer = (a,b) => !a ? b : !b ? a : ((b.at||0) > (a.at||0) ? b : a);
+const mm = (x,y) => { const o = {}; new Set([...Object.keys(x||{}), ...Object.keys(y||{})]).forEach(k => o[k] = newer((x||{})[k], (y||{})[k])); return o; };
+function merge(){ state = { chk: mm(remote.chk, local.chk), exp: mm(remote.exp, local.exp), fam: mm(remote.fam, local.fam) }; }
+function parse(t){ try { let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); return { chk: v.chk || {}, exp: v.exp || {}, fam: v.fam || {} }; } catch(e) { return { chk: {}, exp: {}, fam: {} }; } }
+async function pull(){
+  try { const r = await fetch(STORE, { cache: "no-store" }); if (!r.ok && r.status !== 404) throw 0;
+    const t = r.status === 404 ? "" : await r.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {} }; LS.set("dw-remote", remote);
+    online = true; lastSync = Date.now(); merge(); renderAllShared(); }
+  catch(e) { online = false; syncText(); }
+}
+let pushing = null;
+async function push(){
+  if (pushing) return pushing;
+  pushing = (async () => { try {
+      const r0 = await fetch(STORE, { cache: "no-store" }); if (!r0.ok && r0.status !== 404) throw 0;
+      const t = r0.status === 404 ? "" : await r0.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {} }; merge();
+      const r = await fetch(STORE, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ v: 1, ...state }) }); if (!r.ok) throw 0;
+      remote = JSON.parse(JSON.stringify(state)); LS.set("dw-remote", remote); local = { chk: {}, exp: {}, fam: {} }; LS.set("dw-local", local);
+      pending = false; LS.set("dw-pending", false); online = true; lastSync = Date.now();
+    } catch(e) { online = false; } finally { pushing = null; merge(); renderAllShared(); } })();
+  return pushing;
+}
+function change(kind, id, patch){
+  const cur = state[kind][id] || {}; local[kind] = { ...local[kind], [id]: { ...cur, ...patch, at: Date.now() } };
+  LS.set("dw-local", local); pending = true; LS.set("dw-pending", true); merge(); renderAllShared(); clearTimeout(change.t); change.t = setTimeout(push, 500);
+}
+function syncText(){
+  const d = $("#dot"), t = $("#sync");
+  if (online === null) { d.className = "dotk"; t.textContent = "연결 중…"; }
+  else if (!online) { d.className = "dotk wait"; t.textContent = "오프라인 · 이 폰에 저장, 연결되면 올라가요"; }
+  else if (pending) { d.className = "dotk wait"; t.textContent = "저장 중…"; }
+  else { d.className = "dotk ok"; t.textContent = "다 같이 보는 중"; }
+}
+function renderAllShared(){ renderTips(); renderLedger(); syncText(); }
+
+// ---------- ledger ----------
+const fam = () => { const o = { ...FAM0 }; Object.entries(state.fam).forEach(([k,v]) => { if (v && v.name) o[k] = v.name; }); return o; };
+const toKrw = e => e.cur === "KRW" ? e.amt : e.amt * rate;
+const won = n => Math.round(n).toLocaleString("ko-KR") + "원";
+let myFam = LS.get("dw-myfam", "f1");
+function renderLedger(){
+  const F = fam(), keys = Object.keys(F);
+  const fs = $("#fams"); if (!fs.contains(document.activeElement)) { fs.innerHTML = ""; fs.append(el("span", null, "가족 이름:"));
+    keys.forEach(k => { const i = el("input"); i.value = F[k]; i.maxLength = 10; i.setAttribute("aria-label", "가족 이름 " + k);
+      i.onchange = () => { const v = i.value.trim(); if (v) change("fam", k, { name: v }); }; fs.append(i); }); }
+  const ws = $("#eWho"); const keep = ws.value || myFam; ws.innerHTML = ""; keys.forEach(k => { const o = el("option", null, F[k] + " 냄"); o.value = k; ws.append(o); }); ws.value = keep;
+  const E = Object.entries(state.exp).filter(([,e]) => e && !e.del).sort((a,b) => (b[1].c||0) - (a[1].c||0));
+  const paid = {}, owe = {}; keys.forEach(k => { paid[k] = 0; owe[k] = 0; }); let total = 0;
+  E.forEach(([,e]) => { const v = toKrw(e); total += v; paid[e.who] = (paid[e.who]||0) + v;
+    if (e.split === "me") owe[e.who] = (owe[e.who]||0) + v; else keys.forEach(k => owe[k] += v / keys.length); });
+  const T = $("#tot"); T.innerHTML = "";
+  keys.forEach(k => { const d = el("div"); d.append(el("small", null, F[k] + " 낸 돈"), el("b", null, won(paid[k]))); T.append(d); });
+  const S = $("#settle"); S.innerHTML = "";
+  const shared = E.filter(([,e]) => e.split !== "me").reduce((s,[,e]) => s + toKrw(e), 0);
+  S.append(el("div", null, `총 ${won(total)} · 같이 쓴 돈 ${won(shared)} (가족당 ${won(shared / keys.length)})`));
+  const bal = keys.map(k => [k, paid[k] - owe[k]]); const pos = bal.filter(b => b[1] > 1).map(b => [...b]), neg = bal.filter(b => b[1] < -1).map(b => [b[0], -b[1]]);
+  const lines = []; let i = 0, j = 0; while (i < neg.length && j < pos.length) { const x = Math.min(neg[i][1], pos[j][1]); lines.push(`${F[neg[i][0]]} → ${F[pos[j][0]]} ${won(x)}`); neg[i][1] -= x; pos[j][1] -= x; if (neg[i][1] < 1) i++; if (pos[j][1] < 1) j++; }
+  if (lines.length) { S.append(el("b", null, "정산하면")); lines.forEach(l => S.append(el("div", null, l))); }
+  const X = $("#exps"); X.innerHTML = "";
+  E.forEach(([id, e]) => { const r = el("div","exp"); const a = el("div"); a.append(el("span", null, e.what || "지출"), el("small", null, `${F[e.who] || "?"} 냄 · ${e.split === "me" ? "우리 가족만" : "3가족 나눔"}`));
+    const m = el("span","amt", `${(+e.amt).toLocaleString("ko-KR")} ${e.cur === "KRW" ? "원" : e.cur}`);
+    const x = el("button", null, "✕"); x.type = "button"; x.setAttribute("aria-label", (e.what||"지출") + " 삭제");
+    x.onclick = () => { if (x.dataset.arm) change("exp", id, { del: true }); else { x.dataset.arm = 1; x.textContent = "삭제"; setTimeout(() => { delete x.dataset.arm; x.textContent = "✕"; }, 2500); } };
+    r.append(a, m, x); X.append(r); });
+  if (!E.length) X.append(el("div","src","아직 적은 지출이 없어요. 결제하고 바로 적어 두면 마지막 날 정산이 쉬워요."));
+}
+$("#eWho").onchange = () => { myFam = $("#eWho").value; LS.set("dw-myfam", myFam); };
+$("#addExp").onsubmit = e => { e.preventDefault(); const amt = +$("#eAmt").value; if (!amt) { $("#eAmt").focus(); return; }
+  const id = "e" + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+  change("exp", id, { who: $("#eWho").value, amt, cur: $("#eCur").value, what: $("#eWhat").value.trim(), split: $("#eSplit").value, c: Date.now() });
+  $("#eAmt").value = ""; $("#eWhat").value = ""; };
+
+// ---------- boot ----------
+merge(); clocks(); renderNow(); renderDays(); renderDay(); renderWx(); renderLedger(); syncText(); liveWx();
+(async () => { await pull(); if (pending) push(); })();
+setInterval(() => { clocks(); renderNow(); }, 30000);
+setInterval(() => { if (document.visibilityState === "visible" && !pushing && !document.activeElement.matches("input")) { pending ? push() : pull(); } }, 8000);
+setInterval(() => { renderDay(); }, 120000);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { clocks(); renderNow(); pending ? push() : pull(); liveWx(); } });
+window.addEventListener("online", () => pending ? push() : pull());
+</script>
+</body>
+</html>
