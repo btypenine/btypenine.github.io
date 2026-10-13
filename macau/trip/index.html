@@ -198,6 +198,20 @@ footer{font-size:12px;color:var(--muted)}
 .ctlbox{padding:6px 0 2px}
 .tset{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
 .tset input{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px 6px;font-family:var(--mono)}
+.tr .seg{grid-template-columns:repeat(3,1fr)}
+.tr .seg button{font-size:12px;padding:7px 2px}
+.trrow{margin-top:10px}
+.trrow textarea{width:100%;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit;font-size:17px;resize:vertical;min-height:58px}
+.trbtns{display:flex;gap:6px;margin-top:8px;align-items:stretch}
+.trbtns select{flex:1;min-width:0;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px;font-size:14px}
+.trbtns .btn{flex:1}
+#trMic.on{background:var(--rose);border-color:var(--rose);color:#fff}
+.trout{margin-top:12px;background:var(--paper);border-radius:12px;padding:12px}
+.trres{font-size:24px;font-weight:600;line-height:1.4;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",var(--body);word-break:break-word}
+.trrom{font-size:13px;color:var(--muted);margin-top:4px}
+.trhist{display:flex;flex-direction:column;margin-top:8px}
+.trhist button{all:unset;cursor:pointer;display:block;padding:7px 0;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.trhist button b{color:var(--ink);font-weight:500;margin-right:6px}
 </style>
 </head>
 <body>
@@ -216,8 +230,34 @@ footer{font-size:12px;color:var(--muted)}
   </header>
 
   <nav class="bar" aria-label="바로가기">
-    <a href="#s-now">지금</a><a href="#s-go">길·추천</a><a href="#s-plan">일정</a><a href="#s-wx">날씨</a><a href="#s-taxi">택시·말</a><a href="#s-money">환율·물가</a><a href="#s-ledger">장부</a><a href="#s-info">알아둘 것</a><a href="#s-sos">긴급</a>
+    <a href="#s-tr">번역</a><a href="#s-now">지금</a><a href="#s-go">길·추천</a><a href="#s-plan">일정</a><a href="#s-wx">날씨</a><a href="#s-taxi">택시·말</a><a href="#s-money">환율·물가</a><a href="#s-ledger">장부</a><a href="#s-info">알아둘 것</a><a href="#s-sos">긴급</a>
   </nav>
+
+  <section id="s-tr" class="tr">
+    <div class="sh"><h2>번역</h2><small id="trNote">마카오는 번체 중국어 · 광둥어</small></div>
+    <div class="card">
+      <div class="seg" id="trDir" role="tablist"><button type="button" data-d="ko" aria-pressed="true">한국어 → 中文</button><button type="button" data-d="zh" aria-pressed="false">中文 → 한국어</button><button type="button" data-d="en" aria-pressed="false">English → 한국어</button></div>
+      <div class="trrow">
+        <textarea id="trIn" rows="2" placeholder="하고 싶은 말을 쓰거나 🎤를 누르고 말하세요" aria-label="번역할 문장"></textarea>
+      </div>
+      <div class="trbtns">
+        <button type="button" id="trMic" class="btn" aria-label="말해서 입력">🎤 말하기</button>
+        <select id="trTo" aria-label="번역할 언어"><option value="zh-TW">번체 중문</option><option value="yue">광둥어</option><option value="zh-CN">간체 중문</option><option value="en">영어</option></select>
+        <button type="button" id="trGo" class="btn pri">번역</button>
+      </div>
+      <div class="trout" id="trOut" hidden>
+        <div class="trres" id="trRes" lang="zh-Hant"></div>
+        <div class="trrom" id="trRom"></div>
+        <div class="trbtns">
+          <button type="button" id="trSpeak" class="btn">🔊 듣기</button>
+          <button type="button" id="trBig" class="btn">크게 보기</button>
+          <button type="button" id="trCopy" class="btn">복사</button>
+        </div>
+      </div>
+      <div class="trhist" id="trHist"></div>
+      <small class="src" id="trSrc">인터넷이 필요해요 · 메뉴판은 구글 렌즈나 파파고 카메라 번역이 편해요</small>
+    </div>
+  </section>
 
   <div class="inst" id="inst"><div style="flex:1"><b>앱처럼 쓰기</b><br><span id="instTx">홈 화면에 추가하면 아이콘으로 바로 열려요.</span></div><button type="button" id="instBtn">설치</button><button type="button" class="x" id="instX" aria-label="닫기">✕</button></div>
 
@@ -804,6 +844,65 @@ $("#instBtn").onclick = async () => { if (!deferredPrompt) return; deferredPromp
 $("#instX").onclick = () => { LS.set("dw-inst-x", true); $("#inst").classList.remove("on"); };
 if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(() => {});
 setTimeout(showInstall, 2500);
+
+
+// ---------- translate ----------
+let trDir = LS.get("dw-trdir", "ko"), trLast = null, trHist = LS.get("dw-trhist", []);
+const trSet = d => { trDir = d; LS.set("dw-trdir", d); document.querySelectorAll("#trDir button").forEach(b => b.setAttribute("aria-pressed", b.dataset.d === d));
+  $("#trTo").style.display = d === "ko" ? "" : "none";
+  $("#trIn").placeholder = d === "ko" ? "하고 싶은 말을 쓰거나 🎤를 누르고 말하세요" : d === "zh" ? "中文을 붙여넣거나, 상대방에게 🎤를 누르고 말해 달라고 하세요" : "Type or paste English"; };
+document.querySelectorAll("#trDir button").forEach(b => b.onclick = () => { trSet(b.dataset.d); $("#trOut").hidden = true; });
+async function gtx(q, sl, tl){
+  const u = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${tl}&dt=t&dt=rm&q=${encodeURIComponent(q)}`;
+  const r = await fetch(u); if (!r.ok) throw 0; const j = await r.json();
+  const text = (j[0] || []).filter(x => x && x[0]).map(x => x[0]).join("");
+  const rom = (j[0] || []).map(x => x && x[2]).filter(Boolean).join(" ");
+  if (!text) throw 0; return { text, rom };
+}
+async function mym(q, sl, tl){
+  const r = await fetch(`https://api.mymemory.translated.net/get?langpair=${sl}|${tl}&q=${encodeURIComponent(q)}`); const j = await r.json();
+  if (!j.responseData || !j.responseData.translatedText) throw 0; return { text: j.responseData.translatedText, rom: "" };
+}
+async function translate(){
+  const q = $("#trIn").value.trim(); if (!q) { $("#trIn").focus(); return; }
+  const sl = trDir === "ko" ? "ko" : trDir === "zh" ? "zh-TW" : "en", tl = trDir === "ko" ? $("#trTo").value : "ko";
+  $("#trGo").textContent = "번역 중…"; $("#trSrc").textContent = "";
+  let res = null;
+  try { res = await gtx(q, trDir === "zh" ? "auto" : sl, tl); }
+  catch(e) { try { res = await mym(q, sl, tl === "yue" ? "zh-TW" : tl); $("#trSrc").textContent = "예비 번역기로 번역했어요"; } catch(e2) { res = null; } }
+  $("#trGo").textContent = "번역";
+  if (!res) { $("#trSrc").textContent = "번역하지 못했어요. 인터넷 연결을 확인해 주세요."; return; }
+  trLast = { q, tl, ...res };
+  $("#trRes").textContent = res.text; $("#trRes").lang = tl.startsWith("zh") || tl === "yue" ? "zh-Hant" : tl;
+  $("#trRom").textContent = (tl.startsWith("zh") || tl === "yue") ? res.rom : (trDir === "ko" ? "" : "");
+  $("#trOut").hidden = false;
+  trHist = [{ q, t: res.text, tl }, ...trHist.filter(h => h.q !== q)].slice(0, 6); LS.set("dw-trhist", trHist); renderTrHist();
+}
+function renderTrHist(){
+  const H = $("#trHist"); H.innerHTML = "";
+  trHist.forEach(h => { const b = el("button"); b.type = "button"; b.append(el("b", null, h.q), document.createTextNode(h.t));
+    b.onclick = () => { $("#trIn").value = h.q; trLast = { q: h.q, text: h.t, tl: h.tl, rom: "" }; $("#trRes").textContent = h.t; $("#trRom").textContent = ""; $("#trOut").hidden = false; }; H.append(b); });
+}
+$("#trGo").onclick = translate;
+$("#trIn").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); translate(); } });
+const voiceFor = tl => { const vs = speechSynthesis.getVoices(); const want = tl === "yue" || tl === "zh-TW" ? ["zh-HK","yue","zh-TW","zh"] : tl === "zh-CN" ? ["zh-CN","zh"] : [tl];
+  for (const w of want) { const v = vs.find(v => v.lang.toLowerCase().replace("_","-").startsWith(w.toLowerCase())); if (v) return v; } return null; };
+$("#trSpeak").onclick = () => { if (!trLast || !("speechSynthesis" in window)) return; speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(trLast.text); const v = voiceFor(trLast.tl); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = trLast.tl === "yue" ? "zh-HK" : trLast.tl; u.rate = 0.9; speechSynthesis.speak(u); };
+$("#trBig").onclick = () => { if (trLast) show(trLast.text, trLast.rom || "", trLast.q); };
+$("#trCopy").onclick = async () => { if (!trLast) return; try { await navigator.clipboard.writeText(trLast.text); $("#trCopy").textContent = "복사됨"; setTimeout(() => $("#trCopy").textContent = "복사", 1500); } catch(e) {} };
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition; let rec = null;
+if (!SR) { $("#trMic").style.display = "none"; }
+$("#trMic").onclick = () => {
+  if (!SR) return; if (rec) { rec.stop(); return; }
+  rec = new SR(); rec.lang = trDir === "ko" ? "ko-KR" : trDir === "zh" ? "yue-Hant-HK" : "en-US"; rec.interimResults = true; rec.maxAlternatives = 1;
+  $("#trMic").classList.add("on"); $("#trMic").textContent = "● 듣는 중";
+  let final = "";
+  rec.onresult = e => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; $("#trIn").value = t; if (e.results[e.results.length-1].isFinal) final = t; };
+  rec.onerror = () => {}; rec.onend = () => { rec = null; $("#trMic").classList.remove("on"); $("#trMic").textContent = "🎤 말하기"; if ($("#trIn").value.trim()) translate(); };
+  try { rec.start(); } catch(e) { rec = null; }
+};
+trSet(trDir); renderTrHist();
 
 // ---------- boot ----------
 merge(); clocks(); renderNow(); renderDays(); renderDay(); renderWx(); renderLedger(); syncText(); liveWx();
