@@ -181,6 +181,23 @@ footer{font-size:12px;color:var(--muted)}
 .inst b{font-weight:600}
 .inst button{flex:none;border:0;background:var(--azul);color:#fff;border-radius:10px;padding:8px 12px;font-weight:600}
 .inst .x{background:none;color:var(--muted);padding:4px 6px}
+.adj{font-size:13px;background:var(--ochre-soft);color:var(--ochre);border-radius:10px;padding:8px 10px;font-weight:600}
+.adj.ok{background:var(--jade-soft);color:var(--jade)}
+.adj.warn{background:var(--rose-soft);color:var(--rose)}
+.adj a{color:inherit;font-weight:700}
+.ctl{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.ctl button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 11px;font-size:13px;color:var(--ink)}
+.ctl button.pri{background:var(--jade);border-color:var(--jade);color:#fff;font-weight:600}
+.ask{font-size:12px;color:var(--muted);margin-top:6px}
+.ask button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:2px 9px;font-size:12px;margin-left:2px}
+.ev .tm s{display:block;font-size:11px;color:var(--muted)}
+.ev.skip{opacity:.45} .ev.skip b{text-decoration:line-through}
+.fx{font-size:10px;font-weight:700;color:var(--rose);border:1px solid var(--rose);border-radius:5px;padding:0 5px;margin-left:6px;vertical-align:2px}
+.lt{color:var(--rose)!important}
+.chip.more{cursor:pointer}
+.ctlbox{padding:6px 0 2px}
+.tset{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
+.tset input{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px 6px;font-family:var(--mono)}
 </style>
 </head>
 <body>
@@ -401,24 +418,80 @@ function clocks(){
   const d = moDate(), i = DAYS.findIndex(x => x.d === d);
   $("#dday").textContent = i >= 0 ? `여행 ${i+1}일차 · ${DAYS[i].w}요일` : (d < DAYS[0].d ? "출발 전" : "여행 끝 · 수고했어요");
 }
-function events(){ const out = []; DAYS.forEach((D,di) => D.items.forEach(it => out.push({ di, D, it, t: at(D.d, it[0]) }))); return out; }
+const hm = ms => { const d = new Date(ms + MO*3600e3); return pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes()); };
+const isFixed = it => /비행|송화호수교|댄싱워터|체크아웃|공항 도착|집결/.test(it[1]);
+// 실제 진행(끝/연장/건너뛰기/시간 변경)을 반영해 남은 일정을 다시 계산
+function events(){
+  const out = [], P = state.prog || {};
+  DAYS.forEach((D,di) => { let prevEnd = null, prevDone = false;
+    D.items.forEach((it,i) => {
+      const id = D.d + "#" + i, g = P[id] || {}, p = at(D.d, it[0]);
+      const pn = i + 1 < D.items.length ? at(D.d, D.items[i+1][0]) : p + 60*6e4;
+      const fixed = isFixed(it);
+      let t;
+      if (g.t) t = at(D.d, g.t);
+      else if (fixed || prevEnd === null) t = p;
+      else t = prevDone ? Math.max(prevEnd, p - 30*6e4) : Math.max(p, prevEnd);
+      const late = fixed && prevEnd !== null && prevEnd > p ? prevEnd - p : 0;
+      const dur = Math.max(10*6e4, Math.min(pn - p, 120*6e4) + (g.ext || 0)*6e4);
+      let end = g.skip ? t : (g.done && g.doneAt ? g.doneAt : t + dur);
+      out.push({ di, D, it, i, id, p, t, end, fixed, late, g, shift: Math.round((t - p)/6e4), status: g.skip ? "skip" : g.done ? "done" : "" });
+      if (!g.skip) { prevEnd = end; prevDone = !!g.done; }
+    });
+  });
+  return out;
+}
+function curNext(){
+  const E = events(), now = Date.now();
+  let cur = null, next = null;
+  for (let k = 0; k < E.length; k++) { const e = E[k]; if (e.status) continue;
+    if (e.t <= now && now < e.end) { cur = e; }
+    else if (e.t > now && !next) { next = e; }
+  }
+  if (cur) { const k = E.indexOf(cur); next = E.slice(k+1).find(e => !e.status && e.t >= cur.t) || null; }
+  return { E, cur, next };
+}
+function act(id, patch){ change("prog", id, patch); }
+function ctlRow(e, opts){
+  const c = el("div","ctl");
+  const mk = (txt, fn, cls) => { const b = el("button", cls || "", txt); b.type = "button"; b.onclick = fn; c.append(b); };
+  if (e.status) { mk("되돌리기", () => act(e.id, { done: false, doneAt: 0, skip: false })); return c; }
+  if (opts.done) mk("✓ 끝났어요", () => act(e.id, { done: true, doneAt: Date.now() }), "pri");
+  mk("+15분", () => act(e.id, { ext: (e.g.ext || 0) + 15 }));
+  if (opts.minus) mk("−15분", () => act(e.id, { ext: (e.g.ext || 0) - 15 }));
+  mk("건너뛰기", () => act(e.id, { skip: true }));
+  if (e.g.ext || e.g.t) mk("원래대로", () => act(e.id, { ext: 0, t: "" }));
+  return c;
+}
 function renderNow(){
-  const E = events(), now = Date.now(); const N = $("#now"); N.innerHTML = "";
-  let ci = -1; E.forEach((e,i) => { if (e.t <= now) ci = i; });
-  const cur = ci >= 0 ? E[ci] : null, next = E[ci+1] || null;
+  const { E, cur, next } = curNext(), now = Date.now(); const N = $("#now"); N.innerHTML = "";
   const m = moNow(); $("#nowDate").textContent = `${m.getUTCMonth()+1}/${m.getUTCDate()} 마카오 시간`;
   const row = (lbl, cls, e, extra) => {
     const r = el("div","row"); r.append(el("span","lbl " + cls, lbl));
-    const b = el("div"); b.append(el("div","t", `${e.D.d.slice(5).replace("-","/")} ${e.D.w} · ${e.it[0]}`), el("div","w", e.it[1]));
+    const b = el("div"); const tt = el("div","t", `${e.D.d.slice(5).replace("-","/")} ${e.D.w} · ${hm(e.t)}` + (e.t !== e.p ? `  (원래 ${e.it[0]})` : "") + ` ~ ${hm(e.end)}`); b.append(tt, el("div","w", e.it[1]));
     if (e.it[2]) b.append(el("div","s", e.it[2]));
-    if (extra) b.append(extra);
+    if (extra) extra.forEach(x => x && b.append(x));
     if (e.it[3]) { const a = el("a","chip map","지도 열기"); a.href = mapUrl(e.it[3]); a.target = "_blank"; a.rel = "noopener"; const c = el("div","chips"); c.append(a); b.append(c); }
     r.append(b); N.append(r);
   };
-  if (!cur && next) { row("다음", "x", next, el("div","left", leftText(next.t - now))); return; }
-  if (cur) row("지금", "n", cur);
-  if (next) row("다음", "x", next, el("div","left", leftText(next.t - now)));
-  if (!next) N.append(el("div","s","일정이 모두 끝났어요. 조심히 들어가세요!"));
+  // 지연 요약 + 고정 일정 경고
+  const today = E.filter(e => e.D.d === (cur || next || {}).D?.d && !e.status && e.end > now);
+  const shift = cur ? cur.shift : next ? next.shift : 0;
+  if (shift >= 5) N.append(el("div","adj", `⏱ 예정보다 약 ${shift}분 늦게 진행 중이에요. 남은 일정을 자동으로 밀었어요.`));
+  else if (shift <= -5) N.append(el("div","adj ok", `👍 예정보다 ${-shift}분 빨라요. 다음 일정을 당겨서 보여드려요.`));
+  today.filter(e => e.late > 0).forEach(e => { const w = el("div","adj warn"); w.append(document.createTextNode(`⚠ ${e.it[0]} ${e.it[1]}은 시간이 정해져 있어요. 지금 흐름이면 약 ${Math.round(e.late/6e4)}분 늦어요. 앞 일정을 줄이거나 건너뛰세요.`));
+    if (/송화호수교/.test(e.it[1])) { const a = el("a", null, " 식당에 전화"); a.href = "tel:+85328855155"; w.append(a); } N.append(w); });
+  if (cur) {
+    const k = E.indexOf(cur), prev = E.slice(0, k).reverse().find(x => x.D.d === cur.D.d && x.status !== "skip");
+    let ask = null;
+    if (prev && !prev.g.done && now - cur.t < 40*6e4) { ask = el("div","ask"); ask.append(document.createTextNode(`아직 '${prev.it[1]}' 하는 중이면 `)); const b = el("button", null, "+15분 연장"); b.type = "button"; b.onclick = () => act(prev.id, { ext: (prev.g.ext || 0) + 15 }); ask.append(b); }
+    row("지금", "n", cur, [el("div","left", `${leftText(cur.end - now).replace(" 뒤","")} 남음`), ctlRow(cur, { done: true }), ask]);
+  }
+  if (!cur && next) { const E2 = E.filter(e => e.end <= now && !e.status && e.D.d === next.D.d); const last = E2[E2.length-1];
+    if (last) { const f = el("div","row"); f.append(el("span","lbl x","자유")); const fb = el("div"); fb.append(el("div","w","자유 시간"), el("div","s", `'${last.it[1]}' 끝 → 다음 일정까지 ${leftText(next.t - now).replace(" 뒤","")}`));
+      const c = el("div","ctl"); const bb = el("button", null, `아직 '${last.it[1].slice(0,10)}' 중 (+15분)`); bb.type = "button"; bb.onclick = () => act(last.id, { ext: (last.g.ext || 0) + 15 }); c.append(bb); fb.append(c); f.append(fb); N.append(f); } }
+  if (next) row("다음", "x", next, [el("div","left", leftText(next.t - now)), !cur ? ctlRow(next, { done: false }) : null]);
+  if (!cur && !next) N.append(el("div","s","일정이 모두 끝났어요. 조심히 들어가세요!"));
 }
 const leftText = ms => { const h = Math.floor(ms/36e5), mi = Math.floor(ms%36e5/6e4); return h >= 24 ? `${Math.floor(h/24)}일 뒤` : (h ? `${h}시간 ${mi}분 뒤` : `${mi}분 뒤`); };
 
@@ -431,20 +504,33 @@ function renderDays(){
 }
 function renderDay(){
   const D = DAYS[sel]; $("#dTitle").textContent = `Day ${sel+1} · ${D.title}`; $("#dHotel").textContent = D.hotel ? D.hotel + " 숙박" : "귀국";
-  const T = $("#tl"); T.innerHTML = ""; const now = Date.now(); const E = D.items.map(it => at(D.d, it[0]));
-  D.items.forEach((it,i) => {
-    const r = el("div","ev"); const st = E[i], en = E[i+1] || st + 2*36e5;
-    if (en <= now) r.classList.add("past"); else if (st <= now) r.classList.add("cur");
-    r.append(el("span","tm", it[0]), el("span","dot"));
-    const b = el("div","bd"); b.append(el("b", null, it[1])); if (it[2]) b.append(el("small", null, it[2]));
+  const T = $("#tl"); T.innerHTML = ""; const now = Date.now(); const { E, cur } = curNext();
+  E.filter(e => e.di === sel).forEach(e => {
+    const it = e.it; const r = el("div","ev");
+    if (e.status === "skip") r.classList.add("skip"); else if (e.status === "done" || e.end <= now) r.classList.add("past"); else if (cur && e.id === cur.id) r.classList.add("cur");
+    const tm = el("span","tm"); tm.append(document.createTextNode(hm(e.t))); if (e.t !== e.p) tm.append(el("s", null, it[0]));
+    r.append(tm, el("span","dot"));
+    const b = el("div","bd"); const bt = el("b", null, it[1]); if (e.fixed) bt.append(el("span","fx","고정")); b.append(bt); if (it[2]) b.append(el("small", null, it[2]));
+    if (e.late > 0 && !e.status) b.append(el("small","lt", `⚠ 앞 일정 때문에 약 ${Math.round(e.late/6e4)}분 늦어요`));
+    if (e.status === "done") b.append(el("small", null, `✓ ${hm(e.g.doneAt || e.end)}에 끝`));
+    if (e.status === "skip") b.append(el("small", null, "건너뜀"));
     const c = el("div","chips");
     (it[4] || []).forEach(t => { const [k, v] = t.split(":"); c.append(el("span","chip " + k, v)); });
     if (it[3]) { const a = el("a","chip map","지도"); a.href = mapUrl(it[3]); a.target = "_blank"; a.rel = "noopener"; c.append(a); }
-    if (c.childNodes.length) b.append(c);
+    const more = el("button","chip more", "조정"); more.type = "button"; c.append(more);
+    b.append(c);
+    const box = el("div","ctlbox"); box.hidden = !openCtl.has(e.id);
+    box.append(ctlRow(e, { done: !e.status && e.t <= now, minus: true }));
+    const ti = el("input"); ti.type = "time"; ti.value = hm(e.t); ti.setAttribute("aria-label", it[1] + " 시작 시간 바꾸기");
+    ti.onchange = () => { if (ti.value) act(e.id, { t: ti.value }); };
+    const lab = el("label","tset"); lab.append(document.createTextNode("시작 시간 "), ti); box.append(lab);
+    more.onclick = () => { if (openCtl.has(e.id)) openCtl.delete(e.id); else openCtl.add(e.id); box.hidden = !openCtl.has(e.id); };
+    b.append(box);
     r.append(b); T.append(r);
   });
   renderTips();
 }
+const openCtl = new Set();
 function renderTips(){
   const P = $("#tips"); P.innerHTML = "";
   DAYS[sel].tips.forEach(([id, txt, imp]) => {
@@ -491,15 +577,15 @@ $("#krw").oninput = () => { $("#mop").value = $("#krw").value ? (Math.round($("#
 
 // ---------- shared store ----------
 const FAM0 = { f1: "구씨네", f2: "가족 2", f3: "가족 3" };
-let remote = LS.get("dw-remote", { chk: {}, exp: {}, fam: {} }), local = LS.get("dw-local", { chk: {}, exp: {}, fam: {} });
-let state = { chk: {}, exp: {}, fam: {} }, online = null, pending = LS.get("dw-pending", false), lastSync = 0;
+let remote = LS.get("dw-remote", { chk: {}, exp: {}, fam: {}, prog: {} }), local = LS.get("dw-local", { chk: {}, exp: {}, fam: {}, prog: {} });
+let state = { chk: {}, exp: {}, fam: {}, prog: {} }, online = null, pending = LS.get("dw-pending", false), lastSync = 0;
 const newer = (a,b) => !a ? b : !b ? a : ((b.at||0) > (a.at||0) ? b : a);
 const mm = (x,y) => { const o = {}; new Set([...Object.keys(x||{}), ...Object.keys(y||{})]).forEach(k => o[k] = newer((x||{})[k], (y||{})[k])); return o; };
-function merge(){ state = { chk: mm(remote.chk, local.chk), exp: mm(remote.exp, local.exp), fam: mm(remote.fam, local.fam) }; }
-function parse(t){ try { let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); return { chk: v.chk || {}, exp: v.exp || {}, fam: v.fam || {} }; } catch(e) { return { chk: {}, exp: {}, fam: {} }; } }
+function merge(){ state = { chk: mm(remote.chk, local.chk), exp: mm(remote.exp, local.exp), fam: mm(remote.fam, local.fam), prog: mm(remote.prog, local.prog) }; }
+function parse(t){ try { let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); return { chk: v.chk || {}, exp: v.exp || {}, fam: v.fam || {}, prog: v.prog || {} }; } catch(e) { return { chk: {}, exp: {}, fam: {}, prog: {} }; } }
 async function pull(){
   try { const r = await fetch(STORE, { cache: "no-store" }); if (!r.ok && r.status !== 404) throw 0;
-    const t = r.status === 404 ? "" : await r.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {} }; LS.set("dw-remote", remote);
+    const t = r.status === 404 ? "" : await r.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {}, prog: {} }; LS.set("dw-remote", remote);
     online = true; lastSync = Date.now(); merge(); renderAllShared(); }
   catch(e) { online = false; syncText(); }
 }
@@ -508,15 +594,15 @@ async function push(){
   if (pushing) return pushing;
   pushing = (async () => { try {
       const r0 = await fetch(STORE, { cache: "no-store" }); if (!r0.ok && r0.status !== 404) throw 0;
-      const t = r0.status === 404 ? "" : await r0.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {} }; merge();
+      const t = r0.status === 404 ? "" : await r0.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {}, prog: {} }; merge();
       const r = await fetch(STORE, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ v: 1, ...state }) }); if (!r.ok) throw 0;
-      remote = JSON.parse(JSON.stringify(state)); LS.set("dw-remote", remote); local = { chk: {}, exp: {}, fam: {} }; LS.set("dw-local", local);
+      remote = JSON.parse(JSON.stringify(state)); LS.set("dw-remote", remote); local = { chk: {}, exp: {}, fam: {}, prog: {} }; LS.set("dw-local", local);
       pending = false; LS.set("dw-pending", false); online = true; lastSync = Date.now();
     } catch(e) { online = false; } finally { pushing = null; merge(); renderAllShared(); } })();
   return pushing;
 }
 function change(kind, id, patch){
-  const cur = state[kind][id] || {}; local[kind] = { ...local[kind], [id]: { ...cur, ...patch, at: Date.now() } };
+  const cur = (state[kind] || {})[id] || {}; local[kind] = { ...(local[kind] || {}), [id]: { ...cur, ...patch, at: Date.now() } };
   LS.set("dw-local", local); pending = true; LS.set("dw-pending", true); merge(); renderAllShared(); clearTimeout(change.t); change.t = setTimeout(push, 500);
 }
 function syncText(){
@@ -526,7 +612,8 @@ function syncText(){
   else if (pending) { d.className = "dotk wait"; t.textContent = "저장 중…"; }
   else { d.className = "dotk ok"; t.textContent = "다 같이 보는 중"; }
 }
-function renderAllShared(){ renderTips(); renderLedger(); syncText(); }
+function renderAllShared(){ renderNow(); if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); if (typeof renderGo === "function" && booted) renderGo(); renderLedger(); syncText(); }
+let booted = false;
 
 // ---------- ledger ----------
 const fam = () => { const o = { ...FAM0 }; Object.entries(state.fam).forEach(([k,v]) => { if (v && v.name) o[k] = v.name; }); return o; };
@@ -619,11 +706,10 @@ function startGeo(){
     { enableHighAccuracy: true, maximumAge: 60000, timeout: 20000 });
 }
 function targetEvent(){
-  const E = events(), now = Date.now(); let ci = -1; E.forEach((e,i) => { if (e.t <= now) ci = i; });
-  const cand = [E[ci], E[ci+1]].filter(Boolean); // prefer next stop with a place; if current has a place and started <45min ago use current
-  const cur = E[ci], next = E[ci+1];
+  const { E, cur, next } = curNext(), now = Date.now();
   if (cur && cur.it[3] && now - cur.t < 45*6e4) return { e: cur, label: "지금 일정 장소" };
-  for (let k = ci+1; k < E.length; k++) if (E[k].it[3]) return { e: E[k], label: "다음 목적지" };
+  const k = cur ? E.indexOf(cur) + 1 : (next ? E.indexOf(next) : E.length);
+  for (let x = k; x < E.length; x++) if (!E[x].status && E[x].it[3]) return { e: E[x], label: "다음 목적지" };
   return null;
 }
 function renderGo(){
@@ -631,7 +717,7 @@ function renderGo(){
   if (!T) { G.append(el("div","s","남은 이동 일정이 없어요.")); return; }
   const e = T.e, q = e.it[3], ll = GEO[q];
   $("#goWhen").textContent = T.label;
-  G.append(el("div","t", `${e.D.d.slice(5).replace("-","/")} ${e.D.w} · ${e.it[0]} · ${e.t <= Date.now() ? "진행 중" : leftText(e.t - Date.now())}`));
+  G.append(el("div","t", `${e.D.d.slice(5).replace("-","/")} ${e.D.w} · ${hm(e.t)} · ${e.t <= Date.now() ? "진행 중" : leftText(e.t - Date.now())}`));
   G.append(el("div","dest", e.it[1]));
   if (e.it[2]) G.append(el("div","s", e.it[2]));
   if (me && ll) {
@@ -713,11 +799,11 @@ setTimeout(showInstall, 2500);
 
 // ---------- boot ----------
 merge(); clocks(); renderNow(); renderDays(); renderDay(); renderWx(); renderLedger(); syncText(); liveWx();
-applyRate(); liveRate(); if (geoOn) startGeo();
+booted = true; applyRate(); liveRate(); if (geoOn) startGeo();
 (async () => { await pull(); if (pending) push(); })();
 setInterval(() => { clocks(); renderNow(); renderGo(); }, 30000);
 setInterval(() => { if (document.visibilityState === "visible" && !pushing && !document.activeElement.matches("input")) { pending ? push() : pull(); } }, 8000);
-setInterval(() => { renderDay(); }, 120000);
+setInterval(() => { if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); }, 60000);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { clocks(); renderNow(); renderGo(); pending ? push() : pull(); liveWx(); liveRate(); } });
 window.addEventListener("online", () => pending ? push() : pull());
 </script>
