@@ -170,7 +170,7 @@ footer{font-size:12px;color:var(--muted)}
 .rec .pr{font-family:var(--mono);font-size:13px;text-align:right;white-space:nowrap}
 .rec .pr i{display:block;font-style:normal;color:var(--muted);font-size:11px}
 .rec .tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;margin-right:4px;vertical-align:1px}
-.tag.eat{background:var(--ochre-soft);color:var(--ochre)} .tag.buy{background:var(--azul-soft);color:var(--azul)} .tag.see{background:var(--jade-soft);color:var(--jade)}
+.tag.perk{background:var(--rose-soft);color:var(--rose)} .tag.eat{background:var(--ochre-soft);color:var(--ochre)} .tag.buy{background:var(--azul-soft);color:var(--azul)} .tag.see{background:var(--jade-soft);color:var(--jade)}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--line);padding:4px;border-radius:12px}
 .seg button{border:0;background:transparent;border-radius:9px;padding:7px 0;font-size:13px;color:var(--muted)}
 .seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:600}
@@ -292,6 +292,7 @@ footer{font-size:12px;color:var(--muted)}
   <section id="s-info">
     <div class="sh"><h2>알아둘 것</h2></div>
     <div class="card">
+      <div class="note"><b>에어마카오 탑승권 특전 · 마카오 도착 후 7일</b>NX 편명이 찍힌 <b>종이 탑승권</b>과 여권(이름 일치)이 있어야 해요. 모바일 탑승권은 안 받는 곳이 있으니 10명 모두 종이 탑승권을 버리지 말고 여권에 끼워 두세요. 대부분 1인 1회, 수량 한정이에요. 갤럭시 · 샌즈(런더너·베네시안·파리지앵) · 리스보에타 짚라인 15% · 공항 출국장에서 써요. 자세한 건 '길·추천 → 전체'의 '특전'.</div>
       <div class="note"><b>런더너 근위병 교대식 · 크리스탈 팰리스 메인 로비</b>
         <table><tr><th>요일</th><th>시간</th></tr><tr><td>화 ~ 목</td><td>19:30 · 21:30</td></tr><tr><td>금 ~ 일</td><td>16:00 · 19:30 · 21:30</td></tr></table>
         <small style="color:var(--muted)">첫날 저녁 먹고 가면 21:30 회차예요.</small></div>
@@ -665,6 +666,13 @@ const GEO = {
 };
 // [id, day(1-5 or 0=any), kind, emoji, name, why, mop(null|number|string), query, lat, lng]
 const RECS = [
+ ["p-galaxy",1,"perk","🎫","갤럭시 쇼핑 MOP300 + 식사 MOP100 e-바우처","에어마카오 종이 탑승권 + 여권 → 갤럭시 프롬나드 동쪽 컨시어지(맥도날드 옆, 11~21시). QR로 갤럭시 멤버 가입하면 지급. 1인당 받으니 10명 모두 탑승권 챙기기.",null,"Galaxy Promenade East Concierge Galaxy Macau",22.1484,113.5540],
+ ["p-waso",2,"perk","🍞","와소 카페 밀크티 또는 파인애플번 무료","갤럭시 G층 프롬나드 서쪽(반얀트리 근처), 10~20시. 물놀이 가기 전에 들르기. 갤럭시 e-바우처로 받아요.",0,"Waso Cafe Galaxy Macau",22.1478,113.5520],
+ ["p-yengkee",2,"perk","🥮","옝키 에그롤 1상자 무료 + 15% 할인","갤럭시 브로드웨이 푸드스트리트 E-G034A, 11:30~20:00. 도장 찍힌 종이 탑승권 원본 필요. 선물용으로 좋아요.",0,"Pastelaria Yeng Kee Broadway Food Street Macau",22.1427,113.5520],
+ ["p-londoner",1,"perk","🍽️","런더너 식사 쿠폰 MOP100 (수량 한정)","런더너 1층 샌즈 스타일 카운터. 근위병 교대식 보러 갈 때 같이 받기. 사용처는 받을 때 확인.",null,"Sands Style counter The Londoner Macao",22.1458,113.5654],
+ ["p-parisian",4,"perk","🎁","파리지앵 러기지 벨트 무료 · 에펠탑 기념품점 5%","파리지앵 1층 샌즈 스타일 카운터. 4일차 밤 호텔 투어 때.",0,"The Parisian Macao",22.1437,113.5620],
+ ["p-qcube",4,"perk","🧸","큐브 킹덤 아이 입장 10% · 팀랩 20% · 곤돌라 5%","베네시안·파리지앵. 금요일 오후 소나기 오면 아이들 실내 놀이로 딱이에요. 팀랩은 최대 4장.",null,"Q Cube Kingdom The Venetian Macao",22.1480,113.5605],
+ ["p-airport",5,"perk","✈️","공항 출국장: 기념품 10% · 에그타르트 세트 15% · 마그넷 무료","보안검색 지난 뒤 포르투갈 기념품점, 퉁퐁윤 커피·에그타르트, 마카오 제품관. 남은 파타카 쓰기 좋아요.",null,"Macau International Airport",22.1561,113.5877],
  ["r-lounge",1,"eat","🍪","안다즈 라운지 아몬드 쿠키","라운지 간식으로 나오는 아몬드 쿠키가 맛있다는 후기가 많아요. 해피아워는 19시까지.",null,"Andaz Macau",22.1455,113.5566],
  ["r-goose",1,"eat","🦆","갤럭시 푸드코트 로스트 구스","'Tastes of Asia' 광둥식 바비큐 코너의 거위 다리 덮밥이 인기. 호텔 안이라 시내보다는 비싸요.","약 80~120","Tastes of Asia Galaxy Macau",22.1493,113.5545],
  ["r-skycab",1,"see","🚡","윈 팰리스 스카이캡 + 분수쇼","무료. 16~22시 운행. 바깥 줄이 길면 2층 탑승구가 덜 붐벼요. 분수쇼는 약 20분 간격.",0,"Wynn Palace SkyCab",22.1481,113.5695],
@@ -755,7 +763,7 @@ function renderRecs(){
   list.forEach(r => {
     const a = el("a","rec"); a.href = mapUrl(r[7]); a.target = "_blank"; a.rel = "noopener";
     a.append(el("span","em", r[3]));
-    const b = el("div"); const tt = el("b"); const tg = el("span","tag " + r[2], { eat: "먹기", buy: "사기", see: "보기" }[r[2]]); tt.append(tg, document.createTextNode(r[4])); b.append(tt, el("small", null, r[5]));
+    const b = el("div"); const tt = el("b"); const tg = el("span","tag " + r[2], { eat: "먹기", buy: "사기", see: "보기", perk: "특전" }[r[2]]); tt.append(tg, document.createTextNode(r[4])); b.append(tt, el("small", null, r[5]));
     if (recMode !== "day") b.append(el("small", null, `Day ${r[1]}` + (r[10] != null ? ` · 여기서 ${fmtD(r[10])}` : "")));
     const pr = el("span","pr", fmtMop(r[6])); const k = krwOf(r[6]); if (k) pr.append(el("i", null, k));
     a.append(b, pr); R.append(a);
