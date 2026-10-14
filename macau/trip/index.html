@@ -705,6 +705,8 @@ function renderNow(){
   if (!cur && next) { const E2 = E.filter(e => e.end <= now && !e.status && e.D.d === next.D.d); const last = E2[E2.length-1];
     if (last) { const f = el("div","row"); f.append(el("span","lbl x","자유")); const fb = el("div"); fb.append(el("div","w","자유 시간"), el("div","s", `'${last.it[1]}' 끝 → 다음 일정까지 ${leftText(next.t - now).replace(" 뒤","")}`), revBtn(last));
       const c = el("div","ctl"); const bb = el("button", null, `아직 '${last.it[1].slice(0,10)}' 중 (+15분)`); bb.type = "button"; bb.onclick = () => act(last.id, { ext: (last.g.ext || 0) + 15 }); c.append(bb); fb.append(c); f.append(fb); N.append(f); } }
+  if (!cur) { const done = E.filter(e => e.status !== "skip" && e.end <= now && now - e.end < 6*36e5 && !/취침|비행|집결|이동/.test(e.it[1])).slice(-2).reverse();
+    if (done.length && !N.querySelector(".revgo")) { const f = el("div","row"); f.append(el("span","lbl n","후기")); const fb = el("div"); fb.append(el("div","w","방금 끝난 일정, 후기 남겨요")); done.forEach(e => fb.append(revBtn(e))); f.append(fb); N.append(f); } }
   if (next) row("다음", "x", next, [el("div","left", leftText(next.t - now)), !cur ? ctlRow(next, { done: false }) : null]);
   if (!cur && !next) N.append(el("div","s","일정이 모두 끝났어요. 조심히 들어가세요!"));
 }
@@ -1024,7 +1026,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.14-11";
+const APP_VER = "2026.10.14-12";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
