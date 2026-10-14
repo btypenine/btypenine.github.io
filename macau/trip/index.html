@@ -995,7 +995,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.14-9";
+const APP_VER = "2026.10.14-10";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1199,7 +1199,7 @@ function renderPosts(){
   if (!L.length) { P.append(el("p","s","아직 후기가 없어요. 첫 후기를 남겨 주세요!")); return; }
   L.forEach(([id, r]) => { const d = el("div","post"); const hd = el("div","hd"); const l = el("span"); l.append(el("b", null, memLabel(r.who)));
     if (r.st) l.append(el("span","st"," " + "★".repeat(r.st)));
-    const tm = new Date((r.c||0) + MO*3600e3); const rt = el("span", null, `${tm.getUTCMonth()+1}/${tm.getUTCDate()} ${pad(tm.getUTCHours())}:${pad(tm.getUTCMinutes())}` + (r.voice ? " · 🎤" : ""));
+    const tm = new Date((r.c||0) + MO*3600e3); const rt = el("span", null, `${tm.getUTCMonth()+1}/${tm.getUTCDate()} ${pad(tm.getUTCHours())}:${pad(tm.getUTCMinutes())}` + (r.voice ? " · 🎤" : "") + (r.restored ? " · ↺ 복구됨" : ""));
     hd.append(l, rt); d.append(hd);
     if (r.text) d.append(el("div","tx", r.text));
     if (r.tr) d.append(el("div","trn", "한국어로: " + r.tr));
@@ -1267,7 +1267,7 @@ function postEl(id, r, withPlace){
   const d = el("div","post");
   if (withPlace) { const e = boardInfo(r.b); const pb = el("button","place", "📍 " + (e ? `Day ${e.di+1} · ${e.it[1]}` : "장소")); pb.type = "button"; pb.onclick = () => openBoard(r.b); d.append(pb); }
   const hd = el("div","hd"); const l = el("span"); l.append(el("b", null, memLabel(r.who))); if (r.st) l.append(el("span","st"," " + "★".repeat(r.st)));
-  const tm = new Date((r.c||0) + MO*3600e3); hd.append(l, el("span", null, `${tm.getUTCMonth()+1}/${tm.getUTCDate()} ${pad(tm.getUTCHours())}:${pad(tm.getUTCMinutes())}` + (r.voice ? " · 🎤" : ""))); d.append(hd);
+  const tm = new Date((r.c||0) + MO*3600e3); hd.append(l, el("span", null, `${tm.getUTCMonth()+1}/${tm.getUTCDate()} ${pad(tm.getUTCHours())}:${pad(tm.getUTCMinutes())}` + (r.voice ? " · 🎤" : "") + (r.restored ? " · ↺ 복구됨" : ""))); d.append(hd);
   if (r.text) d.append(el("div","tx", r.text)); if (r.tr) d.append(el("div","trn", "한국어로: " + r.tr));
   if (r.ph && r.ph.length) { const th = el("div","thumbs"); r.ph.forEach(pid => th.append(thumbEl(pid))); d.append(th); }
   return d;
