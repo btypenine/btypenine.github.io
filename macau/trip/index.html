@@ -53,25 +53,25 @@ a{color:var(--azul)}
 .clocks b{font-family:var(--mono);font-weight:500}
 .ppl{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
 .ppl i{font-style:normal;font-size:11px;padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
-.bar{position:sticky;top:0;z-index:5;margin:0 -16px;padding:8px 0 8px 16px;padding-top:calc(8px + env(safe-area-inset-top));background:var(--paper);border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:stretch}
-.navs{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:18px}
-.navs::-webkit-scrollbar{display:none}
-.navs a{flex:none;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:66px;height:56px;padding:4px 10px;border-radius:14px;text-decoration:none;font-size:13px;font-weight:600;
+.bar{position:sticky;top:0;z-index:5;margin:0 -16px;padding:6px 10px;padding-top:calc(6px + env(safe-area-inset-top));background:var(--paper);border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.navs{display:contents}
+.navs a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;min-width:0;height:50px;padding:3px 2px;border-radius:12px;text-decoration:none;font-size:11.5px;font-weight:600;letter-spacing:-.03em;line-height:1.15;text-align:center;white-space:nowrap;
   color:hsl(var(--h) 55% 30%);background:hsl(var(--h) 75% 94%);border:1px solid hsl(var(--h) 55% 86%);transition:transform .12s,background .2s}
-.navs a i{font-style:normal;font-size:20px;line-height:1.1;font-family:"Apple Color Emoji","Noto Color Emoji",sans-serif}
-.navs a:active{transform:scale(.95)}
+.navs a i{font-style:normal;font-size:19px;line-height:1.15;font-family:"Apple Color Emoji","Noto Color Emoji",sans-serif}
+.navs a:active{transform:scale(.94)}
 .navs a.on{background:hsl(var(--h) 60% 42%);border-color:hsl(var(--h) 60% 42%);color:#fff}
-.refresh{flex:none;margin-right:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:62px;height:56px;border-radius:14px;border:0;background:var(--ink);color:var(--paper);font-size:11px;font-weight:600}
-.refresh svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.refresh{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:0;height:50px;border-radius:12px;border:0;background:var(--ink);color:var(--paper);font-size:11px;font-weight:600;letter-spacing:-.03em;padding:0}
+@media (min-width:560px){.bar{grid-template-columns:repeat(12,minmax(0,1fr))}}
+.refresh svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .refresh.spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:40;background:var(--ink);color:var(--paper);border-radius:999px;padding:9px 16px;font-size:14px;transition:opacity .25s,transform .25s;white-space:nowrap}
 .toast.on{opacity:1;transform:translate(-50%,0)}
-.upd{top:84px!important}
+.upd{top:124px!important}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .navs a{color:hsl(var(--h) 80% 82%);background:hsl(var(--h) 35% 18%);border-color:hsl(var(--h) 35% 26%)}
   :root:not([data-theme="light"]) .navs a.on{background:hsl(var(--h) 55% 45%);color:#fff}}
 :root[data-theme="dark"] .navs a{color:hsl(var(--h) 80% 82%);background:hsl(var(--h) 35% 18%);border-color:hsl(var(--h) 35% 26%)}
-section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:84px}
+section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 .sh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .sh small{color:var(--muted);font-size:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
@@ -317,7 +317,7 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
 
   <nav class="bar" aria-label="바로가기">
     <div class="navs" id="navs">
-      <a href="#s-tr" style="--h:208"><i>🌐</i>번역</a><a href="#s-now" style="--h:350"><i>⏱️</i>지금</a><a href="#s-go" style="--h:160"><i>🧭</i>길·추천</a><a href="#s-plan" style="--h:222"><i>🗓️</i>일정</a><a href="#s-rev" style="--h:330"><i>💬</i>후기</a><a href="#s-wx" style="--h:195"><i>☀️</i>날씨</a><a href="#s-taxi" style="--h:40"><i>🚕</i>택시·말</a><a href="#s-money" style="--h:140"><i>💱</i>환율·물가</a><a href="#s-ledger" style="--h:265"><i>🧾</i>장부</a><a href="#s-info" style="--h:28"><i>📌</i>알아둘 것</a><a href="#s-sos" style="--h:0"><i>🆘</i>긴급</a>
+      <a href="#s-tr" style="--h:208"><i>🌐</i>번역</a><a href="#s-now" style="--h:350"><i>⏱️</i>지금</a><a href="#s-go" style="--h:160"><i>🧭</i>길추천</a><a href="#s-plan" style="--h:222"><i>🗓️</i>일정</a><a href="#s-rev" style="--h:330"><i>💬</i>후기</a><a href="#s-wx" style="--h:195"><i>☀️</i>날씨</a><a href="#s-taxi" style="--h:40"><i>🚕</i>택시말</a><a href="#s-money" style="--h:140"><i>💱</i>환율물가</a><a href="#s-ledger" style="--h:265"><i>🧾</i>장부</a><a href="#s-info" style="--h:28"><i>📌</i>알아둘것</a><a href="#s-sos" style="--h:0"><i>🆘</i>긴급</a>
     </div>
     <button type="button" class="refresh" id="refresh" aria-label="새로고침"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg><span>새로고침</span></button>
   </nav>
@@ -975,7 +975,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.14-6";
+const APP_VER = "2026.10.14-7";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1268,7 +1268,7 @@ function renderFeed(){
 // ---------- nav highlight + refresh ----------
 function toast(t){ const T = $("#toast"); T.textContent = t; T.classList.add("on"); clearTimeout(toast.h); toast.h = setTimeout(() => T.classList.remove("on"), 2200); }
 const navLinks = [...document.querySelectorAll("#navs a")];
-const navObs = "IntersectionObserver" in window ? new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) { navLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id)); const on = navLinks.find(a => a.classList.contains("on")); if (on) on.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }); } }); }, { rootMargin: "-90px 0px -65% 0px" }) : null;
+const navObs = "IntersectionObserver" in window ? new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) { navLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id)); const on = navLinks.find(a => a.classList.contains("on"));  } }); }, { rootMargin: "-130px 0px -60% 0px" }) : null;
 if (navObs) navLinks.forEach(a => { const t = document.querySelector(a.getAttribute("href")); if (t) navObs.observe(t); });
 $("#refresh").onclick = async () => {
   const b = $("#refresh"); if (b.classList.contains("spin")) return; b.classList.add("spin");
