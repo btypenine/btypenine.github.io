@@ -57,6 +57,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0}
 .post .who b{color:var(--ink);font-weight:600;margin-right:6px}
 .post .tx{white-space:pre-wrap;word-break:break-word;font-size:16px}
 .post .tr{font-size:13px;color:var(--muted)}
+.post .cm{font-size:13px;color:var(--muted);padding-left:6px}
 .empty{color:var(--muted);font-size:14px}
 .end{padding:34px 0}
 .end h2{font-size:28px;margin-bottom:14px}
@@ -135,7 +136,9 @@ function render(full){
       if (pids.length) { const g = el("div","photos" + (pids.length === 1 ? " one" : "")); pids.forEach(({ p, who }) => { const f = el("figure"); const im = el("img"); im.alt = memName(who) + "의 사진"; im.loading = "lazy"; f.append(im, el("figcaption", null, memName(who))); g.append(f);
         photo(p, full).then(src => { if (src) im.src = src; }); }); pl.append(g); }
       rs.forEach(r => { if (!r.text && !r.st) return; const po = el("div","post"); const w = el("div","who"); w.append(el("b", null, memName(r.who))); if (r.st) w.append(el("span","gold", "★".repeat(r.st) + " ")); w.append(document.createTextNode(fmt(r.c || 0)));
-        po.append(w); if (r.text) po.append(el("div","tx", r.text)); if (r.tr) po.append(el("div","tr", "→ " + r.tr)); pl.append(po); });
+        po.append(w); if (r.text) po.append(el("div","tx", r.text)); if (r.tr) po.append(el("div","tr", "→ " + r.tr));
+        Object.values(DATA.cmt || {}).filter(c => c && !c.del && c.r === r.id).sort((x,y) => (x.c||0)-(y.c||0)).forEach(c => po.append(el("div","cm", `└ ${memName(c.who)}: ${c.text}`)));
+        pl.append(po); });
       sec.append(pl);
     });
     if (!any) sec.append(el("p","empty","이날은 아직 남긴 기록이 없어요. 여행 앱의 후기 게시판에서 남겨 주세요."));

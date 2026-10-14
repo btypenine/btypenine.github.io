@@ -153,9 +153,9 @@ section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 .calc{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
 .calc label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:3px}
 .calc input{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 10px;font-family:var(--mono);font-size:17px;width:100%;min-width:0}
-.note{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.note{display:block;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
 .note:first-child{border-top:0;padding-top:0}
-.note b{font-weight:600}
+.note > b:first-child{font-weight:600;display:block;margin-bottom:2px}
 table{border-collapse:collapse;width:100%;font-size:13px;margin-top:4px}
 td,th{text-align:left;padding:5px 4px;border-bottom:1px solid var(--line)}
 th{color:var(--muted);font-weight:500}
@@ -298,6 +298,28 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
 .feed .place{display:inline-flex;gap:6px;align-items:center;border:0;background:var(--azul-soft);color:var(--azul);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:600;align-self:flex-start;cursor:pointer}
 .feed .post:first-child{padding-top:0}
 .more{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px;font-size:14px;margin-top:10px;width:100%}
+.revgo{display:block;width:100%;margin-top:8px;border:0;border-radius:10px;padding:9px 10px;background:var(--rose);color:#fff;font-size:14px;font-weight:700;text-align:left}
+.revtabs{display:flex;gap:6px;align-items:center}
+.revtabs .seg{flex:1}
+.bookmini{flex:none;font-size:11px;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 8px;background:var(--card);white-space:nowrap}
+.setlist{display:flex;flex-direction:column;padding:4px 14px}
+.setlist button,.setlist a{all:unset;cursor:pointer;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--line);color:var(--ink)}
+.setlist > :first-child{border-top:0}
+.setlist span{font-size:20px;text-align:center}
+.setlist b{font-weight:600;display:block}
+.setlist small{display:block;color:var(--muted);font-size:12px}
+.setlist i{font-style:normal;color:var(--muted);font-size:20px}
+.cmts{display:flex;flex-direction:column;gap:4px;background:var(--paper);border-radius:10px;padding:6px 10px}
+.cmt{display:flex;gap:6px;align-items:baseline;font-size:13px;line-height:1.45}
+.cmt b{font-weight:600;flex:none}
+.cmt .ct{flex:1;word-break:break-word;white-space:pre-wrap}
+.cmt small{color:var(--muted);font-size:11px;flex:none}
+.cx{border:0;background:none;color:var(--muted);font-size:11px;padding:0 2px}
+.cx[data-arm]{color:var(--rose)}
+.cadd{all:unset;cursor:pointer;font-size:12px;color:var(--azul);padding:2px 0}
+.cform{display:flex;gap:6px}
+.cform input{flex:1;min-width:0;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 9px;font-size:15px}
+.cform button{flex:none;border:0;background:var(--azul);color:#fff;border-radius:8px;padding:0 12px;font-weight:600}
 </style>
 </head>
 <body>
@@ -317,7 +339,7 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
 
   <nav class="bar" aria-label="바로가기">
     <div class="navs" id="navs">
-      <a href="#s-tr" style="--h:208"><i>🌐</i>번역</a><a href="#s-now" style="--h:350"><i>⏱️</i>지금</a><a href="#s-go" style="--h:160"><i>🧭</i>길추천</a><a href="#s-plan" style="--h:222"><i>🗓️</i>일정</a><a href="#s-rev" style="--h:330"><i>💬</i>후기</a><a href="#s-wx" style="--h:195"><i>☀️</i>날씨</a><a href="#s-taxi" style="--h:40"><i>🚕</i>택시말</a><a href="#s-money" style="--h:140"><i>💱</i>환율물가</a><a href="#s-ledger" style="--h:265"><i>🧾</i>장부</a><a href="#s-info" style="--h:28"><i>📌</i>알아둘것</a><a href="#s-sos" style="--h:0"><i>🆘</i>긴급</a>
+      <a href="#s-tr" style="--h:208"><i>🌐</i>번역</a><a href="#s-now" style="--h:350"><i>⏱️</i>지금</a><a href="#s-go" style="--h:160"><i>🧭</i>길추천</a><a href="#s-plan" style="--h:222"><i>🗓️</i>일정</a><a href="#s-rev" style="--h:330"><i>💬</i>후기</a><a href="#s-wx" style="--h:195"><i>☀️</i>날씨</a><a href="#s-taxi" style="--h:40"><i>🚕</i>택시말</a><a href="#s-money" style="--h:140"><i>💱</i>환율물가</a><a href="#s-ledger" style="--h:265"><i>🧾</i>장부</a><a href="#s-info" style="--h:28"><i>📌</i>알아둘것</a><a href="#s-sos" style="--h:0"><i>🆘</i>긴급·설정</a>
     </div>
     <button type="button" class="refresh" id="refresh" aria-label="새로고침"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg><span>새로고침</span></button>
   </nav>
@@ -350,7 +372,6 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
   </section>
 
   <div class="upd" id="upd" hidden><span>새 버전이 있어요</span><button type="button" id="updBtn">지금 적용</button></div>
-  <div class="inst" id="pushBar"><div style="flex:1"><b>🔔 후기 알림 받기</b><br><span>일정이 끝날 때마다 "후기 남겨주세요" 알림이 와요.</span></div><button type="button" id="pushOpen">설정</button><button type="button" class="x" id="pushX" aria-label="닫기">✕</button></div>
   <div class="inst" id="inst"><div style="flex:1"><b>앱처럼 쓰기</b><br><span id="instTx">홈 화면에 추가하면 아이콘으로 바로 열려요.</span></div><button type="button" id="instBtn">설치</button><button type="button" class="x" id="instX" aria-label="닫기">✕</button></div>
 
   <section id="s-now">
@@ -423,8 +444,7 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
 
   <section id="s-rev">
     <div class="sh"><h2>후기 게시판</h2><small id="revCount"></small></div>
-    <div class="btns" style="margin-top:0"><a class="btn pri" href="book.html">📖 여행 기록물 만들기</a><button type="button" class="btn" id="pushOpen2">🔔 후기 알림 설정</button></div>
-    <div class="seg two" id="revMode" role="tablist"><button type="button" data-m="feed" aria-pressed="true">📰 전체 후기 몰아보기</button><button type="button" data-m="place" aria-pressed="false">📍 장소별 게시판</button></div>
+    <div class="revtabs"><div class="seg two" id="revMode" role="tablist"><button type="button" data-m="place" aria-pressed="true">✍️ 일정별 후기 쓰기</button><button type="button" data-m="feed" aria-pressed="false">📰 전체 보기</button></div><a class="bookmini" href="book.html" title="여행 기록물 만들기">📖 기록물</a></div>
     <div id="revPlace" hidden><div class="days" id="revDays" role="tablist"></div>
       <div class="card" style="margin-top:10px"><div class="boards" id="boards"></div></div></div>
     <div id="revFeed"><div class="fchips" id="fFilter"></div><div class="card"><div class="posts feed" id="feed"></div></div></div>
@@ -455,6 +475,14 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
       <a href="tel:999"><div>경찰 · 구급차 · 소방<br><span>마카오 긴급번호</span></div><b>999</b></a>
       <a href="tel:+85328333000"><div>마카오 관광 위기관리 핫라인<br><span>24시간 · 영어</span></div><b>+853 2833 3000</b></a>
       <a href="tel:+82232100404"><div>외교부 영사콜센터<br><span>24시간 · 한국어 · 여권 분실, 사건·사고</span></div><b>+82 2 3210 0404</b></a>
+    </div>
+    <div class="sh" style="margin-top:8px"><h2>설정</h2></div>
+    <div class="card setlist">
+      <button type="button" id="pushOpen"><span>🔔</span><div><b>후기 알림 받기</b><small>일정이 끝날 때마다 "후기 남겨주세요" 알림</small></div><i>›</i></button>
+      <button type="button" id="setMe"><span>🙋</span><div><b>내 닉네임</b><small id="setMeTx">이 휴대폰 주인 고르기</small></div><i>›</i></button>
+      <button type="button" id="setInst"><span>📲</span><div><b>앱으로 설치하기</b><small>홈 화면에 아이콘 만들기</small></div><i>›</i></button>
+      <a href="book.html"><span>📖</span><div><b>여행 기록물 · 백업</b><small>후기 모아보기, PDF, 전체 백업 저장</small></div><i>›</i></a>
+      <button type="button" id="setRefresh"><span>🔄</span><div><b>새로고침</b><small id="setVer"></small></div><i>›</i></button>
     </div>
   </section>
 
@@ -649,6 +677,7 @@ function ctlRow(e, opts){
   if (e.g.ext || e.g.t) mk("원래대로", () => act(e.id, { ext: 0, t: "" }));
   return c;
 }
+function revBtn(e){ const n = revsFor(e.id).length; const b = el("button","revgo", `✍️ '${e.it[1].replace(/^(아침|점심|저녁) · /, "").slice(0,14)}' 후기 남기기` + (n ? ` · 💬${n}` : "")); b.type = "button"; b.onclick = () => openBoard(e.id); return b; }
 function renderNow(){
   const { E, cur, next } = curNext(), now = Date.now(); const N = $("#now"); N.innerHTML = "";
   const m = moNow(); $("#nowDate").textContent = `${m.getUTCMonth()+1}/${m.getUTCDate()} 마카오 시간`;
@@ -671,10 +700,10 @@ function renderNow(){
     const k = E.indexOf(cur), prev = E.slice(0, k).reverse().find(x => x.D.d === cur.D.d && x.status !== "skip");
     let ask = null;
     if (prev && !prev.g.done && now - cur.t < 40*6e4) { ask = el("div","ask"); ask.append(document.createTextNode(`아직 '${prev.it[1]}' 하는 중이면 `)); const b = el("button", null, "+15분 연장"); b.type = "button"; b.onclick = () => act(prev.id, { ext: (prev.g.ext || 0) + 15 }); ask.append(b); }
-    row("지금", "n", cur, [el("div","left", `${leftText(cur.end - now).replace(" 뒤","")} 남음`), ctlRow(cur, { done: true }), ask]);
+    row("지금", "n", cur, [el("div","left", `${leftText(cur.end - now).replace(" 뒤","")} 남음`), ctlRow(cur, { done: true }), revBtn(cur), ask]);
   }
   if (!cur && next) { const E2 = E.filter(e => e.end <= now && !e.status && e.D.d === next.D.d); const last = E2[E2.length-1];
-    if (last) { const f = el("div","row"); f.append(el("span","lbl x","자유")); const fb = el("div"); fb.append(el("div","w","자유 시간"), el("div","s", `'${last.it[1]}' 끝 → 다음 일정까지 ${leftText(next.t - now).replace(" 뒤","")}`));
+    if (last) { const f = el("div","row"); f.append(el("span","lbl x","자유")); const fb = el("div"); fb.append(el("div","w","자유 시간"), el("div","s", `'${last.it[1]}' 끝 → 다음 일정까지 ${leftText(next.t - now).replace(" 뒤","")}`), revBtn(last));
       const c = el("div","ctl"); const bb = el("button", null, `아직 '${last.it[1].slice(0,10)}' 중 (+15분)`); bb.type = "button"; bb.onclick = () => act(last.id, { ext: (last.g.ext || 0) + 15 }); c.append(bb); fb.append(c); f.append(fb); N.append(f); } }
   if (next) row("다음", "x", next, [el("div","left", leftText(next.t - now)), !cur ? ctlRow(next, { done: false }) : null]);
   if (!cur && !next) N.append(el("div","s","일정이 모두 끝났어요. 조심히 들어가세요!"));
@@ -765,7 +794,7 @@ $("#krw").oninput = () => { $("#mop").value = $("#krw").value ? (Math.round($("#
 // ---------- shared store ----------
 const FAM0 = { f1: "구씨네", f2: "가족 2", f3: "가족 3" };
 // ---------- shared store (union-only: data is never dropped; deletes are tombstones) ----------
-const EMPTY = () => ({ chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} });
+const EMPTY = () => ({ chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {}, cmt: {} });
 const newer = (a,b) => !a ? b : !b ? a : ((b.at||0) > (a.at||0) ? b : a);
 const mm = (x,y) => { const o = {}; new Set([...Object.keys(x||{}), ...Object.keys(y||{})]).forEach(k => o[k] = newer((x||{})[k], (y||{})[k])); return o; };
 const kindsOf = (...ds) => [...new Set(ds.flatMap(d => Object.keys(d || {}).filter(k => d[k] && typeof d[k] === "object" && !Array.isArray(d[k]))))];
@@ -819,7 +848,7 @@ function syncText(){
   else if (pending) { d.className = "dotk wait"; t.textContent = "저장 중…"; }
   else { d.className = "dotk ok"; t.textContent = "다 같이 보는 중"; }
 }
-function renderAllShared(){ renderPpl(); renderBoards(); if (typeof renderFeed === "function" && booted) renderFeed(); if ($("#board").classList.contains("on") && !$("#board").contains(document.activeElement)) renderPosts(); renderNow(); if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); if (typeof renderGo === "function" && booted) renderGo(); renderLedger(); syncText(); }
+function renderAllShared(){ renderPpl(); renderBoards(); if (typeof renderFeed === "function" && booted && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("#feed"))) renderFeed(); if ($("#board").classList.contains("on") && !$("#board").contains(document.activeElement)) renderPosts(); renderNow(); if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); if (typeof renderGo === "function" && booted) renderGo(); renderLedger(); syncText(); }
 let booted = false;
 
 // ---------- ledger ----------
@@ -995,7 +1024,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.14-10";
+const APP_VER = "2026.10.14-11";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1069,9 +1098,11 @@ async function syncReminders(){
   } catch(e) {} finally { remSyncing = false; }
 }
 const showPush = () => { $("#topicName").textContent = TOPIC; $("#topicLink").href = "ntfy://ntfy.sh/" + TOPIC; openSheet("pushSheet"); };
-$("#pushOpen").onclick = showPush; $("#pushOpen2").onclick = showPush;
-$("#pushX").onclick = () => { LS.set("dw-push-x", true); $("#pushBar").classList.remove("on"); };
-if (!LS.get("dw-push-x", false)) $("#pushBar").classList.add("on");
+$("#pushOpen").onclick = showPush;
+$("#setMe").onclick = () => openMem(meKey || "m0");
+$("#setInst").onclick = () => { if (isIOS) { iosSteps(); openSheet("iosSheet"); } else if (deferredPrompt) $("#instBtn").click(); else { LS.set("dw-inst-x", false); showInstall(); toast(isStandalone() ? "이미 앱으로 쓰고 있어요" : "크롬 메뉴(⋮) → '앱 설치'를 누르세요"); } };
+$("#setRefresh").onclick = () => $("#refresh").click();
+$("#setVer").textContent = "앱 버전 " + APP_VER;
 $("#topicCopy").onclick = async () => { try { await navigator.clipboard.writeText(TOPIC); $("#topicCopy").textContent = "복사됨"; } catch(e) {} };
 $("#pushTest").onclick = async () => { try { await ntfyPub({ title: "🐗 돼지사냥꾼 알림 테스트", message: `${meKey ? memLabel(meKey) + "님, " : ""}알림이 잘 오네요! 일정이 끝나면 후기 알림을 보내 드릴게요.`, tags: ["tada"], click: APP_URL }); $("#pushMsg").textContent = "보냈어요. 몇 초 안에 ntfy 앱으로 알림이 와야 해요."; } catch(e) { $("#pushMsg").textContent = "보내지 못했어요. 인터넷을 확인해 주세요."; } };
 setInterval(syncReminders, 5 * 60e3);
@@ -1151,6 +1182,7 @@ function renderPpl(){
   MEM0.forEach((lab, i) => { const k = "m" + i, n = memName(k); const b = el("button", (n ? "named" : "") + (k === meKey ? " me" : ""));
     b.type = "button"; b.append(document.createTextNode(n || lab));
     b.setAttribute("aria-label", (n ? n + " · " : "") + lab + " · 닉네임 정하기"); b.onclick = () => openMem(k); P.append(b); });
+  if ($("#setMeTx")) $("#setMeTx").textContent = meKey ? `이 휴대폰: ${memLabel(meKey)}` : "이 휴대폰 주인 고르기";
   $("#meline").textContent = meKey ? `이 휴대폰: ${memLabel(meKey)} · 다른 사람이면 내 칸을 눌러 바꿔요` : "👆 내 칸을 눌러 닉네임을 정하면 후기에 이름이 남아요";
 }
 function openSheet(id){ $("#" + id).classList.add("on"); }
@@ -1205,7 +1237,7 @@ function renderPosts(){
     if (r.tr) d.append(el("div","trn", "한국어로: " + r.tr));
     if (r.ph && r.ph.length) { const th = el("div","thumbs"); r.ph.forEach(pid => th.append(thumbEl(pid))); d.append(th); }
     if (r.who === meKey) { const x = el("button","del","삭제"); x.type = "button"; x.onclick = () => { if (x.dataset.arm) change("rev", id, { del: true }); else { x.dataset.arm = 1; x.textContent = "한 번 더 누르면 삭제"; setTimeout(() => { delete x.dataset.arm; x.textContent = "삭제"; }, 2500); } }; const w = el("div"); w.append(x); d.append(w); }
-    P.append(d); });
+    d.append(cmtBlock(id)); P.append(d); });
 }
 $("#bdText").addEventListener("input", () => { if (curBoard) LS.set("dw-draft-" + curBoard, $("#bdText").value); });
 $("#bdFile").onchange = async () => { const fs = [...$("#bdFile").files].slice(0, 6 - pend.length); $("#bdMsg").textContent = fs.length ? "사진 준비 중…" : "";
@@ -1260,8 +1292,8 @@ function renderBoards(){
 
 
 // ---------- review feed ----------
-let revMode = LS.get("dw-revmode", "feed"), feedF = "all", feedN = 20;
-document.querySelectorAll("#revMode button").forEach(b => b.onclick = () => { revMode = b.dataset.m; LS.set("dw-revmode", revMode); renderRevMode(); });
+let revMode = LS.get("dw-revmode2", "place"), feedF = "all", feedN = 20;
+document.querySelectorAll("#revMode button").forEach(b => b.onclick = () => { revMode = b.dataset.m; LS.set("dw-revmode2", revMode); renderRevMode(); });
 function renderRevMode(){ document.querySelectorAll("#revMode button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === revMode)); $("#revPlace").hidden = revMode !== "place"; $("#revFeed").hidden = revMode !== "feed"; if (revMode === "feed") renderFeed(); }
 function postEl(id, r, withPlace){
   const d = el("div","post");
@@ -1270,7 +1302,25 @@ function postEl(id, r, withPlace){
   const tm = new Date((r.c||0) + MO*3600e3); hd.append(l, el("span", null, `${tm.getUTCMonth()+1}/${tm.getUTCDate()} ${pad(tm.getUTCHours())}:${pad(tm.getUTCMinutes())}` + (r.voice ? " · 🎤" : "") + (r.restored ? " · ↺ 복구됨" : ""))); d.append(hd);
   if (r.text) d.append(el("div","tx", r.text)); if (r.tr) d.append(el("div","trn", "한국어로: " + r.tr));
   if (r.ph && r.ph.length) { const th = el("div","thumbs"); r.ph.forEach(pid => th.append(thumbEl(pid))); d.append(th); }
+  d.append(cmtBlock(id));
   return d;
+}
+const cmtDraft = {}, cmtOpen = new Set();
+const cmtsFor = rid => Object.entries(state.cmt || {}).filter(([,c]) => c && !c.del && c.r === rid).sort((a,b) => (a[1].c||0) - (b[1].c||0));
+function cmtBlock(rid){
+  const box = el("div","cmts"); const L = cmtsFor(rid);
+  L.forEach(([cid, c]) => { const row = el("div","cmt"); const tm = new Date((c.c||0) + MO*3600e3);
+    row.append(el("b", null, memLabel(c.who)), el("span","ct", c.text), el("small", null, `${pad(tm.getUTCHours())}:${pad(tm.getUTCMinutes())}`));
+    if (c.who === meKey) { const x = el("button","cx","✕"); x.type = "button"; x.setAttribute("aria-label","댓글 삭제"); x.onclick = () => { if (x.dataset.arm) change("cmt", cid, { del: true }); else { x.dataset.arm = 1; x.textContent = "삭제?"; setTimeout(() => { delete x.dataset.arm; x.textContent = "✕"; }, 2500); } }; row.append(x); }
+    box.append(row); });
+  const open = cmtOpen.has(rid) || cmtDraft[rid];
+  if (!open) { const b = el("button","cadd", L.length ? `💬 댓글 달기` : `💬 댓글 달기`); b.type = "button"; b.onclick = () => { cmtOpen.add(rid); const nb = cmtBlock(rid); box.replaceWith(nb); const i = nb.querySelector("input"); if (i) i.focus(); }; box.append(b); return box; }
+  const f = el("form","cform"); const i = el("input"); i.type = "text"; i.maxLength = 200; i.placeholder = meKey ? `${memLabel(meKey)}(으)로 댓글…` : "먼저 맨 위에서 내 칸을 골라 주세요"; i.value = cmtDraft[rid] || ""; i.setAttribute("aria-label","댓글");
+  i.oninput = () => { cmtDraft[rid] = i.value; };
+  const s2 = el("button", null, "등록"); s2.type = "submit"; f.append(i, s2);
+  f.onsubmit = e => { e.preventDefault(); const t = i.value.trim(); if (!t) return; if (!meKey) { openMem("m0"); return; }
+    change("cmt", "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,5), { r: rid, who: meKey, text: t, c: Date.now() }); delete cmtDraft[rid]; cmtOpen.delete(rid); i.blur(); renderFeed(); if ($("#board").classList.contains("on")) renderPosts(); };
+  box.append(f); return box;
 }
 function renderFeed(){
   if (revMode !== "feed") return;
