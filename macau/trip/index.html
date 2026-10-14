@@ -53,11 +53,25 @@ a{color:var(--azul)}
 .clocks b{font-family:var(--mono);font-weight:500}
 .ppl{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
 .ppl i{font-style:normal;font-size:11px;padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
-.bar{position:sticky;top:0;z-index:5;margin:0 -16px;padding:8px 16px;background:var(--paper);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
-.bar::-webkit-scrollbar{display:none}
-.bar a{flex:none;text-decoration:none;color:var(--muted);font-size:13px;padding:6px 11px;border-radius:999px}
-.bar a:active{background:var(--line)}
-section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:52px}
+.bar{position:sticky;top:0;z-index:5;margin:0 -16px;padding:8px 0 8px 16px;padding-top:calc(8px + env(safe-area-inset-top));background:var(--paper);border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:stretch}
+.navs{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:18px}
+.navs::-webkit-scrollbar{display:none}
+.navs a{flex:none;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:66px;height:56px;padding:4px 10px;border-radius:14px;text-decoration:none;font-size:13px;font-weight:600;
+  color:hsl(var(--h) 55% 30%);background:hsl(var(--h) 75% 94%);border:1px solid hsl(var(--h) 55% 86%);transition:transform .12s,background .2s}
+.navs a i{font-style:normal;font-size:20px;line-height:1.1;font-family:"Apple Color Emoji","Noto Color Emoji",sans-serif}
+.navs a:active{transform:scale(.95)}
+.navs a.on{background:hsl(var(--h) 60% 42%);border-color:hsl(var(--h) 60% 42%);color:#fff}
+.refresh{flex:none;margin-right:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:62px;height:56px;border-radius:14px;border:0;background:var(--ink);color:var(--paper);font-size:11px;font-weight:600}
+.refresh svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.refresh.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:40;background:var(--ink);color:var(--paper);border-radius:999px;padding:9px 16px;font-size:14px;transition:opacity .25s,transform .25s;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.upd{top:84px!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .navs a{color:hsl(var(--h) 80% 82%);background:hsl(var(--h) 35% 18%);border-color:hsl(var(--h) 35% 26%)}
+  :root:not([data-theme="light"]) .navs a.on{background:hsl(var(--h) 55% 45%);color:#fff}}
+:root[data-theme="dark"] .navs a{color:hsl(var(--h) 80% 82%);background:hsl(var(--h) 35% 18%);border-color:hsl(var(--h) 35% 26%)}
+section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:84px}
 .sh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .sh small{color:var(--muted);font-size:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
@@ -274,6 +288,16 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
 .ios{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center}
 .ios .ic{width:44px;height:44px;border-radius:12px;background:var(--azul-soft);display:grid;place-items:center;font-size:22px}
 .ios svg{width:24px;height:24px;stroke:var(--azul);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.seg.two{grid-template-columns:1fr 1fr}
+.seg.two button{font-size:14px;padding:9px 0}
+.fchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}
+.fchips::-webkit-scrollbar{display:none}
+.fchips button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--ink)}
+.fchips button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.feed .post{border-bottom:1px solid var(--line)}
+.feed .place{display:inline-flex;gap:6px;align-items:center;border:0;background:var(--azul-soft);color:var(--azul);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:600;align-self:flex-start;cursor:pointer}
+.feed .post:first-child{padding-top:0}
+.more{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px;font-size:14px;margin-top:10px;width:100%}
 </style>
 </head>
 <body>
@@ -292,8 +316,12 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
   </header>
 
   <nav class="bar" aria-label="바로가기">
-    <a href="#s-tr">번역</a><a href="#s-now">지금</a><a href="#s-go">길·추천</a><a href="#s-plan">일정</a><a href="#s-wx">날씨</a><a href="#s-taxi">택시·말</a><a href="#s-money">환율·물가</a><a href="#s-ledger">장부</a><a href="#s-rev">후기</a><a href="#s-info">알아둘 것</a><a href="#s-sos">긴급</a>
+    <div class="navs" id="navs">
+      <a href="#s-tr" style="--h:208"><i>🌐</i>번역</a><a href="#s-now" style="--h:350"><i>⏱️</i>지금</a><a href="#s-go" style="--h:160"><i>🧭</i>길·추천</a><a href="#s-plan" style="--h:222"><i>🗓️</i>일정</a><a href="#s-rev" style="--h:330"><i>💬</i>후기</a><a href="#s-wx" style="--h:195"><i>☀️</i>날씨</a><a href="#s-taxi" style="--h:40"><i>🚕</i>택시·말</a><a href="#s-money" style="--h:140"><i>💱</i>환율·물가</a><a href="#s-ledger" style="--h:265"><i>🧾</i>장부</a><a href="#s-info" style="--h:28"><i>📌</i>알아둘 것</a><a href="#s-sos" style="--h:0"><i>🆘</i>긴급</a>
+    </div>
+    <button type="button" class="refresh" id="refresh" aria-label="새로고침"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg><span>새로고침</span></button>
   </nav>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <section id="s-tr" class="tr">
     <div class="sh"><h2>번역</h2><small id="trNote">마카오는 번체 중국어 · 광둥어</small></div>
@@ -396,8 +424,10 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
   <section id="s-rev">
     <div class="sh"><h2>후기 게시판</h2><small id="revCount"></small></div>
     <div class="btns" style="margin-top:0"><a class="btn pri" href="book.html">📖 여행 기록물 만들기</a><button type="button" class="btn" id="pushOpen2">🔔 후기 알림 설정</button></div>
-    <div class="days" id="revDays" role="tablist"></div>
-    <div class="card"><div class="boards" id="boards"></div></div>
+    <div class="seg two" id="revMode" role="tablist"><button type="button" data-m="feed" aria-pressed="true">📰 전체 후기 몰아보기</button><button type="button" data-m="place" aria-pressed="false">📍 장소별 게시판</button></div>
+    <div id="revPlace" hidden><div class="days" id="revDays" role="tablist"></div>
+      <div class="card" style="margin-top:10px"><div class="boards" id="boards"></div></div></div>
+    <div id="revFeed"><div class="fchips" id="fFilter"></div><div class="card"><div class="posts feed" id="feed"></div></div></div>
   </section>
 
   <section id="s-info">
@@ -769,7 +799,7 @@ function syncText(){
   else if (pending) { d.className = "dotk wait"; t.textContent = "저장 중…"; }
   else { d.className = "dotk ok"; t.textContent = "다 같이 보는 중"; }
 }
-function renderAllShared(){ renderPpl(); renderBoards(); if ($("#board").classList.contains("on") && !$("#board").contains(document.activeElement)) renderPosts(); renderNow(); if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); if (typeof renderGo === "function" && booted) renderGo(); renderLedger(); syncText(); }
+function renderAllShared(){ renderPpl(); renderBoards(); if (typeof renderFeed === "function" && booted) renderFeed(); if ($("#board").classList.contains("on") && !$("#board").contains(document.activeElement)) renderPosts(); renderNow(); if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); if (typeof renderGo === "function" && booted) renderGo(); renderLedger(); syncText(); }
 let booted = false;
 
 // ---------- ledger ----------
@@ -945,7 +975,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.14-5";
+const APP_VER = "2026.10.14-6";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1208,9 +1238,53 @@ function renderBoards(){
     b.append(pic, mid, n); L.append(b); });
 }
 
+
+// ---------- review feed ----------
+let revMode = LS.get("dw-revmode", "feed"), feedF = "all", feedN = 20;
+document.querySelectorAll("#revMode button").forEach(b => b.onclick = () => { revMode = b.dataset.m; LS.set("dw-revmode", revMode); renderRevMode(); });
+function renderRevMode(){ document.querySelectorAll("#revMode button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === revMode)); $("#revPlace").hidden = revMode !== "place"; $("#revFeed").hidden = revMode !== "feed"; if (revMode === "feed") renderFeed(); }
+function postEl(id, r, withPlace){
+  const d = el("div","post");
+  if (withPlace) { const e = boardInfo(r.b); const pb = el("button","place", "📍 " + (e ? `Day ${e.di+1} · ${e.it[1]}` : "장소")); pb.type = "button"; pb.onclick = () => openBoard(r.b); d.append(pb); }
+  const hd = el("div","hd"); const l = el("span"); l.append(el("b", null, memLabel(r.who))); if (r.st) l.append(el("span","st"," " + "★".repeat(r.st)));
+  const tm = new Date((r.c||0) + MO*3600e3); hd.append(l, el("span", null, `${tm.getUTCMonth()+1}/${tm.getUTCDate()} ${pad(tm.getUTCHours())}:${pad(tm.getUTCMinutes())}` + (r.voice ? " · 🎤" : ""))); d.append(hd);
+  if (r.text) d.append(el("div","tx", r.text)); if (r.tr) d.append(el("div","trn", "한국어로: " + r.tr));
+  if (r.ph && r.ph.length) { const th = el("div","thumbs"); r.ph.forEach(pid => th.append(thumbEl(pid))); d.append(th); }
+  return d;
+}
+function renderFeed(){
+  if (revMode !== "feed") return;
+  const all = Object.entries(state.rev || {}).filter(([,r]) => r && !r.del).sort((a,c) => (c[1].c||0) - (a[1].c||0));
+  const F = $("#fFilter"); F.innerHTML = "";
+  const who = [...new Set(all.map(([,r]) => r.who))];
+  const opts = [["all", `전체 ${all.length}`], ["photo", "📷 사진만"], ["star", "★ 4점 이상"], ...DAYS.map((D,i) => ["d" + D.d, `Day ${i+1}`]), ...who.map(k => ["w" + k, memLabel(k)])];
+  opts.forEach(([k, l]) => { const b = el("button", null, l); b.type = "button"; b.setAttribute("aria-pressed", feedF === k); b.onclick = () => { feedF = k; feedN = 20; renderFeed(); }; F.append(b); });
+  const list = all.filter(([,r]) => feedF === "all" || (feedF === "photo" && r.ph && r.ph.length) || (feedF === "star" && r.st >= 4) || (feedF[0] === "d" && (r.b||"").startsWith(feedF.slice(1))) || (feedF[0] === "w" && r.who === feedF.slice(1)));
+  const P = $("#feed"); P.innerHTML = "";
+  if (!list.length) { P.append(el("p","s", all.length ? "조건에 맞는 후기가 없어요." : "아직 후기가 없어요. 일정표의 '💬 후기'나 '장소별 게시판'에서 첫 후기를 남겨 주세요!")); return; }
+  list.slice(0, feedN).forEach(([id, r]) => P.append(postEl(id, r, true)));
+  if (list.length > feedN) { const m = el("button","more", `더 보기 (${list.length - feedN}개 남음)`); m.type = "button"; m.onclick = () => { feedN += 20; renderFeed(); }; P.append(m); }
+}
+// ---------- nav highlight + refresh ----------
+function toast(t){ const T = $("#toast"); T.textContent = t; T.classList.add("on"); clearTimeout(toast.h); toast.h = setTimeout(() => T.classList.remove("on"), 2200); }
+const navLinks = [...document.querySelectorAll("#navs a")];
+const navObs = "IntersectionObserver" in window ? new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) { navLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id)); const on = navLinks.find(a => a.classList.contains("on")); if (on) on.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" }); } }); }, { rootMargin: "-90px 0px -65% 0px" }) : null;
+if (navObs) navLinks.forEach(a => { const t = document.querySelector(a.getAttribute("href")); if (t) navObs.observe(t); });
+$("#refresh").onclick = async () => {
+  const b = $("#refresh"); if (b.classList.contains("spin")) return; b.classList.add("spin");
+  try {
+    let j = {}; try { const r = await fetch("version.json?t=" + Date.now(), { cache: "no-store" }); if (r.ok) j = await r.json(); } catch(e) {}
+    if (j.v && j.v !== APP_VER && !busyEditing()) { toast("새 버전으로 바꾸는 중…"); setTimeout(applyUpdate, 400); return; }
+    await (pending ? push() : pull()); await Promise.all([liveWx(), liveRate()].map(x => x.catch(() => {}))); if (geoOn) startGeo();
+    clocks(); renderNow(); renderDay(); renderGo(); renderRecs(); syncReminders();
+    toast(online === false ? "인터넷 연결이 안 돼요 · 저장된 내용으로 보여드려요" : "최신 내용으로 새로고침했어요");
+  } catch(e) { toast("새로고침하지 못했어요"); }
+  finally { b.classList.remove("spin"); }
+};
+
 // ---------- boot ----------
 merge(); clocks(); renderNow(); renderDays(); renderDay(); renderWx(); renderLedger(); syncText(); liveWx();
-booted = true; renderPpl(); renderBoards(); applyRate(); liveRate(); if (geoOn) startGeo();
+booted = true; renderPpl(); renderBoards(); renderRevMode(); applyRate(); liveRate(); if (geoOn) startGeo();
 (async () => { await pull(); if (pending) push(); setTimeout(syncReminders, 3000); openFromHash(); })();
 setInterval(() => { clocks(); renderNow(); renderGo(); }, 30000);
 setInterval(() => { if (document.visibilityState === "visible" && !pushing && !document.activeElement.matches("input")) { pending ? push() : pull(); } }, 8000);
