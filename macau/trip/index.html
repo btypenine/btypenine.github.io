@@ -975,7 +975,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.14-7";
+const APP_VER = "2026.10.14-8";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1121,15 +1121,15 @@ trSet(trDir); renderTrHist();
 
 
 // ---------- members ----------
-const MEM0 = ["어른 43","어른 43","어른 43","어른 43","어른 45","16","12","11","10","10"];
+const MEM0 = ["어른1","어른2","어른3","어른4","어른5","어린이1","어린이2","어린이3","어린이4","어린이5"];
 let meKey = LS.get("dw-me", "");
 const memName = k => { const m = state.mem[k]; return m && m.name ? m.name : ""; };
-const memLabel = k => memName(k) || ("구성원 " + MEM0[+k.slice(1)]);
+const memLabel = k => memName(k) || MEM0[+k.slice(1)];
 let memEdit = null;
 function renderPpl(){
   const P = $("#ppl"); P.innerHTML = "";
   MEM0.forEach((lab, i) => { const k = "m" + i, n = memName(k); const b = el("button", (n ? "named" : "") + (k === meKey ? " me" : ""));
-    b.type = "button"; b.append(document.createTextNode(n || lab)); if (n) b.append(el("small", null, lab));
+    b.type = "button"; b.append(document.createTextNode(n || lab));
     b.setAttribute("aria-label", (n ? n + " · " : "") + lab + " · 닉네임 정하기"); b.onclick = () => openMem(k); P.append(b); });
   $("#meline").textContent = meKey ? `이 휴대폰: ${memLabel(meKey)} · 다른 사람이면 내 칸을 눌러 바꿔요` : "👆 내 칸을 눌러 닉네임을 정하면 후기에 이름이 남아요";
 }

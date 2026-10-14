@@ -91,7 +91,7 @@ h1,h2,h3{font-family:var(--display);font-weight:400;margin:0}
 <script>
 const STORE = "https://textdb.dev/api/data/dwaeji-macau-trip-cb6b956a-ba43-4f31-bcea-ce6ae77aea24";
 const PH = id => STORE + "-ph-" + id, TH = id => STORE + "-th-" + id;
-const MEM0 = ["어른 43","어른 43","어른 43","어른 43","어른 45","16","12","11","10","10"];
+const MEM0 = ["어른1","어른2","어른3","어른4","어른5","어린이1","어린이2","어린이3","어린이4","어린이5"];
 const MO = 8;
 const $ = s => document.querySelector(s);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
@@ -103,7 +103,7 @@ async function getText(url){ const r = await fetch(url); if (!r.ok) throw 0; let
 async function photo(id, full){ const k = (full ? "p" : "t") + id; if (cache[k]) return cache[k]; try { cache[k] = await getText(full ? PH(id) : TH(id)); } catch(e) { if (full) return photo(id, false); cache[k] = ""; } return cache[k]; }
 async function loadDays(){ const html = await (await fetch("index.html", { cache: "no-store" })).text(); const m = html.match(/const DAYS = (\[[\s\S]*?\n\]);/); DAYS = Function('"use strict";return ' + m[1])(); }
 async function loadData(){ let t = await (await fetch(STORE, { cache: "no-store" })).text(); let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); DATA = v; }
-const memName = k => (DATA.mem && DATA.mem[k] && DATA.mem[k].name) || ("구성원 " + MEM0[+k.slice(1)]);
+const memName = k => (DATA.mem && DATA.mem[k] && DATA.mem[k].name) || MEM0[+k.slice(1)];
 const BOAR = '<svg viewBox="0 0 64 100" aria-hidden="true"><rect x="1" y="1" width="62" height="98" rx="5" fill="#b3122a"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#f3e6c8"/><g stroke="#b3122a" stroke-width="2.4" fill="none"><path d="M40 12 l8 -3 M44 18 l9 -2 M36 22 l7 -5"/></g><path d="M12 70 C12 58 22 50 34 50 C44 50 52 56 54 64 L58 66 L54 70 C52 78 44 82 34 82 C22 82 12 78 12 70Z" fill="#2b1c18"/><circle cx="48" cy="62" r="1.6" fill="#f3e6c8"/><path d="M18 82 v6 M28 82 v7 M40 82 v7 M48 80 v7" stroke="#2b1c18" stroke-width="3"/></svg>';
 function render(full){
   const B = $("#book"); B.innerHTML = "";
