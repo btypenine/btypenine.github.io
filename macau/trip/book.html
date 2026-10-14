@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>돼지사냥꾼 마카오 여행기</title>
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--paper:#f7f3ea;--card:#fffdf8;--ink:#1d1a16;--muted:#6f675c;--line:#e4dccd;--azul:#1d4ea6;--rose:#b3122a;--gold:#c9952b;
+  --display:"Song Myung",Georgia,serif;--body:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#15130f;--card:#1e1b16;--ink:#efe8db;--muted:#a99f90;--line:#3a342b;--azul:#8fb0ff;--rose:#ff8094;--gold:#e6b65a;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#15130f;--card:#1e1b16;--ink:#efe8db;--muted:#a99f90;--line:#3a342b;--azul:#8fb0ff;--rose:#ff8094;--gold:#e6b65a;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 80px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0}
+.tools{position:sticky;top:0;z-index:5;display:flex;gap:6px;flex-wrap:wrap;padding:10px 0;background:var(--paper);border-bottom:1px solid var(--line)}
+.tools a,.tools button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 12px;text-decoration:none;cursor:pointer}
+.tools .pri{background:var(--azul);border-color:var(--azul);color:#fff}
+.status{font-size:12px;color:var(--muted);align-self:center}
+.cover{min-height:78vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;padding:40px 0;border-bottom:1px solid var(--line)}
+.cover .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--muted)}
+.cover h1{font-size:clamp(36px,10vw,60px);line-height:1.15;word-break:keep-all}
+.cover .sub{font-size:16px;color:var(--muted)}
+.cover svg{width:84px;transform:rotate(8deg)}
+.crew{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:520px}
+.crew span{border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px;background:var(--card)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:440px;margin-top:8px}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 4px}
+.stats b{display:block;font-family:var(--mono);font-size:22px;font-weight:500}
+.stats small{font-size:12px;color:var(--muted)}
+.toc{padding:28px 0;border-bottom:1px solid var(--line)}
+.toc h2{font-size:26px;margin-bottom:10px}
+.toc a{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line);color:var(--ink);text-decoration:none}
+.toc a small{color:var(--muted);font-family:var(--mono)}
+.day{padding:34px 0 10px;border-bottom:1px solid var(--line)}
+.day .dh{display:flex;flex-direction:column;gap:2px;margin-bottom:18px}
+.day .dh .k{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--rose)}
+.day .dh h2{font-size:30px;line-height:1.2;word-break:keep-all}
+.day .dh small{color:var(--muted)}
+.place{margin:0 0 26px;break-inside:avoid-page}
+.place h3{font-size:21px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:2px solid var(--ink);padding-bottom:4px;margin-bottom:10px;word-break:keep-all}
+.place h3 small{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.gold{color:var(--gold)}
+.photos{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px}
+.photos.one{grid-template-columns:1fr}
+.photos figure{margin:0;border-radius:8px;overflow:hidden;background:var(--line);aspect-ratio:4/3}
+.photos.one figure{aspect-ratio:auto}
+.photos img{width:100%;height:100%;object-fit:cover;display:block}
+.photos.one img{height:auto}
+.photos figcaption{display:none}
+.post{padding:8px 0 8px 12px;border-left:3px solid var(--line);margin-bottom:8px;break-inside:avoid}
+.post .who{font-size:13px;color:var(--muted)}
+.post .who b{color:var(--ink);font-weight:600;margin-right:6px}
+.post .tx{white-space:pre-wrap;word-break:break-word;font-size:16px}
+.post .tr{font-size:13px;color:var(--muted)}
+.empty{color:var(--muted);font-size:14px}
+.end{padding:34px 0}
+.end h2{font-size:28px;margin-bottom:14px}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bars .r{display:grid;grid-template-columns:110px 1fr 40px;gap:8px;align-items:center;font-size:13px}
+.bars .bar{height:10px;border-radius:5px;background:var(--azul)}
+.bars .r span:last-child{font-family:var(--mono);text-align:right}
+.best{margin-top:18px}
+.best li{margin:4px 0}
+@media print{
+  @page{size:A5;margin:12mm}
+  body{background:#fff;color:#111;font-size:11pt}
+  .tools{display:none}
+  .wrap{max-width:none;padding:0}
+  .cover{min-height:180mm;border:0}
+  .toc,.day,.end{break-before:page;border:0}
+  .photos figure{background:#eee}
+  a{color:inherit}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tools">
+    <a href="./">← 여행 앱</a>
+    <button type="button" class="pri" id="pdf">📄 PDF·인쇄용 만들기</button>
+    <button type="button" id="backup">💾 전체 백업 저장</button>
+    <span class="status" id="st">불러오는 중…</span>
+  </div>
+  <div id="book"></div>
+</div>
+<script>
+const STORE = "https://textdb.dev/api/data/dwaeji-macau-trip-cb6b956a-ba43-4f31-bcea-ce6ae77aea24";
+const PH = id => STORE + "-ph-" + id, TH = id => STORE + "-th-" + id;
+const MEM0 = ["어른 43","어른 43","어른 43","어른 43","어른 45","16","12","11","10","10"];
+const MO = 8;
+const $ = s => document.querySelector(s);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const pad = n => String(n).padStart(2,"0");
+const fmt = ms => { const d = new Date(ms + MO*3600e3); return `${d.getUTCMonth()+1}/${d.getUTCDate()} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`; };
+let DAYS = [], DATA = null;
+const cache = {};
+async function getText(url){ const r = await fetch(url); if (!r.ok) throw 0; let t = await r.text(); if (t.startsWith('"')) { try { t = JSON.parse(t); } catch(e) {} } return t; }
+async function photo(id, full){ const k = (full ? "p" : "t") + id; if (cache[k]) return cache[k]; try { cache[k] = await getText(full ? PH(id) : TH(id)); } catch(e) { if (full) return photo(id, false); cache[k] = ""; } return cache[k]; }
+async function loadDays(){ const html = await (await fetch("index.html", { cache: "no-store" })).text(); const m = html.match(/const DAYS = (\[[\s\S]*?\n\]);/); DAYS = Function('"use strict";return ' + m[1])(); }
+async function loadData(){ let t = await (await fetch(STORE, { cache: "no-store" })).text(); let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); DATA = v; }
+const memName = k => (DATA.mem && DATA.mem[k] && DATA.mem[k].name) || ("구성원 " + MEM0[+k.slice(1)]);
+const BOAR = '<svg viewBox="0 0 64 100" aria-hidden="true"><rect x="1" y="1" width="62" height="98" rx="5" fill="#b3122a"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#f3e6c8"/><g stroke="#b3122a" stroke-width="2.4" fill="none"><path d="M40 12 l8 -3 M44 18 l9 -2 M36 22 l7 -5"/></g><path d="M12 70 C12 58 22 50 34 50 C44 50 52 56 54 64 L58 66 L54 70 C52 78 44 82 34 82 C22 82 12 78 12 70Z" fill="#2b1c18"/><circle cx="48" cy="62" r="1.6" fill="#f3e6c8"/><path d="M18 82 v6 M28 82 v7 M40 82 v7 M48 80 v7" stroke="#2b1c18" stroke-width="3"/></svg>';
+function render(full){
+  const B = $("#book"); B.innerHTML = "";
+  const revs = Object.entries(DATA.rev || {}).filter(([,r]) => r && !r.del).map(([id, r]) => ({ id, ...r }));
+  const nPh = revs.reduce((a, r) => a + (r.ph || []).length, 0);
+  const named = MEM0.map((l, i) => "m" + i).filter(k => DATA.mem && DATA.mem[k] && DATA.mem[k].name);
+  // cover
+  const cv = el("section","cover"); cv.innerHTML = BOAR;
+  cv.append(el("div","eyebrow","MACAU · 2026.10.13 – 10.17"), el("h1", null, "돼지사냥꾼 가족들의\n마카오 4박 5일"), el("div","sub","열 명이 함께 쓴 여행 기록"));
+  cv.querySelector("h1").style.whiteSpace = "pre-line";
+  const crew = el("div","crew"); (named.length ? named : MEM0.map((l,i) => "m"+i)).forEach(k => crew.append(el("span", null, memName(k)))); cv.append(crew);
+  const st = el("div","stats"); [["후기", revs.length], ["사진", nPh], ["장소", new Set(revs.map(r => r.b)).size]].forEach(([l, v]) => { const d = el("div"); d.append(el("b", null, String(v)), el("small", null, l)); st.append(d); }); cv.append(st);
+  B.append(cv);
+  // toc
+  const toc = el("section","toc"); toc.append(el("h2", null, "차례"));
+  DAYS.forEach((D, di) => { const a = el("a"); a.href = "#day" + (di+1); const n = revs.filter(r => (r.b||"").startsWith(D.d)).length;
+    a.append(el("span", null, `Day ${di+1} · ${D.title}`), el("small", null, `${+D.d.slice(5,7)}/${+D.d.slice(8)} ${D.w} · 후기 ${n}`)); toc.append(a); });
+  B.append(toc);
+  // days
+  DAYS.forEach((D, di) => {
+    const sec = el("section","day"); sec.id = "day" + (di+1);
+    const dh = el("div","dh"); dh.append(el("span","k", `DAY ${di+1} · ${+D.d.slice(5,7)}월 ${+D.d.slice(8)}일 ${D.w}요일`), el("h2", null, D.title), el("small", null, D.hotel ? D.hotel + "에서 묵은 날" : "집으로 돌아온 날")); sec.append(dh);
+    let any = false;
+    D.items.forEach((it, i) => {
+      const bid = D.d + "#" + i; const rs = revs.filter(r => r.b === bid).sort((a, b) => (a.c||0) - (b.c||0)); if (!rs.length) return; any = true;
+      const pl = el("article","place"); const h = el("h3"); h.append(document.createTextNode(it[1]));
+      const sts = rs.filter(r => r.st).map(r => r.st); const sm = el("small", null, it[0] + (sts.length ? " · " : "")); if (sts.length) sm.append(el("span","gold", "★ " + (sts.reduce((a,c)=>a+c,0)/sts.length).toFixed(1))); h.append(sm); pl.append(h);
+      const pids = rs.flatMap(r => (r.ph || []).map(p => ({ p, who: r.who })));
+      if (pids.length) { const g = el("div","photos" + (pids.length === 1 ? " one" : "")); pids.forEach(({ p, who }) => { const f = el("figure"); const im = el("img"); im.alt = memName(who) + "의 사진"; im.loading = "lazy"; f.append(im, el("figcaption", null, memName(who))); g.append(f);
+        photo(p, full).then(src => { if (src) im.src = src; }); }); pl.append(g); }
+      rs.forEach(r => { if (!r.text && !r.st) return; const po = el("div","post"); const w = el("div","who"); w.append(el("b", null, memName(r.who))); if (r.st) w.append(el("span","gold", "★".repeat(r.st) + " ")); w.append(document.createTextNode(fmt(r.c || 0)));
+        po.append(w); if (r.text) po.append(el("div","tx", r.text)); if (r.tr) po.append(el("div","tr", "→ " + r.tr)); pl.append(po); });
+      sec.append(pl);
+    });
+    if (!any) sec.append(el("p","empty","이날은 아직 남긴 기록이 없어요. 여행 앱의 후기 게시판에서 남겨 주세요."));
+    B.append(sec);
+  });
+  // ending
+  const end = el("section","end"); end.append(el("h2", null, "우리가 남긴 것들"));
+  const by = {}; revs.forEach(r => by[r.who] = (by[r.who] || 0) + 1); const mx = Math.max(1, ...Object.values(by));
+  const bars = el("div","bars"); Object.entries(by).sort((a,b) => b[1]-a[1]).forEach(([k, n]) => { const r = el("div","r"); const bar = el("div","bar"); bar.style.width = (n/mx*100) + "%"; const w = el("div"); w.append(bar); r.append(el("span", null, memName(k)), w, el("span", null, n + "개")); bars.append(r); });
+  end.append(el("p","empty","누가 가장 많이 남겼을까요?"), bars);
+  const ranks = {}; revs.filter(r => r.st).forEach(r => { (ranks[r.b] = ranks[r.b] || []).push(r.st); });
+  const top = Object.entries(ranks).map(([b, a]) => [b, a.reduce((x,y)=>x+y,0)/a.length, a.length]).sort((a,b) => b[1]-a[1] || b[2]-a[2]).slice(0, 5);
+  if (top.length) { end.append(el("h3", null, "별점이 가장 높았던 곳")); const ol = el("ol","best"); top.forEach(([b, avg, n]) => { const [d, i] = b.split("#"); const D = DAYS.find(x => x.d === d); const it = D && D.items[+i]; ol.append(el("li", null, `${it ? it[1] : b} — ★${avg.toFixed(1)} (${n}명)`)); }); end.append(ol); }
+  B.append(end);
+  $("#st").textContent = `후기 ${revs.length}개 · 사진 ${nPh}장`;
+}
+$("#pdf").onclick = async () => {
+  $("#st").textContent = "고화질 사진 불러오는 중…"; render(true);
+  const imgs = [...document.images].filter(i => i.closest(".photos"));
+  await new Promise(res => { let n = 0; const check = () => { n++; const ok = imgs.every(i => i.complete && i.naturalWidth); if (ok || n > 120) res(); else setTimeout(check, 250); }; check(); });
+  $("#st").textContent = "인쇄 창에서 'PDF로 저장'을 고르세요"; window.print();
+};
+$("#backup").onclick = async () => {
+  $("#st").textContent = "백업 만드는 중…";
+  const revs = Object.values(DATA.rev || {}).filter(r => r && !r.del); const photos = {};
+  for (const r of revs) for (const p of (r.ph || [])) photos[p] = await photo(p, true);
+  const blob = new Blob([JSON.stringify({ made: new Date().toISOString(), days: DAYS, data: DATA, photos }, null, 1)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "돼지사냥꾼_마카오_기록_백업.json"; document.body.append(a); a.click(); a.remove();
+  $("#st").textContent = "백업 파일을 저장했어요";
+};
+(async () => { try { await loadDays(); await loadData(); render(false); } catch(e) { $("#st").textContent = "불러오지 못했어요. 인터넷을 확인하고 새로고침해 주세요."; } })();
+</script>
+</body>
+</html>

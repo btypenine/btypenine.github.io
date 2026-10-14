@@ -10,6 +10,8 @@
 <meta name="theme-color" content="#1d4ea6">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="돼지사냥꾼">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Song+Myung&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -259,6 +261,19 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
 .sheet.photo{align-items:center;background:rgba(0,0,0,.92)}
 .sheet.photo img{max-width:100%;max-height:100%;object-fit:contain}
 .sheet.photo .x{position:absolute;top:calc(10px + env(safe-area-inset-top));right:10px;color:#fff;font-size:26px}
+.upd[hidden]{display:none!important}
+.upd{position:sticky;top:46px;z-index:6;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--jade);color:#fff;border-radius:12px;padding:8px 12px;font-size:14px}
+.upd button{border:0;background:#fff;color:var(--jade);border-radius:8px;padding:5px 10px;font-weight:700}
+#pushBar button{flex:none;border:0;background:var(--rose);color:#fff;border-radius:10px;padding:8px 12px;font-weight:600}
+#pushBar .x{background:none;color:var(--muted);padding:4px 6px}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:12px;font-size:14px}
+.steps li b{font-weight:600}
+.topic{display:flex;gap:6px;align-items:center;margin-top:6px}
+.topic code{flex:1;background:var(--paper);border-radius:8px;padding:8px;font-family:var(--mono);font-size:14px;word-break:break-all}
+.topic .btn{flex:none}
+.ios{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center}
+.ios .ic{width:44px;height:44px;border-radius:12px;background:var(--azul-soft);display:grid;place-items:center;font-size:22px}
+.ios svg{width:24px;height:24px;stroke:var(--azul);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
@@ -306,6 +321,8 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
     </div>
   </section>
 
+  <div class="upd" id="upd" hidden><span>새 버전이 있어요</span><button type="button" id="updBtn">지금 적용</button></div>
+  <div class="inst" id="pushBar"><div style="flex:1"><b>🔔 후기 알림 받기</b><br><span>일정이 끝날 때마다 "후기 남겨주세요" 알림이 와요.</span></div><button type="button" id="pushOpen">설정</button><button type="button" class="x" id="pushX" aria-label="닫기">✕</button></div>
   <div class="inst" id="inst"><div style="flex:1"><b>앱처럼 쓰기</b><br><span id="instTx">홈 화면에 추가하면 아이콘으로 바로 열려요.</span></div><button type="button" id="instBtn">설치</button><button type="button" class="x" id="instX" aria-label="닫기">✕</button></div>
 
   <section id="s-now">
@@ -378,6 +395,7 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
 
   <section id="s-rev">
     <div class="sh"><h2>후기 게시판</h2><small id="revCount"></small></div>
+    <div class="btns" style="margin-top:0"><a class="btn pri" href="book.html">📖 여행 기록물 만들기</a><button type="button" class="btn" id="pushOpen2">🔔 후기 알림 설정</button></div>
     <div class="days" id="revDays" role="tablist"></div>
     <div class="card"><div class="boards" id="boards"></div></div>
   </section>
@@ -438,6 +456,25 @@ label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
   <div class="posts" id="bdPosts"></div>
 </div></div>
 <div class="sheet photo" id="phView" role="dialog" aria-modal="true"><img id="phImg" alt=""><button type="button" class="x" data-close="phView" aria-label="닫기">✕</button></div>
+<div class="sheet" id="iosSheet" role="dialog" aria-modal="true" aria-labelledby="iosT"><div class="sheetin">
+  <div class="sh"><h2 id="iosT">아이폰에서 앱으로 쓰기</h2><button type="button" class="x" data-close="iosSheet" aria-label="닫기">✕</button></div>
+  <div class="steps" id="iosSteps"></div>
+  <p class="s">한 번만 해 두면 홈 화면 아이콘으로 바로 열리고, 주소창 없이 앱처럼 꽉 찬 화면으로 보여요. 새 버전도 자동으로 적용돼요.</p>
+  <div class="trbtns"><button type="button" class="btn" id="iosCopy">링크 복사</button><button type="button" class="btn pri" data-close="iosSheet">알겠어요</button></div>
+</div></div>
+<div class="sheet" id="pushSheet" role="dialog" aria-modal="true" aria-labelledby="pushT"><div class="sheetin">
+  <div class="sh"><h2 id="pushT">🔔 후기 알림 받기</h2><button type="button" class="x" data-close="pushSheet" aria-label="닫기">✕</button></div>
+  <p class="s">앱이 꺼져 있어도 알림이 오도록 무료 알림 앱 'ntfy'를 써요. 한 번만 설정하면 돼요.</p>
+  <ol class="steps">
+    <li><b>ntfy 앱 설치</b><div class="btns" style="margin-top:6px"><a class="btn" target="_blank" rel="noopener" href="https://apps.apple.com/app/ntfy/id1625396347">아이폰 App Store</a><a class="btn" target="_blank" rel="noopener" href="https://play.google.com/store/apps/details?id=io.heckel.ntfy">안드로이드 Play</a></div></li>
+    <li><b>우리 채널 구독</b> · 앱에서 <b>+</b> 를 누르고 아래 이름을 붙여넣기 (서버는 기본값 ntfy.sh 그대로)
+      <div class="topic"><code id="topicName"></code><button type="button" class="btn" id="topicCopy">복사</button></div>
+      <a class="btn" id="topicLink" style="margin-top:6px;display:block">안드로이드: 눌러서 바로 구독</a></li>
+    <li><b>알림 허용</b> · 앱이 알림 권한을 물으면 '허용'</li>
+  </ol>
+  <div class="trbtns"><button type="button" class="btn" id="pushTest">테스트 알림 보내기</button><button type="button" class="btn pri" data-close="pushSheet">완료</button></div>
+  <small class="s" id="pushMsg">일정이 끝나는 시간(조정된 시간 기준)과 매일 밤 22:30에 알림이 와요. 알림을 누르면 그 장소의 후기 게시판이 바로 열려요.</small>
+</div></div>
 <div class="show" id="show" role="dialog" aria-modal="true"><div class="zh" id="shZh"></div><div class="sub" id="shSub"></div><div class="ko" id="shKo"></div><button type="button" id="shX">닫기</button></div>
 
 <script>
@@ -697,15 +734,15 @@ $("#krw").oninput = () => { $("#mop").value = $("#krw").value ? (Math.round($("#
 
 // ---------- shared store ----------
 const FAM0 = { f1: "구씨네", f2: "가족 2", f3: "가족 3" };
-let remote = LS.get("dw-remote", { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {} }), local = LS.get("dw-local", { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {} });
-let state = { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {} }, online = null, pending = LS.get("dw-pending", false), lastSync = 0;
+let remote = LS.get("dw-remote", { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }), local = LS.get("dw-local", { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} });
+let state = { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }, online = null, pending = LS.get("dw-pending", false), lastSync = 0;
 const newer = (a,b) => !a ? b : !b ? a : ((b.at||0) > (a.at||0) ? b : a);
 const mm = (x,y) => { const o = {}; new Set([...Object.keys(x||{}), ...Object.keys(y||{})]).forEach(k => o[k] = newer((x||{})[k], (y||{})[k])); return o; };
-function merge(){ state = { chk: mm(remote.chk, local.chk), exp: mm(remote.exp, local.exp), fam: mm(remote.fam, local.fam), prog: mm(remote.prog, local.prog), mem: mm(remote.mem, local.mem), rev: mm(remote.rev, local.rev) }; }
-function parse(t){ try { let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); return { chk: v.chk || {}, exp: v.exp || {}, fam: v.fam || {}, prog: v.prog || {}, mem: v.mem || {}, rev: v.rev || {} }; } catch(e) { return { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {} }; } }
+function merge(){ state = { chk: mm(remote.chk, local.chk), exp: mm(remote.exp, local.exp), fam: mm(remote.fam, local.fam), prog: mm(remote.prog, local.prog), mem: mm(remote.mem, local.mem), rev: mm(remote.rev, local.rev), nt: mm(remote.nt, local.nt) }; }
+function parse(t){ try { let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); return { chk: v.chk || {}, exp: v.exp || {}, fam: v.fam || {}, prog: v.prog || {}, mem: v.mem || {}, rev: v.rev || {}, nt: v.nt || {} }; } catch(e) { return { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }; } }
 async function pull(){
   try { const r = await fetch(STORE, { cache: "no-store" }); if (!r.ok && r.status !== 404) throw 0;
-    const t = r.status === 404 ? "" : await r.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {} }; LS.set("dw-remote", remote);
+    const t = r.status === 404 ? "" : await r.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }; LS.set("dw-remote", remote);
     online = true; lastSync = Date.now(); merge(); renderAllShared(); }
   catch(e) { online = false; syncText(); }
 }
@@ -714,9 +751,9 @@ async function push(){
   if (pushing) return pushing;
   pushing = (async () => { try {
       const r0 = await fetch(STORE, { cache: "no-store" }); if (!r0.ok && r0.status !== 404) throw 0;
-      const t = r0.status === 404 ? "" : await r0.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {} }; merge();
+      const t = r0.status === 404 ? "" : await r0.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }; merge();
       const r = await fetch(STORE, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ v: 1, ...state }) }); if (!r.ok) throw 0;
-      remote = JSON.parse(JSON.stringify(state)); LS.set("dw-remote", remote); local = { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {} }; LS.set("dw-local", local);
+      remote = JSON.parse(JSON.stringify(state)); LS.set("dw-remote", remote); local = { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }; LS.set("dw-local", local);
       pending = false; LS.set("dw-pending", false); online = true; lastSync = Date.now();
     } catch(e) { online = false; } finally { pushing = null; merge(); renderAllShared(); } })();
   return pushing;
@@ -908,21 +945,90 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
+const APP_VER = "2026.10.14-5";
 let deferredPrompt = null;
+const UA = navigator.userAgent;
+const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\//i.test(UA);
 const isStandalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; showInstall(); });
+const SHARE_SVG = '<svg viewBox="0 0 24 24"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></svg>';
+function iosSteps(){
+  const S = $("#iosSteps"); S.innerHTML = "";
+  const st = [];
+  if (inApp) st.push(["🧭", "지금은 카카오톡 같은 앱 안에서 열려 있어요. 오른쪽 아래(또는 위) <b>⋯</b> → <b>'Safari로 열기'</b>를 먼저 눌러 주세요."]);
+  else if (!/Safari/i.test(UA) || /CriOS|FxiOS|EdgiOS/i.test(UA)) st.push(["🧭", "아이폰은 <b>Safari</b>에서만 홈 화면 앱으로 추가돼요. 링크를 복사해 Safari에 붙여 넣어 주세요."]);
+  st.push([SHARE_SVG, "Safari 아래쪽 가운데 <b>공유 버튼</b>(네모에 위 화살표)을 눌러요."]);
+  st.push(["➕", "메뉴를 아래로 내려 <b>'홈 화면에 추가'</b>를 누르고, 오른쪽 위 <b>'추가'</b>를 눌러요."]);
+  st.push(["🐗", "홈 화면에 생긴 <b>돼지사냥꾼</b> 아이콘으로 열면 앱처럼 써요."]);
+  st.forEach(([ic, tx]) => { const d = el("div","ios"); const i = el("span","ic"); i.innerHTML = ic; const t = el("div"); t.innerHTML = tx; d.append(i, t); S.append(d); });
+}
 function showInstall(){
   if (isStandalone() || LS.get("dw-inst-x", false)) return;
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if (ios) { $("#instTx").textContent = "아이폰: 아래 공유 버튼(□↑) → '홈 화면에 추가'를 누르면 앱처럼 열려요."; $("#instBtn").style.display = "none"; }
-  else if (!deferredPrompt) { $("#instTx").textContent = "크롬 메뉴(⋮) → '앱 설치' 또는 '홈 화면에 추가'를 누르세요."; $("#instBtn").style.display = "none"; }
-  else { $("#instBtn").style.display = ""; }
+  if (isIOS) { $("#instTx").textContent = inApp ? "카카오톡 안에서는 앱 설치가 안 돼요. Safari로 열어 홈 화면에 추가하세요." : "Safari 공유 버튼 → '홈 화면에 추가'로 앱처럼 쓸 수 있어요."; $("#instBtn").textContent = "방법 보기"; $("#instBtn").style.display = ""; }
+  else if (!deferredPrompt) { $("#instTx").textContent = inApp ? "카카오톡 안에서는 설치가 안 돼요. ⋮ → '다른 브라우저로 열기'(크롬) 후 설치하세요." : "크롬 메뉴(⋮) → '앱 설치' 또는 '홈 화면에 추가'를 누르세요."; $("#instBtn").style.display = "none"; }
+  else { $("#instBtn").textContent = "설치"; $("#instBtn").style.display = ""; }
   $("#inst").classList.add("on");
 }
-$("#instBtn").onclick = async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $("#inst").classList.remove("on"); };
+$("#instBtn").onclick = async () => { if (isIOS) { iosSteps(); openSheet("iosSheet"); return; } if (!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; $("#inst").classList.remove("on"); };
 $("#instX").onclick = () => { LS.set("dw-inst-x", true); $("#inst").classList.remove("on"); };
-if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js", { scope: "./" }).catch(() => {});
+$("#iosCopy").onclick = async () => { try { await navigator.clipboard.writeText(location.origin + location.pathname); $("#iosCopy").textContent = "복사됨"; } catch(e) {} };
 setTimeout(showInstall, 2500);
+
+// ---------- auto update ----------
+let swReg = null;
+if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js", { scope: "./" }).then(r => { swReg = r; }).catch(() => {});
+const busyEditing = () => { const a = document.activeElement; return (a && a.matches("textarea, input[type=text], input[type=number]") && a.value) || ($("#bdText") && $("#bdText").value.trim()) || pend.length || recB; };
+function applyUpdate(){ try { sessionStorage.setItem("dw-upd", "1"); } catch(e) {} location.reload(); }
+async function checkVersion(){
+  try { const r = await fetch("version.json?t=" + Date.now(), { cache: "no-store" }); if (!r.ok) return; const j = await r.json();
+    if (j.v && j.v !== APP_VER) { if (swReg) { try { await swReg.update(); } catch(e) {} }
+      if (busyEditing()) $("#upd").hidden = false; else applyUpdate(); } } catch(e) {}
+}
+$("#updBtn").onclick = applyUpdate;
+setInterval(checkVersion, 10 * 60e3);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkVersion(); });
+setTimeout(checkVersion, 4000);
+
+// ---------- push reminders (ntfy) ----------
+const TOPIC = "dwaeji-macau-5807738c37", NTFY = "https://ntfy.sh/";
+const APP_URL = "https://btypenine.github.io/macau/trip/";
+const seqOf = id => "ev-" + id.replace(/[^0-9a-z]/gi, "");
+async function ntfyPub(o){ const r = await fetch(NTFY, { method: "POST", body: JSON.stringify({ topic: TOPIC, ...o }) }); if (!r.ok) throw 0; return r.json(); }
+let remSyncing = false;
+async function syncReminders(){
+  if (remSyncing || online === false) return; remSyncing = true;
+  try {
+    const now = Date.now(), max = now + 3*864e5 - 10*6e4, E = events(); const NT = state.nt || {};
+    for (const e of E) {
+      if (/취침|비행|집결|이동|체크아웃|공항 도착/.test(e.it[1])) continue;
+      const k = e.id, cur = NT[k] || {}, want = e.status === "skip" ? 0 : Math.round(Math.max(e.end, now + 20e3) / 1000);
+      if (e.status === "skip") { if (cur.t && !cur.x) { try { await fetch(NTFY + TOPIC + "/" + seqOf(k), { method: "DELETE" }); } catch(err) {} change("nt", k, { x: 1 }); } continue; }
+      if (e.end < now - 30*6e4 && !cur.t) continue;             // 지난 일정은 새로 보내지 않음
+      if (want * 1000 > max) continue;                            // 3일 넘으면 나중에
+      if (cur.t && (cur.sent || Math.abs(cur.t - want) < 90)) continue;
+      if (cur.t && cur.t * 1000 < now) { change("nt", k, { sent: 1 }); continue; } // 이미 보냈음
+      const place = e.it[1].replace(/^(아침|점심|저녁) · /, "");
+      await ntfyPub({ title: "📝 후기 남겨주세요 · " + place, message: `${place} 어땠나요? 사진 한 장, 한 줄 후기면 충분해요. 나중에 우리 여행책이 돼요!`, tags: ["pig2"], click: APP_URL + "#rev=" + encodeURIComponent(k), delay: String(want), sequence_id: seqOf(k) });
+      change("nt", k, { t: want, x: 0 });
+    }
+    for (const D of DAYS) { const k = "day-" + D.d, t = Math.round(at(D.d, "22:30") / 1000), cur = NT[k] || {};
+      if (t * 1000 < now || t * 1000 > max || cur.t === t) continue;
+      await ntfyPub({ title: "🌙 오늘 하루 어땠나요?", message: `Day ${DAYS.indexOf(D)+1} 마무리! 오늘 제일 좋았던 순간을 후기 게시판에 남겨 주세요.`, tags: ["crescent_moon"], click: APP_URL + "#s-rev", delay: String(t), sequence_id: "day-" + D.d.replace(/-/g, "") });
+      change("nt", k, { t }); }
+  } catch(e) {} finally { remSyncing = false; }
+}
+const showPush = () => { $("#topicName").textContent = TOPIC; $("#topicLink").href = "ntfy://ntfy.sh/" + TOPIC; openSheet("pushSheet"); };
+$("#pushOpen").onclick = showPush; $("#pushOpen2").onclick = showPush;
+$("#pushX").onclick = () => { LS.set("dw-push-x", true); $("#pushBar").classList.remove("on"); };
+if (!LS.get("dw-push-x", false)) $("#pushBar").classList.add("on");
+$("#topicCopy").onclick = async () => { try { await navigator.clipboard.writeText(TOPIC); $("#topicCopy").textContent = "복사됨"; } catch(e) {} };
+$("#pushTest").onclick = async () => { try { await ntfyPub({ title: "🐗 돼지사냥꾼 알림 테스트", message: `${meKey ? memLabel(meKey) + "님, " : ""}알림이 잘 오네요! 일정이 끝나면 후기 알림을 보내 드릴게요.`, tags: ["tada"], click: APP_URL }); $("#pushMsg").textContent = "보냈어요. 몇 초 안에 ntfy 앱으로 알림이 와야 해요."; } catch(e) { $("#pushMsg").textContent = "보내지 못했어요. 인터넷을 확인해 주세요."; } };
+setInterval(syncReminders, 5 * 60e3);
+// deep link: #rev=<event id>
+function openFromHash(){ const h = decodeURIComponent(location.hash || ""); if (h.startsWith("#rev=")) { const id = h.slice(5); if (events().some(e => e.id === id)) { openBoard(id); history.replaceState(null, "", location.pathname); } } }
+window.addEventListener("hashchange", openFromHash);
+
 
 
 // ---------- translate ----------
@@ -1105,7 +1211,7 @@ function renderBoards(){
 // ---------- boot ----------
 merge(); clocks(); renderNow(); renderDays(); renderDay(); renderWx(); renderLedger(); syncText(); liveWx();
 booted = true; renderPpl(); renderBoards(); applyRate(); liveRate(); if (geoOn) startGeo();
-(async () => { await pull(); if (pending) push(); })();
+(async () => { await pull(); if (pending) push(); setTimeout(syncReminders, 3000); openFromHash(); })();
 setInterval(() => { clocks(); renderNow(); renderGo(); }, 30000);
 setInterval(() => { if (document.visibilityState === "visible" && !pushing && !document.activeElement.matches("input")) { pending ? push() : pull(); } }, 8000);
 setInterval(() => { if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); }, 60000);
