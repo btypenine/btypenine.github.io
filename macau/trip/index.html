@@ -764,30 +764,50 @@ $("#krw").oninput = () => { $("#mop").value = $("#krw").value ? (Math.round($("#
 
 // ---------- shared store ----------
 const FAM0 = { f1: "구씨네", f2: "가족 2", f3: "가족 3" };
-let remote = LS.get("dw-remote", { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }), local = LS.get("dw-local", { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} });
-let state = { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }, online = null, pending = LS.get("dw-pending", false), lastSync = 0;
+// ---------- shared store (union-only: data is never dropped; deletes are tombstones) ----------
+const EMPTY = () => ({ chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} });
 const newer = (a,b) => !a ? b : !b ? a : ((b.at||0) > (a.at||0) ? b : a);
 const mm = (x,y) => { const o = {}; new Set([...Object.keys(x||{}), ...Object.keys(y||{})]).forEach(k => o[k] = newer((x||{})[k], (y||{})[k])); return o; };
-function merge(){ state = { chk: mm(remote.chk, local.chk), exp: mm(remote.exp, local.exp), fam: mm(remote.fam, local.fam), prog: mm(remote.prog, local.prog), mem: mm(remote.mem, local.mem), rev: mm(remote.rev, local.rev), nt: mm(remote.nt, local.nt) }; }
-function parse(t){ try { let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); return { chk: v.chk || {}, exp: v.exp || {}, fam: v.fam || {}, prog: v.prog || {}, mem: v.mem || {}, rev: v.rev || {}, nt: v.nt || {} }; } catch(e) { return { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }; } }
+const kindsOf = (...ds) => [...new Set(ds.flatMap(d => Object.keys(d || {}).filter(k => d[k] && typeof d[k] === "object" && !Array.isArray(d[k]))))];
+function mmAll(a, b){ const o = EMPTY(); kindsOf(EMPTY(), a, b).forEach(k => o[k] = mm((a||{})[k], (b||{})[k])); return o; }
+const countAll = d => kindsOf(d).reduce((n, k) => n + Object.keys(d[k]).length, 0);
+let seen = mmAll(LS.get("dw-seen", null), LS.get("dw-remote", null));   // 이 폰이 한 번이라도 본 모든 데이터
+let remote = seen, local = mmAll(EMPTY(), LS.get("dw-local", null));
+let state = EMPTY(), online = null, pending = LS.get("dw-pending", false), lastSync = 0;
+function merge(){ state = mmAll(remote, local); }
+function parse(t){ let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); if (!v || typeof v !== "object") throw new Error("bad doc"); return v; } // 실패하면 throw → 절대 덮어쓰지 않음
+function keepSnap(d){ try { const n = countAll(d), snaps = LS.get("dw-snaps", []); if (!snaps.length || n > snaps[0].n || Date.now() - snaps[0].t > 30*6e4) { snaps.unshift({ t: Date.now(), n, d }); LS.set("dw-snaps", snaps.slice(0, 6)); } } catch(e) {} }
+async function readServer(){
+  const r = await fetch(STORE, { cache: "no-store" });
+  if (r.status === 404) return {};
+  if (!r.ok) throw new Error("read " + r.status);
+  const t = await r.text(); if (!t.trim()) throw new Error("empty");
+  return parse(t);
+}
 async function pull(){
-  try { const r = await fetch(STORE, { cache: "no-store" }); if (!r.ok && r.status !== 404) throw 0;
-    const t = r.status === 404 ? "" : await r.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }; LS.set("dw-remote", remote);
-    online = true; lastSync = Date.now(); merge(); renderAllShared(); }
-  catch(e) { online = false; syncText(); }
+  try { const srv = await readServer();
+    const before = countAll(seen); remote = mmAll(seen, srv); seen = remote; LS.set("dw-seen", seen); LS.set("dw-remote", remote); keepSnap(seen);
+    online = true; lastSync = Date.now(); merge(); renderAllShared();
+    if (countAll(mmAll(EMPTY(), srv)) < countAll(seen)) { pending = true; setTimeout(push, 400); }   // 서버에 빠진 게 있으면 자동 복구
+  } catch(e) { online = false; syncText(); }
 }
 let pushing = null;
 async function push(){
   if (pushing) return pushing;
   pushing = (async () => { try {
-      const r0 = await fetch(STORE, { cache: "no-store" }); if (!r0.ok && r0.status !== 404) throw 0;
-      const t = r0.status === 404 ? "" : await r0.text(); remote = t ? parse(t) : { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }; merge();
-      const r = await fetch(STORE, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ v: 1, ...state }) }); if (!r.ok) throw 0;
-      remote = JSON.parse(JSON.stringify(state)); LS.set("dw-remote", remote); local = { chk: {}, exp: {}, fam: {}, prog: {}, mem: {}, rev: {}, nt: {} }; LS.set("dw-local", local);
+      const srv = await readServer();                       // 읽기 실패 시 여기서 중단 (쓰지 않음)
+      remote = mmAll(seen, srv); seen = remote; merge();
+      const doc = { ...srv, v: 1, ...state, _w: APP_VER_SAFE() };   // 모르는 항목도 그대로 보존
+      const body = JSON.stringify(doc);
+      const r = await fetch(STORE, { method: "POST", headers: { "content-type": "text/plain" }, body }); if (!r.ok) throw 0;
+      try { const slot = new Date(Date.now() + MO*3600e3).getUTCHours(); fetch(STORE + "-bak-" + slot, { method: "POST", headers: { "content-type": "text/plain" }, body }); } catch(e) {}
+      seen = mmAll(seen, state); remote = seen; LS.set("dw-seen", seen); LS.set("dw-remote", remote); keepSnap(seen);
+      local = EMPTY(); LS.set("dw-local", local);
       pending = false; LS.set("dw-pending", false); online = true; lastSync = Date.now();
     } catch(e) { online = false; } finally { pushing = null; merge(); renderAllShared(); } })();
   return pushing;
 }
+function APP_VER_SAFE(){ try { return APP_VER; } catch(e) { return ""; } }
 function change(kind, id, patch){
   const cur = (state[kind] || {})[id] || {}; local[kind] = { ...(local[kind] || {}), [id]: { ...cur, ...patch, at: Date.now() } };
   LS.set("dw-local", local); pending = true; LS.set("dw-pending", true); merge(); renderAllShared(); clearTimeout(change.t); change.t = setTimeout(push, 500);
@@ -975,7 +995,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.14-8";
+const APP_VER = "2026.10.14-9";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);

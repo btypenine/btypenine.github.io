@@ -336,14 +336,16 @@ function syncText(){
   d.className = "syncdot ok"; t.textContent = `공유 중 · 아빠, 엄마 화면에 같이 보여요 (${s < 10 ? "방금" : s < 60 ? s + "초 전" : Math.round(s/60) + "분 전"} 확인)`;
 }
 function parse(txt){
-  try { let v = JSON.parse(txt); if (typeof v === "string") v = JSON.parse(v);
-    if (!v || typeof v !== "object") return { items: {}, custom: {} };
-    return { list: v.list, listVer: v.listVer || 0, items: v.items || {}, custom: v.custom || {} };
-  } catch(e) { return { items: {}, custom: {} }; }
+  let v = JSON.parse(txt); if (typeof v === "string") v = JSON.parse(v);   // 실패하면 throw → 덮어쓰지 않음
+  if (!v || typeof v !== "object") throw new Error("bad doc");
+  return { list: v.list, listVer: v.listVer || 0, items: v.items || {}, custom: v.custom || {} };
 }
 async function pull(){
   try { const r = await fetch(STORE, { cache: "no-store" }); if (!r.ok && r.status !== 404) throw 0;
-    const txt = r.status === 404 ? "" : await r.text(); remote = txt ? parse(txt) : { items: {}, custom: {} };
+    const txt = r.status === 404 ? "" : await r.text(); if (r.status !== 404 && !txt.trim()) throw 0;
+    const srv = txt ? parse(txt) : { items: {}, custom: {} }; const before = remote || { items: {}, custom: {} };
+    remote = { ...srv, items: mergeMap(before.items, srv.items), custom: mergeMap(before.custom, srv.custom) };
+    if (Object.keys(remote.items).length > Object.keys(srv.items).length || Object.keys(remote.custom).length > Object.keys(srv.custom).length) { pending = true; setTimeout(push, 400); }
     LS.set("koo5-remote", remote); online = true; lastSync = Date.now(); merge(); render();
     if (!remote.list || (remote.listVer || 0) < LIST_VER) { pending = true; setTimeout(push, 300); }
     return true; }
@@ -355,7 +357,9 @@ async function push(){
   pushing = (async () => {
     try {
       const r0 = await fetch(STORE, { cache: "no-store" }); if (!r0.ok && r0.status !== 404) throw 0;
-      const txt = r0.status === 404 ? "" : await r0.text(); remote = txt ? parse(txt) : { items: {}, custom: {} }; merge();
+      const txt = r0.status === 404 ? "" : await r0.text(); if (r0.status !== 404 && !txt.trim()) throw 0;
+      const srv = txt ? parse(txt) : { items: {}, custom: {} }; const before = remote || { items: {}, custom: {} };
+      remote = { ...srv, items: mergeMap(before.items, srv.items), custom: mergeMap(before.custom, srv.custom) }; merge();
       const useList = (Array.isArray(remote.list) && (remote.listVer || 0) >= LIST_VER) ? remote.list : BASE;
       const doc = { v: 3, listVer: Math.max(LIST_VER, remote.listVer || 0), list: useList, items: state, custom };
       const r = await fetch(STORE, { method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify(doc) });
