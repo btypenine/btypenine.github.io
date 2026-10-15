@@ -168,6 +168,13 @@ section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 .gmrank .r b{font-family:var(--mono)}
 .gmrank .r small{color:var(--muted);font-size:11px}
 .gmrank h3{font-size:13px;margin:0 0 2px;font-weight:600}
+.gmtot{margin-bottom:8px;display:flex;flex-direction:column;gap:4px}
+.gmtot h3{font-size:14px;margin:0;font-weight:700}
+.gmtot .r{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:6px 8px;border-radius:8px;background:var(--paper)}
+.gmtot .r.top{background:#ffd54a;color:#2b1c18;font-weight:700}
+.gmtot .r.me{outline:2px solid var(--rose-soft)}
+.gmtot small{color:var(--muted);font-size:11px}
+.gmtot .r.top small{color:#5a3c06}
 .big em{font-style:normal;font-size:11px;font-weight:700;color:var(--rose);font-family:var(--mono)}
 .big.up{border-color:var(--rose-soft)}
 .tmore{margin-top:8px}.tmore summary{cursor:pointer;font-size:13px;color:var(--muted);padding:6px 2px}.tmore .grid2{margin-top:6px}
@@ -457,6 +464,7 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
 
   <section id="s-game">
     <div class="sh"><h2 style="white-space:nowrap">🐗 돼지사냥</h2><small id="gmMe"></small></div>
+    <div class="card gm gmtot" id="gmTot"></div>
     <div class="seg gmtabs" role="tablist"><button type="button" id="gtA" aria-pressed="true">🃏 화투 속 돼지찾기</button><button type="button" id="gtB" aria-pressed="false">🧮 돼지 셈왕</button></div>
     <div class="card gm" id="gmA">
       <div class="gmtop"><span>레벨 <b id="gmLv">1</b></span><span>점수 <b id="gmScore">0</b></span><span>내 최고 <b id="gmBest">0</b></span></div>
@@ -473,7 +481,7 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
       <div class="smopts" id="smOpts"></div>
       <div class="gmmsg" id="smMsg">돼지가 사냥꾼에게 잡히기 전에 계산하세요!</div>
       <button type="button" class="btn pri gmgo" id="smGo">셈 사냥 시작</button>
-      <div class="gmhelp">덧셈 → 뺄셈 → 구구단 → 두 자리 → 나눗셈 → 섞어 계산 순으로 점점 어려워져요. 틀리거나 시간이 다 되면 끝 (정답은 알려줘요). 빨리 맞힐수록 점수가 커요. 아이는 쉬운 단계에서, 어른은 끝까지!</div>
+      <div class="gmhelp">4문제마다 한 단계씩 어려워져요. 덧셈·뺄셈 사이사이 곱셈·나눗셈이 섞여 나오고, 구구단 → 두 자리 → 섞어 계산까지 이어져요. 틀리거나 시간이 다 되면 끝 (정답은 알려줘요). 빨리 맞힐수록 점수가 커요. 아이는 쉬운 단계에서, 어른은 끝까지!</div>
       <div class="gmrank" id="smRank"></div>
     </div>
   </section>
@@ -1180,7 +1188,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.15-21";
+const APP_VER = "2026.10.15-22";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1518,6 +1526,24 @@ setInterval(() => { if (!document.activeElement || !document.activeElement.match
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { clocks(); renderNow(); renderGo(); pending ? push() : pull(); liveWx(); liveRate(); } });
 window.addEventListener("online", () => pending ? push() : pull());
 
+// ---------- 미니게임 공통: 점수 시즌 (2026-10-15 두 게임 점수 초기화 → 시즌 2) ----------
+const GM_SS = 2;
+// 보통 어른 점수 추산 (모의실험 중앙값): 화투 돼지찾기 ≈ 350점, 돼지 셈왕 ≈ 600점 → 각각 보통 = 100으로 환산해 합산
+const GM_TYP = { hw: 350, sm: 600 };
+function renderGmTotal(meId){
+  const T = $("#gmTot"); if (!T) return; T.innerHTML = "";
+  const rows = Object.entries(state.gm || {}).filter(([, r]) => r && r.ss === GM_SS && !r.del && (r.hw || r.sm))
+    .map(([id, r]) => { const a = Math.round((r.hw || 0) / GM_TYP.hw * 100), b = Math.round((r.sm || 0) / GM_TYP.sm * 100);
+      return { id, n: r.who ? memLabel(r.who) : "이름 없는 폰", a, b, t: a + b, me: id === meId }; })
+    .sort((x, y) => y.t - x.t).slice(0, 5);
+  T.append(el("h3", null, "👑 돼지사냥꾼 종합 순위"));
+  if (!rows.length) { T.append(el("small", null, "점수가 새로 시작됐어요. 두 게임을 모두 해서 종합 1등에 도전하세요!")); return; }
+  rows.forEach((r, i) => { const d = el("div", "r" + (i === 0 ? " top" : "") + (r.me ? " me" : ""));
+    const nm = el("span", null, `${i === 0 ? "👑 종합 1등" : (i + 1) + "."} ${r.n} `); nm.append(el("small", null, `화투 ${r.a} · 셈왕 ${r.b}`));
+    d.append(nm, el("b", null, r.t + "점")); T.append(d); });
+  T.append(el("small", null, "두 게임의 보통 점수(화투 350 · 셈왕 600)를 각각 100으로 환산해 더한 점수예요. 보통 실력이면 합산 200점."));
+}
+
 // ---------- 미니게임: 돼지사냥 (화투 속 멧돼지 찾기 · 무한 · 점점 어려워짐) ----------
 (function(){
   const box = $("#hw"); if (!box) return;
@@ -1526,7 +1552,7 @@ window.addEventListener("online", () => pending ? push() : pull());
   const BACK = '<svg viewBox="0 0 64 100"><rect x="1" y="1" width="62" height="98" rx="5" fill="#b3122a"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#8e0e22"/><circle cx="32" cy="50" r="13" fill="none" stroke="#e6b3a0" stroke-width="2"/><text x="32" y="55" font-size="13" text-anchor="middle" fill="#f3d6c8" font-family="serif">花</text></svg>';
   const decoy = k => { const [c, e] = FL[k % FL.length]; return `<svg viewBox="0 0 64 100"><rect x="1" y="1" width="62" height="98" rx="5" fill="${c}"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#f3e6c8"/><text x="32" y="58" font-size="28" text-anchor="middle">${e}</text><text x="32" y="86" font-size="11" text-anchor="middle" fill="${c}" font-weight="700">꽝</text></svg>`; };
   const devKey = LS.get("dw-gmdev", "") || (() => { const k = "d" + Math.random().toString(36).slice(2, 8); LS.set("dw-gmdev", k); return k; })();
-  let best = LS.get("dw-hwbest", 0), lv = 1, score = 0, cards = [], slots = [], boarSet = new Set(), found = new Set(), state_ = "idle", t0 = 0, streak = 0;
+  let best = LS.get("dw-hwbest2", 0), lv = 1, score = 0, cards = [], slots = [], boarSet = new Set(), found = new Set(), state_ = "idle", t0 = 0, streak = 0;
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch(e) {} };
   const NS = [4, 6, 6, 8, 9, 9, 12, 12, 12, 15, 16, 16, 20];
@@ -1572,17 +1598,18 @@ window.addEventListener("online", () => pending ? push() : pull());
     }
     state_ = "over"; box.classList.add("wait"); streak = 0; flipAll(true); c.el.classList.add("bad"); buzz([80, 60, 160]);
     cards.forEach(x => { if (boarSet.has(x.k)) x.el.classList.add(found.has(x.k) ? "ok" : "miss"); });
-    const nb = score > best; if (nb) { best = score; LS.set("dw-hwbest", best); $("#gmBest").textContent = best; save(); }
+    const nb = score > best; if (nb) { best = score; LS.set("dw-hwbest2", best); $("#gmBest").textContent = best; save(); }
     msg(nb ? `꽝! 그래도 신기록 ${score}점 🎉 (레벨 ${lv})` : `꽝! 점선 표시가 멧돼지 자리였어요 · ${score}점`);
     $("#gmGo").textContent = "다시 사냥"; $("#gmGo").hidden = false;
   }
   function msg(t){ $("#gmMsg").textContent = t; }
-  function save(){ const id = meKey || devKey; const cur = (state.gm || {})[id] || {}; if ((cur.hw || 0) >= score) return; try { change("gm", id, { hw: score, hl: lv, who: meKey || "" }); } catch(e) {} }
+  function save(){ const id = meKey || devKey; const cur = (state.gm || {})[id] || {}, ok = cur.ss === GM_SS; if (ok && (cur.hw || 0) >= score) return;
+    try { change("gm", id, ok ? { hw: score, hl: lv, who: meKey || "" } : { hw: score, hl: lv, sm: 0, sl: 0, ss: GM_SS, who: meKey || "" }); } catch(e) {} }
   $("#gmGo").onclick = () => { lv = 1; score = 0; streak = 0; $("#gmScore").textContent = 0; $("#gmGo").hidden = true; round(); };
   window.renderGameRank = function(){
     $("#gmBest").textContent = best; $("#gmMe").textContent = meKey ? `${memLabel(meKey)} 기록 중` : "'나'를 고르면 이름으로 기록";
-    const mine = meKey || devKey;
-    const rows = Object.entries(state.gm || {}).filter(([, r]) => r && r.hw && !r.del).map(([id, r]) => ({ id, n: r.who ? memLabel(r.who) : "이름 없는 폰", b: r.hw, l: r.hl || 1, me: id === mine }))
+    const mine = meKey || devKey; try { renderGmTotal(mine); } catch(e) {}
+    const rows = Object.entries(state.gm || {}).filter(([, r]) => r && r.ss === GM_SS && r.hw && !r.del).map(([id, r]) => ({ id, n: r.who ? memLabel(r.who) : "이름 없는 폰", b: r.hw, l: r.hl || 1, me: id === mine }))
       .sort((a, b) => b.b - a.b).slice(0, 10);
     const R = $("#gmRank"); R.innerHTML = ""; if (!rows.length) { R.append(el("small", null, "아직 기록이 없어요. 첫 사냥꾼이 되어 보세요!")); return; }
     R.append(el("h3", null, "🏆 돼지사냥꾼 순위"));
@@ -1603,10 +1630,15 @@ window.addEventListener("online", () => pending ? push() : pull());
   if (!LS.get("dw-rnwiped", false)) { LS.set("dw-rnwiped", true); try { localStorage.removeItem("dw-rnbest"); } catch(e) {}
     setTimeout(() => { try { Object.entries(state.gm || {}).forEach(([id, r]) => { if (r && (r.rn || r.rl)) change("gm", id, { rn: 0, rl: 0 }); }); } catch(e) {} }, 2500); }
   const R = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
-  let best = LS.get("dw-smbest", 0), lv = 1, score = 0, n = 0, ans = 0, limit = 10, tLeft = 0, tick = 0, live = false, qAt = 0;
-  function make(L){
+  let best = LS.get("dw-smbest2", 0), lv = 1, score = 0, n = 0, ans = 0, limit = 10, tLeft = 0, tick = 0, live = false, qAt = 0;
+  function make(L, md){
     const k = Math.min(L, 9) + (L > 9 ? R(0, 2) : 0), big = Math.max(0, L - 9);   // 9단계 넘으면 범위가 계속 커짐
     let q, a, x, y, z;
+    if (md) {                                                                    // 덧셈·뺄셈 단계 사이사이 곱셈·나눗셈
+      const hi = L <= 1 ? 5 : 9;
+      if (Math.random() < .55) { x = R(2, hi); y = R(2, 9); if (L >= 5 && Math.random() < .5) { x = R(11, 19); y = R(2, 5); } q = `${x} × ${y}`; a = x * y; }
+      else { y = R(2, hi); a = R(2, L <= 2 ? 9 : 12); x = a * y; q = `${x} ÷ ${y}`; }
+    } else
     switch (Math.min(k, 9)) {
       case 1: x = R(1, 9); y = R(1, 9); q = `${x} + ${y}`; a = x + y; break;
       case 2: if (Math.random() < .5) { x = R(5, 20); y = R(1, x); q = `${x} − ${y}`; a = x - y; } else { x = R(6, 15); y = R(5, 15); q = `${x} + ${y}`; a = x + y; } break;
@@ -1624,8 +1656,8 @@ window.addEventListener("online", () => pending ? push() : pull());
     return { q, a, opts: [...opts].sort(() => Math.random() - .5) };
   }
   function next(){
-    lv = 1 + Math.floor(n / 5); limit = Math.max(10 - (lv - 1) * 0.55, 3.5) + (lv >= 7 ? 2 : 0) + (lv >= 9 ? 2 : 0);   // 어려운 식은 시간을 조금 더
-    const P = make(lv); ans = P.a; $("#smQ").textContent = P.q + " = ?"; $("#smLv").textContent = lv;
+    lv = 1 + Math.floor(n / 4); limit = Math.max(10 - (lv - 1) * 0.55, 3.5) + (lv >= 7 ? 2 : 0) + (lv >= 9 ? 2 : 0);   // 어려운 식은 시간을 조금 더
+    const P = make(lv, [1, 2, 3, 5].includes(Math.min(lv, 9)) && n % 3 === 2); ans = P.a; $("#smQ").textContent = P.q + " = ?"; $("#smLv").textContent = lv;
     const O = $("#smOpts"); O.innerHTML = ""; P.opts.forEach(v => { const b = el("button", null, String(v)); b.type = "button"; b.onclick = () => choose(v, b); O.append(b); });
     tLeft = limit; qAt = performance.now(); live = true; clearInterval(tick); tick = setInterval(timer, 50); timer();
   }
@@ -1633,19 +1665,20 @@ window.addEventListener("online", () => pending ? push() : pull());
     $("#smTime").style.width = f * 100 + "%"; $("#smPig").style.left = Math.max(f * 100, 4) + "%"; if (tLeft <= 0) finish(null); }
   function choose(v, b){ if (!live) return; if (v === ans) { live = false; clearInterval(tick); b.classList.add("ok"); n++;
       const pts = 10 + lv * 2 + Math.round(Math.max(tLeft, 0) * 2); score += pts; $("#smScore").textContent = score;
-      $("#smMsg").textContent = `정답! +${pts}` + (tLeft > limit * 0.7 ? " ⚡암산왕!" : "") + (n % 5 === 0 ? ` · 🎉 ${lv + 1}단계로!` : "");
-      [...$("#smOpts").children].forEach(x => x.disabled = true); setTimeout(next, n % 5 === 0 ? 900 : 450); }
+      $("#smMsg").textContent = `정답! +${pts}` + (tLeft > limit * 0.7 ? " ⚡암산왕!" : "") + (n % 4 === 0 ? ` · 🎉 ${lv + 1}단계로!` : "");
+      [...$("#smOpts").children].forEach(x => x.disabled = true); setTimeout(next, n % 4 === 0 ? 900 : 450); }
     else finish(b); }
   function finish(b){ live = false; clearInterval(tick); [...$("#smOpts").children].forEach(x => { x.disabled = true; if (+x.textContent === ans) x.classList.add("ok"); }); if (b) b.classList.add("no");
     try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch(e) {}
-    const nb = score > best; if (nb) { best = score; LS.set("dw-smbest", best); save(); }
+    const nb = score > best; if (nb) { best = score; LS.set("dw-smbest2", best); save(); }
     $("#smMsg").textContent = (b ? "앗, 틀렸어요! " : "⏰ 시간 끝! ") + `정답은 ${ans} · ` + (nb ? `🎉 신기록 ${score}점` : `${score}점`);
     $("#smGo").textContent = "다시 도전"; $("#smGo").hidden = false; renderSmRank(); }
-  function save(){ const id = meKey || devKey; const cur = (state.gm || {})[id] || {}; if ((cur.sm || 0) >= score) return; try { change("gm", id, { sm: score, sl: lv, who: meKey || "" }); } catch(e) {} }
+  function save(){ const id = meKey || devKey; const cur = (state.gm || {})[id] || {}, ok = cur.ss === GM_SS; if (ok && (cur.sm || 0) >= score) return;
+    try { change("gm", id, ok ? { sm: score, sl: lv, who: meKey || "" } : { sm: score, sl: lv, hw: 0, hl: 0, ss: GM_SS, who: meKey || "" }); } catch(e) {} }
   $("#smGo").onclick = () => { n = 0; score = 0; $("#smScore").textContent = 0; $("#smMsg").textContent = "집중! 🐗"; $("#smGo").hidden = true; next(); };
   window.renderSmRank = function(){
     $("#smBest").textContent = best; const mine = meKey || devKey;
-    const rs = Object.entries(state.gm || {}).filter(([, r]) => r && r.sm && !r.del).map(([id, r]) => ({ id, n: r.who ? memLabel(r.who) : "이름 없는 폰", b: r.sm, l: r.sl || 1, me: id === mine })).sort((a, b) => b.b - a.b).slice(0, 10);
+    const rs = Object.entries(state.gm || {}).filter(([, r]) => r && r.ss === GM_SS && r.sm && !r.del).map(([id, r]) => ({ id, n: r.who ? memLabel(r.who) : "이름 없는 폰", b: r.sm, l: r.sl || 1, me: id === mine })).sort((a, b) => b.b - a.b).slice(0, 10);
     const Rk = $("#smRank"); Rk.innerHTML = ""; if (!rs.length) { Rk.append(el("small", null, "아직 기록이 없어요. 첫 셈왕이 되어 보세요!")); return; }
     Rk.append(el("h3", null, "🏆 돼지 셈왕 순위"));
     rs.forEach((r, i) => { const d = el("div", "r" + (r.me ? " me" : "")); const nm = el("span", null, `${["🥇","🥈","🥉"][i] || (i + 1) + "."} ${r.n} `); nm.append(el("small", null, `${r.l}단계`)); d.append(nm, el("b", null, r.b + "점")); Rk.append(d); });
