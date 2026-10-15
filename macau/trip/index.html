@@ -133,6 +133,9 @@ section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 .big b{font-weight:600;font-size:14px}
 .big span{font-size:18px;line-height:1.3;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
 .big small{font-size:11px;color:var(--muted)}
+.big em{font-style:normal;font-size:11px;font-weight:700;color:var(--rose);font-family:var(--mono)}
+.big.up{border-color:var(--rose-soft)}
+.tmore{margin-top:8px}.tmore summary{cursor:pointer;font-size:13px;color:var(--muted);padding:6px 2px}.tmore .grid2{margin-top:6px}
 .show{position:fixed;inset:0;z-index:20;background:#fff;color:#111;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:18px}
 .show.on{display:flex}
 .show .zh{font-size:clamp(40px,13vw,84px);font-weight:700;line-height:1.2;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;word-break:break-all}
@@ -383,7 +386,7 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
           <button type="button" id="trCopy" class="btn">복사</button>
         </div>
       </div>
-      <div class="trhist" id="trHist"></div>
+      <div class="trhist" id="trHist" hidden></div>
       <small class="src" id="trSrc">인터넷이 필요해요 · 메뉴판은 구글 렌즈나 파파고 카메라 번역이 편해요</small>
     </div>
   </section>
@@ -423,8 +426,9 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
   </section>
 
   <section id="s-taxi">
-    <div class="sh"><h2>택시 기사님께 보여주기</h2><small>누르면 크게</small></div>
+    <div class="sh"><h2>택시 기사님께 보여주기</h2><small>남은 일정 순서 · 누르면 크게</small></div>
     <div class="grid2" id="taxi"></div>
+    <details class="tmore" id="taxiMore"><summary>다른 장소 보기</summary><div class="grid2" id="taxiRest"></div></details>
     <div class="sh" style="margin-top:6px"><h2>한마디</h2><small>누르면 크게</small></div>
     <div class="grid2" id="say"></div>
     <div class="card"><b style="font-weight:600">송화호수교 예약 때 쓴 음성</b><div class="audio" style="margin-top:8px">
@@ -626,8 +630,14 @@ const TAXI = [
  ["콜로안 빌리지","路環市區","Coloane Village"],
  ["마카오 공항","澳門國際機場","Macau International Airport"],
  ["외항 페리터미널","外港客運碼頭","Outer Harbour Ferry Terminal"],
- ["파리지앵","澳門巴黎人","The Parisian Macao"]
+ ["파리지앵","澳門巴黎人","The Parisian Macao"],
+ ["성 도미니크 성당","玫瑰堂","St. Dominic's Church · 板樟堂前地 (議事亭前地旁)"],
+ ["마이비스트로 (한식당)","星海豪庭 My Bistro","馬濟時總督大馬路 412號 地下 · Av. do Gov. Jaime Silvério Marques 412"],
+ ["로얄 슈퍼마켓 · 산미우","來來超級市場 / 新苗超級市場","羅理基博士大馬路 301號 (保怡中心旁) · Av. Dr. Rodrigo Rodrigues"]
 ];
+const TMAP = {"Macau International Airport":11,"Andaz Macau":0,"Galaxy Macau food court":2,"Grand Resort Deck Galaxy Macau":2,"Wynn Palace SkyCab":4,"City of Dreams Macau":3,"Songhuahu Dumplings City of Dreams Macau":3,"The House of Dancing Water Macau":3,"Coloane Village Macau":10,"신무이 굴국수 마카오":9,"Taipa Village Macau":9,"Artyzen Grand Lapa Macau":1,"Ruins of St. Paul's Macau":8,"Senado Square Macau":7,"Macau Outer Harbour Ferry Terminal":12,"The Venetian Macao food court":5,"The Parisian Macao":13,"Mochi Macau Taipa":9,"Macau 520 Taipa":9,"MAISON Taipa":9,"O-moon Taipa":9,"Lemoncello Gelato Taipa":9,"My Bistro Macau":15,"Royal Supermarket Macau":16};
+// 각 장소의 주소 한 줄 (기사님께 같이 보여줌)
+const TADDR = {1:"友誼大馬路 956-1110號 · Av. da Amizade 956", 7:"新馬路 · Largo do Senado", 8:"大三巴街 · Rua de São Paulo", 11:"氹仔 · 機場大馬路", 12:"外港客運碼頭 · Terminal Marítimo", 5:"路氹金光大道 · Cotai Strip", 13:"路氹金光大道 · Cotai Strip"};
 const SAY = [
  ["감사합니다","唔該","음꺼이 (부탁·감사 둘 다)"],
  ["계산해 주세요","埋單，唔該","마이단, 음꺼이"],
@@ -810,11 +820,28 @@ async function liveWx(){
 }
 
 // ---------- show cards ----------
-function show(zh, sub, ko){ $("#shZh").textContent = zh; $("#shSub").textContent = sub || ""; $("#shKo").textContent = ko || ""; $("#show").classList.add("on"); $("#shX").focus(); }
+function show(zh, sub, ko){ $("#shZh").textContent = zh; $("#shSub").textContent = sub || ""; $("#shSub").style.whiteSpace = "pre-line"; $("#shKo").textContent = ko || ""; $("#show").classList.add("on"); $("#shX").focus(); }
 $("#shX").onclick = () => $("#show").classList.remove("on");
 $("#show").onclick = e => { if (e.target.id === "show") $("#show").classList.remove("on"); };
 document.addEventListener("keydown", e => { if (e.key === "Escape") $("#show").classList.remove("on"); });
-TAXI.forEach(([ko, zh, en]) => { const b = el("button","big"); b.type = "button"; b.append(el("b", null, ko), el("span", null, zh), el("small", null, en)); b.onclick = () => show(zh, en, "여기로 가 주세요 · 唔該去呢度"); $("#taxi").append(b); });
+// 택시 카드: 남은 일정 순서대로 먼저, 나머지는 아래
+function taxiIdx(e){ const out = []; if (/도미니크/.test(e.it[1])) out.push(14); const k = TMAP[e.it[3]]; if (k != null && !(k === 9 && e.D.d === "2026-10-15" && /^[①-⑩]/.test(e.it[1]))) out.push(k); return out; }
+function taxiBtn(k, note){ const [ko, zh, en] = TAXI[k]; const ad = TADDR[k] || ""; const b = el("button","big" + (note ? " up" : "")); b.type = "button";
+  if (note) b.append(el("em", null, note)); b.append(el("b", null, ko), el("span", null, zh), el("small", null, en + (ad && !en.includes(ad) ? " · " + ad : "")));
+  b.onclick = () => show(zh, [en, ad].filter(Boolean).join("\n"), "여기로 가 주세요 · 唔該去呢度"); return b; }
+let taxiKey = "";
+function renderTaxi(){
+  const now = Date.now(), E = events().filter(e => !e.status && e.end > now && e.it[3]);
+  const seen = new Set([1]), up = [[1, "🏨 숙소"]];
+  E.forEach(e => taxiIdx(e).forEach(k => { if (!seen.has(k) && up.length < 12) { seen.add(k); up.push([k, `${e.D.d === moDate() ? "오늘" : e.D.d.slice(5).replace("-","/")} ${hm(e.t)}`]); } }));
+  const key = up.map(x => x.join("")).join("|"); if (key === taxiKey) return; taxiKey = key;
+  const T = $("#taxi"); T.innerHTML = "";
+  up.forEach(([k, n]) => T.append(taxiBtn(k, n)));
+  const rest = TAXI.map((_, k) => k).filter(k => !seen.has(k) && ![0, 9, 10].includes(k) || false);
+  const R = $("#taxiRest"); R.innerHTML = ""; rest.forEach(k => R.append(taxiBtn(k)));
+  $("#taxiMore").hidden = !rest.length;
+}
+setTimeout(() => { try { renderTaxi(); } catch(e) {} }, 0); setInterval(() => { try { renderTaxi(); } catch(e) {} }, 60000);
 SAY.forEach(([ko, zh, rd]) => { const b = el("button","big"); b.type = "button"; b.append(el("b", null, ko), el("span", null, zh), el("small", null, rd)); b.onclick = () => show(zh, rd, ko); $("#say").append(b); });
 
 // ---------- rate calc ----------
@@ -880,7 +907,7 @@ function syncText(){
   else if (pending) { d.className = "dotk wait"; t.textContent = "저장 중…"; }
   else { d.className = "dotk ok"; t.textContent = "다 같이 보는 중"; }
 }
-function renderAllShared(){ renderPpl(); renderBoards(); if (typeof renderFeed === "function" && booted && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("#feed"))) renderFeed(); if ($("#board").classList.contains("on") && !$("#board").contains(document.activeElement)) renderPosts(); renderNow(); if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); if (typeof renderGo === "function" && booted) renderGo(); renderLedger(); syncText(); }
+function renderAllShared(){ renderPpl(); try { renderTaxi(); } catch(e) {} renderBoards(); if (typeof renderFeed === "function" && booted && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("#feed"))) renderFeed(); if ($("#board").classList.contains("on") && !$("#board").contains(document.activeElement)) renderPosts(); renderNow(); if (!document.activeElement || !document.activeElement.matches(".ctlbox input")) renderDay(); if (typeof renderGo === "function" && booted) renderGo(); renderLedger(); syncText(); }
 let booted = false;
 
 // ---------- ledger ----------
@@ -928,12 +955,12 @@ const GEO = {
  "Songhuahu Dumplings City of Dreams Macau":[22.1489,113.5670],"The House of Dancing Water Macau":[22.1492,113.5667],
  "Coloane Village Macau":[22.1181,113.5513],"신무이 굴국수 마카오":[22.1535,113.5570],"Taipa Village Macau":[22.1535,113.5570],
  "Artyzen Grand Lapa Macau":[22.1923,113.5533],"Ruins of St. Paul's Macau":[22.1975,113.5409],"Senado Square Macau":[22.1935,113.5398],
- "My Bistro Macau":[22.1909,113.5520],"Royal Supermarket Macau":[22.1913,113.5411],"Rethink Coffee Macau":[22.1911,113.5527],
+ "My Bistro Macau":[22.19088,113.55199],"Royal Supermarket Macau":[22.19286,113.54727],"Rethink Coffee Macau":[22.1911,113.5527],
  "Macau Outer Harbour Ferry Terminal":[22.1971,113.5590],"The Venetian Macao food court":[22.1480,113.5605],"The Parisian Macao":[22.1437,113.5620],
  "Mochi Macau Taipa":[22.15342,113.55721],"Macau 520 Taipa":[22.15304,113.55768],"MAISON Taipa":[22.15310,113.55686],
  "O-moon Taipa":[22.15262,113.55646],"Lemoncello Gelato Taipa":[22.15223,113.55495]
 };
-const PID = {"Mochi Macau Taipa":"ChIJhZK0PAlwATQROwEI-ehrino","Macau 520 Taipa":"ChIJsR-hstNxATQRxkT_9vvsGBs","MAISON Taipa":"ChIJHby8R_5xATQRT-fYFiclCxs",
+const PID = {"My Bistro Macau":"ChIJMQJ9k757ATQRjEhKJ4QXybc","Royal Supermarket Macau":"ChIJ2Xzqc-h6ATQROF5xlanrZ8c","Mochi Macau Taipa":"ChIJhZK0PAlwATQROwEI-ehrino","Macau 520 Taipa":"ChIJsR-hstNxATQRxkT_9vvsGBs","MAISON Taipa":"ChIJHby8R_5xATQRT-fYFiclCxs",
  "O-moon Taipa":"ChIJB8ulB7dxATQRPg63nlI-2T8","Lemoncello Gelato Taipa":"ChIJEZQQAgxwATQRSOVrrbcL5JQ"};
 // 걸어서 도는 코스: head = 코스 안내 일정, ids = 들르는 순서
 const ROUTES = [{ title: "오늘 오후 타이파 빌리지 5곳", head: "2026-10-15#3", ids: ["2026-10-15#10","2026-10-15#11","2026-10-15#12","2026-10-15#13","2026-10-15#14"] }];
@@ -1048,7 +1075,7 @@ function renderGo(){
   const a1 = el("a","btn pri","길찾기"); a1.href = dirUrl(q, ll, me && ll && dist(me, ll) < 1500 ? "walking" : "driving"); a1.target = "_blank"; a1.rel = "noopener";
   const a2 = el("a","btn","대중교통"); a2.href = dirUrl(q, ll, "transit"); a2.target = "_blank"; a2.rel = "noopener";
   bt.append(a1, a2);
-  const TM = {"Macau International Airport":11,"Andaz Macau":0,"Galaxy Macau food court":2,"Grand Resort Deck Galaxy Macau":2,"Wynn Palace SkyCab":4,"City of Dreams Macau":3,"Songhuahu Dumplings City of Dreams Macau":3,"The House of Dancing Water Macau":3,"Coloane Village Macau":10,"신무이 굴국수 마카오":9,"Taipa Village Macau":9,"Artyzen Grand Lapa Macau":1,"Ruins of St. Paul's Macau":8,"Senado Square Macau":7,"Macau Outer Harbour Ferry Terminal":12,"The Venetian Macao food court":5,"The Parisian Macao":13,"Mochi Macau Taipa":9,"Macau 520 Taipa":9,"MAISON Taipa":9,"O-moon Taipa":9,"Lemoncello Gelato Taipa":9};
+  const TM = TMAP;
   const tx = TAXI[TM[q]];
   if (tx) { const b3 = el("button","btn","택시 카드"); b3.type = "button"; b3.onclick = () => show(tx[1], tx[2], "여기로 가 주세요 · 唔該去呢度"); bt.append(b3); }
   G.append(bt);
@@ -1098,7 +1125,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.15-14";
+const APP_VER = "2026.10.15-15";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1218,7 +1245,7 @@ async function translate(){
   $("#trOut").hidden = false;
   trHist = [{ q, t: res.text, tl }, ...trHist.filter(h => h.q !== q)].slice(0, 6); LS.set("dw-trhist", trHist); renderTrHist();
 }
-function renderTrHist(){
+function renderTrHist(){ return;   // 번역 이력은 화면에서 뺌 (공간 차지)
   const H = $("#trHist"); H.innerHTML = "";
   trHist.forEach(h => { const b = el("button"); b.type = "button"; b.append(el("b", null, h.q), document.createTextNode(h.t));
     b.onclick = () => { $("#trIn").value = h.q; trLast = { q: h.q, text: h.t, tl: h.tl, rom: "" }; $("#trRes").textContent = h.t; $("#trRom").textContent = ""; $("#trOut").hidden = false; }; H.append(b); });
