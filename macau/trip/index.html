@@ -517,7 +517,7 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
       <div class="qzox"><button type="button" id="qzO" class="o" aria-label="맞다 O">O</button><button type="button" id="qzX" class="x" aria-label="틀리다 X">X</button></div>
       <div class="qzfb" id="qzFb" aria-live="polite"></div>
       <button type="button" class="btn pri gmgo" id="qzNext" hidden>다음 문제</button>
-      <div class="gmhelp">우리 여행 일정과 마카오 이야기로 만든 OX퀴즈예요. 한 문제는 한 번만 풀 수 있어요. 정답이면 2점, 10점마다 게임 도전권 1장! 틀려도 해설을 꼭 읽어 보세요.</div>
+      <div class="gmhelp">우리 여행 일정과 마카오 이야기로 만든 OX퀴즈예요. 한 문제는 한 번만 풀 수 있고, 한 시간에 50문제까지 풀 수 있어요(매시 정각 초기화). 정답이면 2점, 10점마다 게임 도전권 1장! 틀려도 해설을 꼭 읽어 보세요.</div>
       <div class="gmrank" id="qzRank"></div>
     </div>
     <div class="card gm" id="gmA" hidden>
@@ -1246,7 +1246,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.16-1";
+const APP_VER = "2026.10.16-2";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1713,6 +1713,7 @@ const QZ = [
  ["q90","마카오","인천에서 마카오까지 비행기로 10시간 넘게 걸린다.",0,"4시간 정도면 가요."]
 ];
 const QZ_PT = 2;                                   // 정답 1개 = 2점 · 10점마다 도전권 1장
+const QZ_HOUR = 50;                                // 퀴즈는 한 시간에 50문제까지 (매시 정각 초기화)
 const TK_HOUR = 10, TK_CAP = 20;                   // 매시 정각 무료 10장 · 최대 2시간치(20장)까지
 const tkId = () => meKey || LS.get("dw-gmdev", "") || (() => { const k = "d" + Math.random().toString(36).slice(2, 8); LS.set("dw-gmdev", k); return k; })();
 const tkRec = () => (state.gm || {})[tkId()] || {};
@@ -1752,24 +1753,32 @@ function renderTk(){
 }
 (function(){
   if (!$("#gmQ")) return;
-  let cur = null, last = "";
+  let cur = null, last = "", answering = false;
   const answered = () => tkRec().qz || {};
   function pickQ(){ const A = answered(), left = QZ.filter(q => !(q[0] in A) && q[0] !== last); return left.length ? left[Math.floor(Math.random() * left.length)] : null; }
+  const qzUsed = () => { const q = tkRec().qh; return q && q.h === hourNow() ? (q.n || 0) : 0; };
+  const qzWait = () => 60 - new Date().getMinutes();
   function head(){ const A = answered(), n = Object.keys(A).length, ok = Object.values(A).filter(v => v === 1).length;
-    $("#qzStat").textContent = `${n} / ${QZ.length}문제 · 정답 ${ok}개 · ${ok * QZ_PT}점`; }
+    $("#qzStat").textContent = `${n} / ${QZ.length}문제 · 정답 ${ok}개 · ${ok * QZ_PT}점 · 이번 시간 ${Math.max(0, QZ_HOUR - qzUsed())}문제 남음`; }
+  function capped(){ if (qzUsed() < QZ_HOUR) return false;
+    $("#qzDay").textContent = "⏳ 잠깐 쉬어요"; $("#qzQ").textContent = `이번 시간에 ${QZ_HOUR}문제를 다 풀었어요. ${qzWait()}분 뒤 정각에 다시 풀 수 있어요. 그동안 후기를 남겨 보세요!`;
+    $("#qzO").disabled = $("#qzX").disabled = true; $("#qzNext").hidden = true; return true; }
   function show(){
-    head(); cur = pickQ(); const F = $("#qzFb"); F.textContent = ""; F.className = "qzfb"; $("#qzNext").hidden = true;
+    head(); const F = $("#qzFb"); F.textContent = ""; F.className = "qzfb"; $("#qzNext").hidden = true;
+    if (capped()) { cur = null; return; } cur = pickQ();
     if (!cur) { $("#qzDay").textContent = "🎉"; $("#qzQ").textContent = "모든 문제를 풀었어요! 이제 여행 박사예요."; $("#qzO").disabled = $("#qzX").disabled = true; return; }
     $("#qzDay").textContent = /^\d/.test(cur[1]) ? `${cur[1]} 일정` : cur[1]; $("#qzQ").textContent = cur[2]; $("#qzO").disabled = $("#qzX").disabled = false;
   }
   function answer(v){
-    if (!cur) return; const id = tkId(), A = { ...answered() }; if (cur[0] in A) { show(); return; }
-    const before = tkEarn().qt, ok = (v === cur[3]); A[cur[0]] = ok ? 1 : 0; change("gm", id, { qz: A });
+    const q = cur; if (!q) return; answering = true;
+    if (!cur) return; const id = tkId(), A = { ...answered() }; if (q[0] in A) { answering = false; show(); return; }
+    if (capped()) { answering = false; cur = null; return; }
+    const before = tkEarn().qt, ok = (v === q[3]); A[q[0]] = ok ? 1 : 0; change("gm", id, { qz: A, qh: { h: hourNow(), n: qzUsed() + 1 } });
     const after = tkEarn().qt; $("#qzO").disabled = $("#qzX").disabled = true;
     const F = $("#qzFb"); F.className = "qzfb " + (ok ? "ok" : "no");
-    F.textContent = (ok ? `⭕ 정답! +${QZ_PT}점` : `❌ 아쉬워요! 정답은 ${cur[3] ? "O" : "X"}`) + (after > before ? " · 🎟️ 도전권 1장 획득!" : "") + `\n${cur[4]}`;
+    F.textContent = (ok ? `⭕ 정답! +${QZ_PT}점` : `❌ 아쉬워요! 정답은 ${q[3] ? "O" : "X"}`) + (after > before ? " · 🎟️ 도전권 1장 획득!" : "") + `\n${q[4]}`;
     try { navigator.vibrate && navigator.vibrate(ok ? 30 : [60, 40, 60]); } catch(e) {}
-    last = cur[0]; $("#qzNext").hidden = false; head(); renderTk(); renderQzRank();
+    answering = false; last = q[0]; $("#qzNext").hidden = false; head(); renderTk(); renderQzRank();
   }
   function renderQzRank(){
     const R = $("#qzRank"); if (!R) return; const mine = tkId();
@@ -1781,7 +1790,7 @@ function renderTk(){
     rows.forEach((x, i) => { const d = el("div", "r" + (x.id === mine ? " me" : "")); d.append(el("span", null, `${["🥇","🥈","🥉"][i] || (i + 1) + "."} ${x.n}`), el("b", null, x.p + "점")); R.append(d); });
   }
   $("#qzO").onclick = () => answer(1); $("#qzX").onclick = () => answer(0); $("#qzNext").onclick = show;
-  window.renderQz = () => { head(); renderQzRank(); renderTk(); if (!cur) show(); };
+  window.renderQz = () => { head(); renderQzRank(); renderTk(); if (!answering && (!cur || (qzUsed() >= QZ_HOUR && $("#qzNext").hidden))) show(); };
   show(); renderQzRank(); renderTk();
   setInterval(() => { if (document.visibilityState === "visible") renderTk(); }, 30000);
 })();
