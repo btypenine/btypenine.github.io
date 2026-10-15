@@ -1180,7 +1180,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.15-20";
+const APP_VER = "2026.10.15-21";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1532,7 +1532,7 @@ window.addEventListener("online", () => pending ? push() : pull());
   const NS = [4, 6, 6, 8, 9, 9, 12, 12, 12, 15, 16, 16, 20];
   const cfg = L => { const n = NS[Math.min(L, NS.length) - 1];                     // 패 수: 4장 → 20장
     const boars = L < 4 ? 1 : L < 8 ? 2 : L < 13 ? 3 : Math.min(4 + Math.floor((L - 13) / 3), 7);  // 숨은 멧돼지 수
-    const peek = Math.max(1900 - (L - 1) * 110, 500) + (boars - 1) * 450;           // 보여 주는 시간(ms)
+    const peek = Math.max(950 - (L - 1) * 55, 250) + (boars - 1) * 225;             // 보여 주는 시간(ms) · 기존의 절반
     return { n, boars, peek }; };
   const colsFor = n => n <= 4 ? n : n <= 6 ? 3 : n <= 8 ? 4 : n === 9 ? 3 : n <= 12 ? 4 : n <= 15 ? 5 : n === 16 ? 4 : 5;
   function layout(n){
