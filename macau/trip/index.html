@@ -161,7 +161,9 @@ section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 .hw.wait .hwc{cursor:default}
 .pfrow{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:6px;min-height:150px;padding:10px;border-radius:14px;background:radial-gradient(ellipse at center,#2f6b3f 0%,#1f4a2c 100%)}
 .pfc{width:calc((100% - 6px * 6) / 7);max-width:52px;aspect-ratio:.72;border-radius:8px;display:grid;place-items:center;font-size:clamp(20px,6vw,30px);background:var(--bg,#f3e6c8);border:3px solid var(--bd,#b3122a);box-shadow:0 3px 8px rgba(0,0,0,.35);position:relative;animation:pfin .25s ease}
-.pfc.dn{background:#8e0e22;border-color:#5e0716;color:transparent}
+.pfc.dn{background:#8e0e22;border-color:#5e0716}
+.pfc b{font-weight:400}
+.pfc.dn b{visibility:hidden}
 .pfc.dn::after{content:"🐾";position:absolute;font-size:.6em;opacity:.5;color:#fff}
 .pfc.ok{border-color:#ffd54a;box-shadow:0 0 0 2px #ffd54a}
 .pfc.bad{border-color:#e33;animation:hwshake .4s}
@@ -488,7 +490,7 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
       <div class="gmmsg" id="gmMsg">동물 친구들이 나오는 순서를 기억하세요!</div>
       <div class="pfbtns" id="pfBtns"></div>
       <button type="button" class="btn pri gmgo" id="gmGo">돼지친구들 시작</button>
-      <div class="gmhelp">동물 카드가 한 장씩 차례로 나와요. 마지막 카드가 나오고 0.6초 뒤 모두 뒤집혀요. 그다음 아래 동물 버튼을 처음 나온 순서대로 시간 안에 누르세요. 같은 동물이 여러 번 나올 수 있고, 돼지는 꼭 한 번 이상 나와요. 카드는 레벨과 상관없이 늘 같은 속도(0.75초 간격)로 나와요. 레벨이 오를수록 카드가 늘고 동물 종류가 많아져요. 한 번 틀리거나 시간이 끝나면 끝!</div>
+      <div class="gmhelp">동물 카드가 한 장씩 차례로 나와요. 마지막 카드가 나오고 0.6초 뒤 모두 뒤집혀요. 그다음 아래 동물 버튼을 처음 나온 순서대로 시간 안에 누르세요. 같은 동물이 여러 번 나올 수 있고, 돼지는 꼭 한 번 이상 나와요. 같은 카드 수에서 느리게(1초) → 보통(0.75초) → 빠르게(0.5초) 3단계를 깨면 카드가 1장 늘어나요. 카드가 늘면 동물 종류도 천천히 많아져요. 한 번 틀리거나 시간이 끝나면 끝!</div>
       <div class="gmrank" id="gmRank"></div>
     </div>
     <div class="card gm" id="gmB" hidden>
@@ -1205,7 +1207,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.15-25";
+const APP_VER = "2026.10.15-26";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1545,8 +1547,8 @@ window.addEventListener("online", () => pending ? push() : pull());
 
 // ---------- 미니게임 공통: 점수 시즌 (2026-10-15 두 게임 점수 초기화 → 시즌 2) ----------
 const GM_SS = 2;
-// 보통 어른 점수 추산 (모의실험 중앙값): 돼지친구들 ≈ 400점, 돼지 셈왕 ≈ 600점 → 각각 보통 = 100으로 환산해 합산
-const GM_TYP = { pf: 400, sm: 600 };
+// 보통 어른 점수 추산 (모의실험 중앙값): 돼지친구들 ≈ 1,200점 (3단계 속도 방식), 돼지 셈왕 ≈ 600점 → 각각 보통 = 100으로 환산해 합산
+const GM_TYP = { pf: 1200, sm: 600 };
 function renderGmTotal(meId){
   const T = $("#gmTot"); if (!T) return; T.innerHTML = "";
   const rows = Object.entries(state.gm || {}).filter(([, r]) => r && r.ss === GM_SS && !r.del && (r.pf || r.sm))
@@ -1558,7 +1560,7 @@ function renderGmTotal(meId){
   rows.forEach((r, i) => { const d = el("div", "r" + (i === 0 ? " top" : "") + (r.me ? " me" : ""));
     const nm = el("span", null, `${i === 0 ? "👑 종합 1등" : (i + 1) + "."} ${r.n} `); nm.append(el("small", null, `돼지친구들 ${r.a} · 셈왕 ${r.b}`));
     d.append(nm, el("b", null, r.t + "점")); T.append(d); });
-  T.append(el("small", null, "두 게임의 보통 점수(돼지친구들 400 · 셈왕 600)를 각각 100으로 환산해 더한 점수예요. 보통 실력이면 합산 200점."));
+  T.append(el("small", null, "두 게임의 보통 점수(돼지친구들 1,200 · 셈왕 600)를 각각 100으로 환산해 더한 점수예요. 보통 실력이면 합산 200점."));
 }
 
 // ---------- 미니게임: 돼지친구들 (동물 카드 순서 기억 · 무한 · 점점 어려워짐) ----------
@@ -1573,11 +1575,12 @@ function renderGmTotal(meId){
   let best = LS.get("dw-pfbest", 0), lv = 1, score = 0, seq = [], cards = [], pos = 0, state_ = "idle", limit = 0, t0 = 0, tick = 0, run = 0;
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch(e) {} };
-  const cfg = L => ({ n: Math.min(L + 2, 14),                                          // 카드 수: 3장 → 14장
-    kinds: Math.min(4 + Math.floor((L - 1) / 2), ZOO.length),                          // 동물 종류: 4 → 10
-    deal: 750,                                                                         // 한 장씩 나오는 간격(ms) · 모든 레벨 동일
-    show: 600 });                                                                      // 마지막 카드 공개 후 0.6초
-  const timeFor = (L, n) => Math.max(n * 1.1 + 2 - (L - 1) * 0.12, n * 0.7 + 1.5);     // 누르는 제한 시간(초)
+  const SPD = [1000, 750, 500];                                                        // 노출 시간 3단계: 느림 → 보통 → 빠름
+  const cfg = L => { const n = Math.min(3 + Math.floor((L - 1) / 3), 14), t = (L - 1) % 3;   // 3레벨마다 카드 1장 추가
+    return { n, t, kinds: Math.min(4 + Math.floor((n - 3) / 2), ZOO.length),           // 동물 종류: 4 → 10 (카드 수 따라 천천히)
+      deal: SPD[t],                                                                    // 한 장씩 나오는 간격(ms)
+      show: 600 }; };                                                                  // 마지막 카드 공개 후 0.6초
+  const timeFor = (L, n) => n * 1.1 + 2;                                              // 누르는 제한 시간(초): 카드 수에만 비례
   function makeSeq(C){
     const pool = ZOO.slice(0, C.kinds), q = Array.from({ length: C.n }, () => pool[Math.floor(Math.random() * pool.length)]);
     if (!q.includes("🐷")) q[Math.floor(Math.random() * C.n)] = "🐷";                 // 돼지는 꼭 등장
@@ -1592,8 +1595,8 @@ function renderGmTotal(meId){
   async function round(){
     const my = ++run; state_ = "show"; const C = cfg(lv), S = makeSeq(C); seq = S.q; pos = 0; box.innerHTML = ""; cards = []; bar(1);
     $("#gmLv").textContent = lv; buttons(S.pool); setBtns(false);
-    msg(`레벨 ${lv} · 카드 ${C.n}장 · 순서를 기억하세요! 👀`);
-    for (let k = 0; k < C.n; k++) { if (my !== run) return; const c = tint(el("div", "pfc"), seq[k]); c.innerHTML = `<i>${k + 1}</i>${seq[k]}`; box.append(c); cards.push(c); await wait(C.deal); }
+    msg(`레벨 ${lv} · 카드 ${C.n}장 · ${["느리게 🐢", "보통 🐷", "빠르게 ⚡"][C.t]} · 순서를 기억하세요!`);
+    for (let k = 0; k < C.n; k++) { if (my !== run) return; const c = tint(el("div", "pfc"), seq[k]); c.innerHTML = `<i>${k + 1}</i><b>${seq[k]}</b>`; box.append(c); cards.push(c); await wait(C.deal); }
     await wait(C.show); if (my !== run) return;
     cards.forEach(c => c.classList.add("dn"));
     state_ = "pick"; setBtns(true); limit = timeFor(lv, C.n); t0 = performance.now(); clearInterval(tick); tick = setInterval(timer, 50);
@@ -1622,7 +1625,22 @@ function renderGmTotal(meId){
     try { change("gm", id, ok ? { pf: score, pl: lv, who: meKey || "" } : { pf: score, pl: lv, sm: 0, sl: 0, ss: GM_SS, who: meKey || "" }); } catch(e) {} }
   $("#gmGo").onclick = () => { lv = 1; score = 0; $("#gmScore").textContent = 0; $("#gmGo").hidden = true; round(); };
   document.addEventListener("visibilitychange", () => { if (document.hidden && (state_ === "pick" || state_ === "show")) over(null); });
+  // 아이폰에서 뒤집힌 카드 그림이 보이던 문제로 생긴 기록 초기화 (요청: 몬치치)
+  const PF_RESET = { at: Date.parse("2026-10-15T15:40:00Z"), names: ["몬치치"] };
+  function pfReset(){ try {
+    const mine = meKey || devKey, isName = nm => PF_RESET.names.some(x => nm.replace(/\s/g, "").includes(x));
+    const myRec = (state.gm || {})[mine];
+    if (!LS.get("dw-pfreset1", false) && ((meKey && isName(memLabel(meKey))) || (myRec && myRec.who && isName(memLabel(myRec.who)))) && Date.now() < PF_RESET.at + 864e5) {
+      LS.set("dw-pfreset1", true); best = 0; LS.set("dw-pfbest", 0); }
+    Object.entries(state.gm || {}).forEach(([id, r]) => {
+      if (!r || !r.pf || (r.at || 0) >= PF_RESET.at) return;
+      const nm = (r.who ? memLabel(r.who) : "").replace(/\s/g, "");
+      if (!PF_RESET.names.some(x => nm.includes(x))) return;
+      change("gm", id, { pf: 0, pl: 0 });
+    });
+  } catch(e) {} }
   window.renderGameRank = function(){
+    if (!pfReset.busy) { pfReset.busy = true; setTimeout(() => { pfReset(); pfReset.busy = false; }, 0); }
     $("#gmBest").textContent = best; $("#gmMe").textContent = meKey ? `${memLabel(meKey)} 기록 중` : "'나'를 고르면 이름으로 기록";
     const mine = meKey || devKey; try { renderGmTotal(mine); } catch(e) {}
     const rows = Object.entries(state.gm || {}).filter(([, r]) => r && r.ss === GM_SS && r.pf && !r.del).map(([id, r]) => ({ id, n: r.who ? memLabel(r.who) : "이름 없는 폰", b: r.pf, l: r.pl || 1, me: id === mine }))
