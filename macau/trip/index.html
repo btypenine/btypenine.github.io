@@ -160,8 +160,8 @@ section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 @keyframes hwshake{25%{margin-left:-6px}75%{margin-left:6px}}
 .hw.wait .hwc{cursor:default}
 .pfrow{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:6px;min-height:150px;padding:10px;border-radius:14px;background:radial-gradient(ellipse at center,#2f6b3f 0%,#1f4a2c 100%)}
-.pfc{width:calc((100% - 6px * 6) / 7);max-width:52px;aspect-ratio:.72;border-radius:8px;display:grid;place-items:center;font-size:clamp(20px,6vw,30px);background:#f3e6c8;border:3px solid #b3122a;box-shadow:0 3px 8px rgba(0,0,0,.35);position:relative;animation:pfin .25s ease}
-.pfc.dn{background:#8e0e22;color:transparent}
+.pfc{width:calc((100% - 6px * 6) / 7);max-width:52px;aspect-ratio:.72;border-radius:8px;display:grid;place-items:center;font-size:clamp(20px,6vw,30px);background:var(--bg,#f3e6c8);border:3px solid var(--bd,#b3122a);box-shadow:0 3px 8px rgba(0,0,0,.35);position:relative;animation:pfin .25s ease}
+.pfc.dn{background:#8e0e22;border-color:#5e0716;color:transparent}
 .pfc.dn::after{content:"🐾";position:absolute;font-size:.6em;opacity:.5;color:#fff}
 .pfc.ok{border-color:#ffd54a;box-shadow:0 0 0 2px #ffd54a}
 .pfc.bad{border-color:#e33;animation:hwshake .4s}
@@ -170,7 +170,7 @@ section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 .pfc.dn i{color:#f3d6c8}
 @keyframes pfin{from{transform:translateY(-14px) scale(.7);opacity:0}}
 .pfbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));gap:6px;margin:4px 0 8px}
-.pfbtns button{font-size:30px;padding:8px 0;border-radius:12px;border:1px solid var(--line);background:var(--card);touch-action:manipulation}
+.pfbtns button{font-size:30px;padding:8px 0;border-radius:12px;border:2px solid var(--bd,var(--line));background:var(--bg,var(--card));touch-action:manipulation}
 .pfbtns button:disabled{opacity:.4}
 .pfbtns button:active{transform:scale(.93)}
 .gmmsg{text-align:center;font-weight:600;margin:10px 0 6px;min-height:22px}
@@ -1205,7 +1205,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.15-23";
+const APP_VER = "2026.10.15-24";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1564,7 +1564,11 @@ function renderGmTotal(meId){
 // ---------- 미니게임: 돼지친구들 (동물 카드 순서 기억 · 무한 · 점점 어려워짐) ----------
 (function(){
   const box = $("#hw"); if (!box) return;
-  const ZOO = ["🐷", "🐶", "🐱", "🐰", "🐮", "🐔", "🐸", "🐵", "🐼", "🐯"];
+  // 모양과 바탕색이 서로 확 다른 동물로 (앞쪽 4종부터 등장)
+  const ZOO = ["🐷", "🐘", "🦒", "🐢", "🦀", "🐧", "🐙", "🦋", "🐝", "🐌"];
+  const TINT = { "🐷": ["#ffc6da", "#e0457b"], "🐘": ["#d3d8e2", "#6b7385"], "🦒": ["#ffe28a", "#d39a00"], "🐢": ["#bfeab8", "#2f8f3a"], "🦀": ["#ffbfb0", "#d23a1e"],
+    "🐧": ["#bcd3ff", "#2b55c7"], "🐙": ["#e2c8fb", "#8a3fd1"], "🦋": ["#b6eef4", "#0f97a8"], "🐝": ["#ffd2a0", "#e07800"], "🐌": ["#e3cfba", "#8a5a2b"] };
+  const tint = (e, a) => { const [bg, bd] = TINT[a] || ["#f3e6c8", "#b3122a"]; e.style.setProperty("--bg", bg); e.style.setProperty("--bd", bd); return e; };
   const devKey = LS.get("dw-gmdev", "") || (() => { const k = "d" + Math.random().toString(36).slice(2, 8); LS.set("dw-gmdev", k); return k; })();
   let best = LS.get("dw-pfbest", 0), lv = 1, score = 0, seq = [], cards = [], pos = 0, state_ = "idle", limit = 0, t0 = 0, tick = 0, run = 0;
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -1581,7 +1585,7 @@ function renderGmTotal(meId){
   }
   function buttons(pool){
     const B = $("#pfBtns"); B.innerHTML = "";
-    pool.forEach(a => { const b = el("button", null, a); b.type = "button"; b.disabled = true; b.setAttribute("aria-label", a); b.onclick = () => press(a); B.append(b); });
+    pool.forEach(a => { const b = tint(el("button", null, a), a); b.type = "button"; b.disabled = true; b.setAttribute("aria-label", a); b.onclick = () => press(a); B.append(b); });
   }
   const setBtns = on => [...$("#pfBtns").children].forEach(b => b.disabled = !on);
   function bar(f){ $("#pfTime").style.width = Math.max(f, 0) * 100 + "%"; $("#pfPig").style.left = Math.max(f * 100, 4) + "%"; }
@@ -1589,7 +1593,7 @@ function renderGmTotal(meId){
     const my = ++run; state_ = "show"; const C = cfg(lv), S = makeSeq(C); seq = S.q; pos = 0; box.innerHTML = ""; cards = []; bar(1);
     $("#gmLv").textContent = lv; buttons(S.pool); setBtns(false);
     msg(`레벨 ${lv} · 카드 ${C.n}장 · 순서를 기억하세요! 👀`);
-    for (let k = 0; k < C.n; k++) { if (my !== run) return; const c = el("div", "pfc"); c.innerHTML = `<i>${k + 1}</i>${seq[k]}`; box.append(c); cards.push(c); await wait(C.deal); }
+    for (let k = 0; k < C.n; k++) { if (my !== run) return; const c = tint(el("div", "pfc"), seq[k]); c.innerHTML = `<i>${k + 1}</i>${seq[k]}`; box.append(c); cards.push(c); await wait(C.deal); }
     await wait(C.show); if (my !== run) return;
     cards.forEach(c => c.classList.add("dn"));
     state_ = "pick"; setBtns(true); limit = timeFor(lv, C.n); t0 = performance.now(); clearInterval(tick); tick = setInterval(timer, 50);
