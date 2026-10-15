@@ -134,14 +134,27 @@ section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 .big span{font-size:18px;line-height:1.3;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
 .big small{font-size:11px;color:var(--muted)}
 .gm{padding:10px}
-.gmtop{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
-.gmtop b{font-family:var(--mono);color:var(--ink);font-size:16px}
-#gmCv{display:block;width:100%;height:230px;border-radius:12px;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:pointer}
-.gmhelp{font-size:11px;color:var(--muted);margin-top:6px;text-align:center}
+.gmtop{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:8px}
+.gmtop b{font-family:var(--mono);color:var(--ink);font-size:17px}
+.hw{position:relative;height:240px;border-radius:14px;background:radial-gradient(ellipse at center,#2f6b3f 0%,#1f4a2c 100%);overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.hwc{position:absolute;left:0;top:0;border-radius:6px;box-shadow:0 3px 8px rgba(0,0,0,.35);transition-property:transform;transition-timing-function:cubic-bezier(.5,0,.3,1);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hwc svg{display:block;width:100%;height:100%}
+.hwc .bk,.hwc .fr{position:absolute;inset:0}
+.hwc .fr{display:none}.hwc.up .fr{display:block}.hwc.up .bk{display:none}
+.hwc.flip{animation:hwflip .22s ease}
+@keyframes hwflip{50%{filter:brightness(1.6)}}
+.hwc.ok{outline:3px solid #ffd54a;outline-offset:2px}
+.hwc.bad{animation:hwshake .4s}
+@keyframes hwshake{25%{margin-left:-6px}75%{margin-left:6px}}
+.hw.wait .hwc{cursor:default}
+.gmmsg{text-align:center;font-weight:600;margin:10px 0 6px;min-height:22px}
+.gmgo{display:block;width:100%}
+.gmhelp{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
 .gmrank{margin-top:10px;display:flex;flex-direction:column;gap:4px}
-.gmrank .r{display:flex;justify-content:space-between;font-size:13px;padding:5px 8px;border-radius:8px;background:var(--paper)}
+.gmrank .r{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:6px 8px;border-radius:8px;background:var(--paper)}
 .gmrank .r.me{outline:2px solid var(--rose-soft)}
 .gmrank .r b{font-family:var(--mono)}
+.gmrank .r small{color:var(--muted);font-size:11px}
 .gmrank h3{font-size:13px;margin:0 0 2px;font-weight:600}
 .big em{font-style:normal;font-size:11px;font-weight:700;color:var(--rose);font-family:var(--mono)}
 .big.up{border-color:var(--rose-soft)}
@@ -369,7 +382,7 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
 
   <nav class="bar" aria-label="바로가기">
     <div class="navs" id="navs">
-      <a href="#s-tr" style="--h:208"><i>🌐</i>번역</a><a href="#s-now" style="--h:350"><i>⏱️</i>지금</a><a href="#s-go" style="--h:160"><i>🧭</i>길추천</a><a href="#s-plan" style="--h:222"><i>🗓️</i>일정</a><a href="#s-rev" style="--h:330"><i>💬</i>후기</a><a href="#s-game" style="--h:195"><i>🎮</i>게임</a><a href="#s-taxi" style="--h:40"><i>🚕</i>택시말</a><a href="#s-money" style="--h:140"><i>💱</i>환율물가</a><a href="#s-ledger" style="--h:265"><i>🧾</i>장부</a><a href="#s-info" style="--h:28"><i>📌</i>알아둘것</a><a href="#s-sos" style="--h:0"><i>🆘</i>긴급·설정</a>
+      <a href="#s-tr" style="--h:208"><i>🌐</i>번역</a><a href="#s-now" style="--h:350"><i>⏱️</i>지금</a><a href="#s-go" style="--h:160"><i>🧭</i>길추천</a><a href="#s-plan" style="--h:222"><i>🗓️</i>일정</a><a href="#s-rev" style="--h:330"><i>💬</i>후기</a><a href="#s-game" style="--h:195"><i>🐗</i>돼지사냥</a><a href="#s-taxi" style="--h:40"><i>🚕</i>택시말</a><a href="#s-money" style="--h:140"><i>💱</i>환율물가</a><a href="#s-ledger" style="--h:265"><i>🧾</i>장부</a><a href="#s-info" style="--h:28"><i>📌</i>알아둘것</a><a href="#s-sos" style="--h:0"><i>🆘</i>긴급·설정</a>
     </div>
     <button type="button" class="refresh" id="refresh" aria-label="새로고침"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg><span>새로고침</span></button>
   </nav>
@@ -431,11 +444,13 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
   </section>
 
   <section id="s-game">
-    <div class="sh"><h2>돼지 점프</h2><small id="gmMe"></small></div>
+    <div class="sh"><h2 style="white-space:nowrap">🐗 돼지사냥</h2><small id="gmMe"></small></div>
     <div class="card gm">
-      <div class="gmtop"><span>점수 <b id="gmScore">0</b></span><span>레벨 <b id="gmLv">1</b></span><span>내 최고 <b id="gmBest">0</b></span></div>
-      <canvas id="gmCv" aria-label="돼지 점프 게임 · 화면을 누르면 점프"></canvas>
-      <div class="gmhelp">화면을 누르면 점프 · 꾹 누르면 높이 점프 · 🥧 먹으면 +10 · 갈수록 빨라져요</div>
+      <div class="gmtop"><span>레벨 <b id="gmLv">1</b></span><span>점수 <b id="gmScore">0</b></span><span>내 최고 <b id="gmBest">0</b></span></div>
+      <div class="hw" id="hw" aria-live="polite"></div>
+      <div class="gmmsg" id="gmMsg">화투 속에 숨은 멧돼지를 잡아라!</div>
+      <button type="button" class="btn pri gmgo" id="gmGo">사냥 시작</button>
+      <div class="gmhelp">멧돼지 패(7월 홍싸리)를 잘 보고, 패가 섞이면 끝까지 눈으로 쫓아가 누르세요. 레벨이 오를수록 패가 늘고 더 빨리, 더 많이 섞여요. 빨리 잡을수록 보너스!</div>
       <div class="gmrank" id="gmRank"></div>
     </div>
   </section>
@@ -1142,7 +1157,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.15-16";
+const APP_VER = "2026.10.15-17";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1480,82 +1495,83 @@ setInterval(() => { if (!document.activeElement || !document.activeElement.match
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { clocks(); renderNow(); renderGo(); pending ? push() : pull(); liveWx(); liveRate(); } });
 window.addEventListener("online", () => pending ? push() : pull());
 
-// ---------- 미니게임: 돼지 점프 (무한 · 점점 빨라짐) ----------
+// ---------- 미니게임: 돼지사냥 (화투 속 멧돼지 찾기 · 무한 · 점점 어려워짐) ----------
 (function(){
-  const cv = $("#gmCv"); if (!cv) return; const cx = cv.getContext("2d");
+  const box = $("#hw"); if (!box) return;
+  const BOARF = '<svg viewBox="0 0 64 100"><rect x="1" y="1" width="62" height="98" rx="5" fill="#b3122a"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#f3e6c8"/><g stroke="#b3122a" stroke-width="2.4" fill="none"><path d="M40 12 l8 -3 M44 18 l9 -2 M36 22 l7 -5"/></g><path d="M12 70 C12 58 22 50 34 50 C44 50 52 56 54 64 L58 66 L54 70 C52 78 44 82 34 82 C22 82 12 78 12 70Z" fill="#2b1c18"/><circle cx="48" cy="62" r="1.6" fill="#f3e6c8"/><path d="M53 69 l5 3" stroke="#f3e6c8" stroke-width="1.6"/><path d="M18 82 v6 M28 82 v7 M40 82 v7 M48 80 v7" stroke="#2b1c18" stroke-width="3"/></svg>';
+  const FL = [["#d94a6a","🌸"],["#7a4fb0","🪻"],["#e0892c","🍁"],["#c03b2b","🌺"],["#3c7d4a","🌿"],["#c9a227","🌕"],["#8b5a2b","🍂"],["#d36aa0","🌷"],["#2f6fa8","🌧️"]];
+  const BACK = '<svg viewBox="0 0 64 100"><rect x="1" y="1" width="62" height="98" rx="5" fill="#b3122a"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#8e0e22"/><circle cx="32" cy="50" r="13" fill="none" stroke="#e6b3a0" stroke-width="2"/><text x="32" y="55" font-size="13" text-anchor="middle" fill="#f3d6c8" font-family="serif">花</text></svg>';
+  const decoy = k => { const [c, e] = FL[k % FL.length]; return `<svg viewBox="0 0 64 100"><rect x="1" y="1" width="62" height="98" rx="5" fill="${c}"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#f3e6c8"/><text x="32" y="58" font-size="28" text-anchor="middle">${e}</text><text x="32" y="86" font-size="11" text-anchor="middle" fill="${c}" font-weight="700">꽝</text></svg>`; };
   const devKey = LS.get("dw-gmdev", "") || (() => { const k = "d" + Math.random().toString(36).slice(2, 8); LS.set("dw-gmdev", k); return k; })();
-  let W = 0, H = 230, dpr = 1, run = false, over = false, raf = 0, last = 0;
-  let pig, obs, items, score, t, speed, nextGap, best = LS.get("dw-gmbest", 0), holdT = 0, holding = false, clouds;
-  const G = 2400, JV = -760, GROUND = () => H - 34;
-  function size(){ dpr = Math.min(window.devicePixelRatio || 1, 2); W = cv.clientWidth || 340; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); if (!run) draw(); }
-  function reset(){ pig = { x: 54, y: GROUND(), vy: 0, on: true }; obs = []; items = []; score = 0; t = 0; speed = 300; nextGap = 420; over = false;
-    clouds = [0,1,2].map(i => ({ x: i * 140 + 40, y: 30 + i * 18 })); }
-  const level = () => 1 + Math.floor(score / 150);
-  function spawn(){
-    const lv = level(), r = Math.random();
-    if (lv >= 4 && r < Math.min(0.12 + lv * 0.02, 0.3)) obs.push({ x: W + 20, y: GROUND() - 78, w: 30, h: 22, e: "🦅", fly: true });   // 높이 날아오는 새: 점프하면 부딪힘
-    else { const n = lv >= 3 && Math.random() < Math.min(0.15 + lv * 0.04, 0.45) ? 2 : 1; for (let k = 0; k < n; k++) obs.push({ x: W + 20 + k * 30, y: GROUND() - 30, w: 26, h: 30, e: Math.random() < .5 ? "🚧" : "🪨" }); }
-    if (Math.random() < 0.35) items.push({ x: W + 120 + Math.random() * 80, y: GROUND() - 70 - Math.random() * 50, e: "🥧" });
-    const minGap = speed * 0.8 + 40;   // 착지하고 다시 뛸 시간은 항상 남김
-    nextGap = minGap + Math.random() * speed * (0.9 - Math.min(lv * 0.04, 0.55));   // 레벨이 오를수록 여유 간격이 줄어듦
+  let best = LS.get("dw-hwbest", 0), lv = 1, score = 0, cards = [], slots = [], boar = 0, state_ = "idle", t0 = 0, streak = 0;
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch(e) {} };
+  const cfg = L => ({ n: Math.min(3 + Math.floor((L - 1) / 2), 10),               // 패 수: 3장 → 최대 10장
+    swaps: Math.round(3 + L * 1.6),                                                   // 섞는 횟수
+    dur: Math.max(520 - L * 28, 150),                                                 // 한 번 섞는 시간(ms)
+    multi: L >= 4 ? Math.min(1 + Math.floor((L - 4) / 3), 4) : 1,                    // 동시에 바뀌는 쌍
+    tri: L >= 6 ? 0.3 : 0,                                                            // 세 장 돌리기 확률
+    peek: Math.max(1100 - L * 40, 550) });
+  function layout(n){
+    const W = box.clientWidth || 340, H = box.clientHeight || 240, cols = n <= 5 ? n : Math.ceil(n / 2), rows = Math.ceil(n / cols), gap = 10;
+    const cw = Math.min(64, (W - gap * (cols + 1)) / cols, ((H - gap * (rows + 1)) / rows) * 0.64), ch = cw / 0.64;
+    const ox = (W - (cols * cw + (cols - 1) * gap)) / 2, oy = (H - (rows * ch + (rows - 1) * gap)) / 2;
+    slots = []; for (let k = 0; k < n; k++) { const r = Math.floor(k / cols), c = k % cols, inRow = r === rows - 1 ? n - cols * (rows - 1) : cols, rx = (W - (inRow * cw + (inRow - 1) * gap)) / 2;
+      slots.push([rx + c * (cw + gap), oy + r * (ch + gap)]); }
+    return [cw, ch];
   }
-  let endAt = 0;
-  function jump(){ if (over) { if (performance.now() - endAt > 500) start(); return; } if (!run) { start(); return; } if (pig.on) { pig.vy = JV; pig.on = false; holdT = 0; } }
-  function start(){ reset(); run = true; last = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); }
-  function hit(a, b){ return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
-  function loop(now){
-    const dt = Math.min((now - last) / 1000, 0.05); last = now; t += dt;
-    speed = Math.min(300 + score * 1.6, 1100);
-    // 꾹 누르면 조금 더 높이
-    if (holding && !pig.on && holdT < 0.18 && pig.vy < 0) { pig.vy -= 1900 * dt; holdT += dt; }
-    pig.vy += G * dt; pig.y += pig.vy * dt; if (pig.y >= GROUND()) { pig.y = GROUND(); pig.vy = 0; pig.on = true; }
-    const dx = speed * dt; nextGap -= dx; if (nextGap <= 0) spawn();
-    obs.forEach(o => o.x -= dx * (o.fly ? 1.15 : 1)); obs = obs.filter(o => o.x > -60);
-    items.forEach(o => o.x -= dx); items = items.filter(o => o.x > -40 && !o.got);
-    clouds.forEach(c => { c.x -= dx * 0.15; if (c.x < -60) c.x = W + 40; });
-    score += dx / 40;
-    const pb = { x: pig.x + 6, y: pig.y - 30, w: 26, h: 26 };
-    for (const o of obs) if (hit(pb, { x: o.x + 3, y: o.y + 3, w: o.w - 6, h: o.h - 6 })) { end(); return; }
-    for (const it of items) if (hit(pb, { x: it.x, y: it.y - 22, w: 24, h: 24 })) { it.got = true; score += 10; }
-    draw(); $("#gmScore").textContent = Math.floor(score); $("#gmLv").textContent = level();
-    raf = requestAnimationFrame(loop);
+  function place(c, d){ c.el.style.transitionDuration = (d || 0) + "ms"; const [x, y] = slots[c.s]; c.el.style.transform = `translate(${x}px,${y}px)`; }
+  function build(){
+    const C = cfg(lv); box.innerHTML = ""; const [cw, ch] = layout(C.n); boar = Math.floor(Math.random() * C.n);
+    cards = Array.from({ length: C.n }, (_, k) => { const el = document.createElement("div"); el.className = "hwc up"; el.style.width = cw + "px"; el.style.height = ch + "px";
+      el.innerHTML = `<div class="bk">${BACK}</div><div class="fr">${k === boar ? BOARF : decoy(k + lv)}</div>`; const c = { el, k, s: k }; el.onclick = () => pick(c); box.append(el); place(c); return c; });
   }
-  function end(){
-    run = false; over = true; endAt = performance.now(); const sc = Math.floor(score);
-    if (sc > best) { best = sc; LS.set("dw-gmbest", best); $("#gmBest").textContent = best; saveBest(sc); }
-    draw(); $("#gmScore").textContent = sc;
+  const flipAll = up => cards.forEach(c => { c.el.classList.toggle("up", up); c.el.classList.remove("flip"); void c.el.offsetWidth; c.el.classList.add("flip"); });
+  async function shuffle(){
+    const C = cfg(lv);
+    for (let i = 0; i < C.swaps; i++) {
+      const idx = cards.map((_, k) => k).sort(() => Math.random() - .5); const used = [];
+      const moves = Math.min(C.multi, Math.floor(C.n / 2));
+      for (let m = 0; m < moves; m++) {
+        if (C.n >= 3 && Math.random() < C.tri && idx.length >= 3) { const [a, b, c] = idx.splice(0, 3).map(k => cards[k]); const s = a.s; a.s = b.s; b.s = c.s; c.s = s; used.push(a, b, c); }
+        else if (idx.length >= 2) { const [a, b] = idx.splice(0, 2).map(k => cards[k]); [a.s, b.s] = [b.s, a.s]; used.push(a, b); }
+      }
+      used.forEach(c => place(c, C.dur)); await wait(C.dur + 40);
+    }
   }
-  function saveBest(sc){ const id = meKey || devKey; const cur = (state.gm || {})[id] || {}; if ((cur.best || 0) >= sc) return; try { change("gm", id, { best: sc, who: meKey || "", lv: level() }); } catch(e) {} }
-  function draw(){
-    const dark = matchMedia("(prefers-color-scheme: dark)").matches;
-    const sky = cx.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, dark ? "#1b2440" : "#cfe8ff"); sky.addColorStop(1, dark ? "#2a2f45" : "#fdf3e1");
-    cx.fillStyle = sky; cx.fillRect(0, 0, W, H);
-    cx.font = "22px serif"; cx.textBaseline = "alphabetic"; (clouds || []).forEach(c => cx.fillText("☁️", c.x, c.y));
-    cx.fillStyle = dark ? "#3b3f52" : "#e9d9b8"; cx.fillRect(0, GROUND(), W, H - GROUND());
-    cx.fillStyle = dark ? "#5a5f78" : "#c9b48a"; for (let x = -((t * speed) % 40); x < W; x += 40) cx.fillRect(x, GROUND() + 10, 18, 3);
-    if (!pig) reset();
-    cx.font = "26px serif"; (obs || []).forEach(o => cx.fillText(o.e, o.x, o.y + o.h));
-    cx.font = "22px serif"; (items || []).forEach(o => cx.fillText(o.e, o.x, o.y));
-    cx.save(); cx.translate(pig.x + 36, pig.y); cx.scale(-1, 1); cx.font = "34px serif"; cx.fillText("🐗", 0, 0); cx.restore();
-    cx.textAlign = "center"; cx.fillStyle = dark ? "#fff" : "#222";
-    if (!run && !over) { cx.font = "600 16px sans-serif"; cx.fillText("눌러서 시작!", W / 2, 70); }
-    if (over) { cx.font = "700 20px sans-serif"; cx.fillText("꽥! 다시 하려면 누르기", W / 2, 64); cx.font = "14px sans-serif"; cx.fillText(`점수 ${Math.floor(score)} · 레벨 ${level()}`, W / 2, 88); }
-    cx.textAlign = "left";
+  async function round(){
+    state_ = "show"; box.classList.add("wait"); build(); $("#gmLv").textContent = lv; const C = cfg(lv);
+    msg(`레벨 ${lv} · 패 ${C.n}장 · 멧돼지 위치를 기억하세요!`);
+    await wait(C.peek); flipAll(false); await wait(260); msg("섞는 중… 눈 떼지 마세요 👀"); await shuffle();
+    state_ = "pick"; box.classList.remove("wait"); t0 = performance.now(); msg("어디 숨었을까? 눌러서 잡기!");
   }
-  const down = e => { e.preventDefault(); holding = true; jump(); };
-  cv.addEventListener("pointerdown", down); cv.addEventListener("pointerup", () => holding = false); cv.addEventListener("pointercancel", () => holding = false); cv.addEventListener("pointerleave", () => holding = false);
-  cv.addEventListener("contextmenu", e => e.preventDefault());
-  document.addEventListener("keydown", e => { if (e.code === "Space" && document.activeElement === document.body && cv.getBoundingClientRect().top < innerHeight && cv.getBoundingClientRect().bottom > 0) { e.preventDefault(); holding = true; jump(); } });
-  document.addEventListener("keyup", e => { if (e.code === "Space") holding = false; });
-  document.addEventListener("visibilitychange", () => { if (document.hidden && run) { end(); } });
+  async function pick(c){
+    if (state_ !== "pick") return; state_ = "done"; box.classList.add("wait");
+    const ms = performance.now() - t0; flipAll(true); const hit = c.k === boar;
+    if (hit) { streak++; const bonus = Math.max(0, 30 - Math.floor(ms / 100)), pts = lv * 10 + bonus + (streak >= 3 ? 5 : 0);
+      score += pts; c.el.classList.add("ok"); buzz(40); $("#gmScore").textContent = score;
+      msg(`잡았다! 🐗 +${pts}점` + (bonus > 15 ? " ⚡번개손!" : "") + (streak >= 3 ? ` · ${streak}연속🔥` : ""));
+      await wait(900); lv++; round(); }
+    else { c.el.classList.add("bad"); cards.find(x => x.k === boar).el.classList.add("ok"); buzz([80, 60, 160]); streak = 0;
+      const nb = score > best; if (nb) { best = score; LS.set("dw-hwbest", best); $("#gmBest").textContent = best; save(); }
+      msg(nb ? `놓쳤다! 그래도 신기록 ${score}점 🎉` : `놓쳤다! 멧돼지는 저기 있었어요 · ${score}점`);
+      $("#gmGo").textContent = "다시 사냥"; $("#gmGo").hidden = false; state_ = "over"; }
+  }
+  function msg(t){ $("#gmMsg").textContent = t; }
+  function save(){ const id = meKey || devKey; const cur = (state.gm || {})[id] || {}; if ((cur.hw || 0) >= score) return; try { change("gm", id, { hw: score, hl: lv, who: meKey || "" }); } catch(e) {} }
+  $("#gmGo").onclick = () => { lv = 1; score = 0; streak = 0; $("#gmScore").textContent = 0; $("#gmGo").hidden = true; round(); };
   window.renderGameRank = function(){
-    $("#gmBest").textContent = best; $("#gmMe").textContent = meKey ? `${memLabel(meKey)}로 기록돼요` : "위 구성원에서 '나'를 고르면 이름으로 기록";
-    const rows = Object.entries(state.gm || {}).filter(([, r]) => r && r.best && !r.del).map(([id, r]) => ({ id, n: r.who ? memLabel(r.who) : "이름 없는 폰", b: r.best, me: id === (meKey || devKey) }))
+    $("#gmBest").textContent = best; $("#gmMe").textContent = meKey ? `${memLabel(meKey)} 기록 중` : "'나'를 고르면 이름으로 기록";
+    const mine = meKey || devKey;
+    const rows = Object.entries(state.gm || {}).filter(([, r]) => r && r.hw && !r.del).map(([id, r]) => ({ id, n: r.who ? memLabel(r.who) : "이름 없는 폰", b: r.hw, l: r.hl || 1, me: id === mine }))
       .sort((a, b) => b.b - a.b).slice(0, 10);
-    const R = $("#gmRank"); R.innerHTML = ""; if (!rows.length) return; R.append(el("h3", null, "🏆 가족 순위"));
-    rows.forEach((r, i) => { const d = el("div", "r" + (r.me ? " me" : "")); d.append(el("span", null, `${["🥇","🥈","🥉"][i] || (i + 1) + "."} ${r.n}`), el("b", null, String(r.b))); R.append(d); });
+    const R = $("#gmRank"); R.innerHTML = ""; if (!rows.length) { R.append(el("small", null, "아직 기록이 없어요. 첫 사냥꾼이 되어 보세요!")); return; }
+    R.append(el("h3", null, "🏆 돼지사냥꾼 순위"));
+    rows.forEach((r, i) => { const d = el("div", "r" + (r.me ? " me" : "")); const nm = el("span", null, `${["🥇","🥈","🥉"][i] || (i + 1) + "."} ${r.n} `); nm.append(el("small", null, `레벨 ${r.l}`)); d.append(nm, el("b", null, r.b + "점")); R.append(d); });
+    if (rows[0] && !rows[0].me && rows.some(r => r.me)) { const me = rows.find(r => r.me); R.append(el("small", null, `1등까지 ${rows[0].b - me.b + 1}점 남았어요!`)); }
   };
-  addEventListener("resize", size); size(); reset(); draw(); renderGameRank();
+  addEventListener("resize", () => { if (cards.length && state_ !== "show") { const [cw, ch] = layout(cards.length); cards.forEach(c => { c.el.style.width = cw + "px"; c.el.style.height = ch + "px"; place(c); }); } });
+  build(); renderGameRank();
 })();
 </script>
 </body>
