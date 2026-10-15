@@ -134,6 +134,8 @@ section{display:flex;flex-direction:column;gap:10px;scroll-margin-top:124px}
 .big span{font-size:18px;line-height:1.3;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
 .big small{font-size:11px;color:var(--muted)}
 .gm{padding:10px}
+.gmtabs{margin-bottom:8px;grid-template-columns:1fr 1fr!important}
+#rnCv{display:block;width:100%;height:340px;border-radius:12px;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:pointer}
 .gmtop{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:8px}
 .gmtop b{font-family:var(--mono);color:var(--ink);font-size:17px}
 .hw{position:relative;height:240px;border-radius:14px;background:radial-gradient(ellipse at center,#2f6b3f 0%,#1f4a2c 100%);overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none}
@@ -445,13 +447,21 @@ button.bd .n{font-family:var(--mono);font-size:13px;color:var(--azul);white-spac
 
   <section id="s-game">
     <div class="sh"><h2 style="white-space:nowrap">🐗 돼지사냥</h2><small id="gmMe"></small></div>
-    <div class="card gm">
+    <div class="seg gmtabs" role="tablist"><button type="button" id="gtA" aria-pressed="true">🃏 화투 속 돼지찾기</button><button type="button" id="gtB" aria-pressed="false">🏃 돼지 돌진</button></div>
+    <div class="card gm" id="gmA">
       <div class="gmtop"><span>레벨 <b id="gmLv">1</b></span><span>점수 <b id="gmScore">0</b></span><span>내 최고 <b id="gmBest">0</b></span></div>
       <div class="hw" id="hw" aria-live="polite"></div>
       <div class="gmmsg" id="gmMsg">화투 속에 숨은 멧돼지를 잡아라!</div>
       <button type="button" class="btn pri gmgo" id="gmGo">사냥 시작</button>
       <div class="gmhelp">멧돼지 패(7월 홍싸리)를 잘 보고, 패가 섞이면 끝까지 눈으로 쫓아가 누르세요. 레벨이 오를수록 패가 늘고 더 빨리, 더 많이 섞여요. 빨리 잡을수록 보너스!</div>
       <div class="gmrank" id="gmRank"></div>
+    </div>
+    <div class="card gm" id="gmB" hidden>
+      <div class="gmtop"><span>거리 <b id="rnScore">0</b></span><span>속도 <b id="rnLv">1</b></span><span>내 최고 <b id="rnBest">0</b></span></div>
+      <canvas id="rnCv" aria-label="돼지 돌진 · 누를 때마다 한 칸 앞으로"></canvas>
+      <div class="gmmsg" id="rnMsg">누를 때마다 멧돼지가 한 칸 앞으로!</div>
+      <div class="gmhelp">화면을 누를 때마다 한 칸 전진 · 달리는 택시·버스를 피해 타이밍을 맞추세요 · 꾸물대면 뒤에서 사냥꾼이 쫓아와요 · 🥧 +5 · 갈수록 차가 빠르고 많아져요</div>
+      <div class="gmrank" id="rnRank"></div>
     </div>
   </section>
 
@@ -1157,7 +1167,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.15-17";
+const APP_VER = "2026.10.15-18";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1572,6 +1582,89 @@ window.addEventListener("online", () => pending ? push() : pull());
   };
   addEventListener("resize", () => { if (cards.length && state_ !== "show") { const [cw, ch] = layout(cards.length); cards.forEach(c => { c.el.style.width = cw + "px"; c.el.style.height = ch + "px"; place(c); }); } });
   build(); renderGameRank();
+})();
+
+// ---------- 미니게임 2: 돼지 돌진 (누를 때마다 한 칸 전진 · 차 피하기 · 무한) ----------
+(function(){
+  const cv = $("#rnCv"); if (!cv) return; const cx = cv.getContext("2d");
+  const tabs = [["#gtA","#gmA"],["#gtB","#gmB"]]; let curTab = LS.get("dw-gmtab", 0);
+  const setTab = k => { curTab = k; LS.set("dw-gmtab", k); tabs.forEach(([b, p], i) => { $(b).setAttribute("aria-pressed", i === k); $(p).hidden = i !== k; }); if (k === 1) { size(); draw(); } };
+  tabs.forEach(([b], i) => $(b).onclick = () => setTab(i));
+  const devKey = LS.get("dw-gmdev", "");
+  const LH = 46, CARS = ["🚕","🚌","🚗","🚙","🛵"];
+  let W = 340, H = 340, dpr = 1, rows = [], br = 0, camY = 0, t = 0, run = false, over = false, raf = 0, last = 0, pies = 0, hop = 0, best = LS.get("dw-rnbest", 0), endAt = 0, creep = 0;
+  const score = () => br + pies * 5, lvl = () => 1 + Math.floor(br / 25);
+  function size(){ dpr = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth || 340; H = cv.clientHeight || 340; cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  function mkRow(r){
+    if (r < 2) return { road: false };
+    const lv = 1 + Math.floor(r / 25), prevRoad = rows[r - 1] && rows[r - 1].road;
+    const grassP = r < 12 ? 0.5 : Math.max(0.4 - lv * 0.04, 0.12);
+    if (Math.random() < grassP && prevRoad) return { road: false, pie: Math.random() < 0.3 };
+    const dir = Math.random() < .5 ? 1 : -1, v = (70 + Math.random() * 60) * (1 + (lv - 1) * 0.18);
+    const n = Math.min(1 + Math.floor(Math.random() * (1 + lv * 0.5)), 4), span = W + 160, cars = [];
+    const minGap = 120;                                  // 차 사이 최소 틈(돼지가 지나갈 자리)
+    let x = Math.random() * 80; for (let k = 0; k < n; k++) { const w = 40 + Math.random() * 26; if (x + w > span - minGap) break; cars.push({ x, w, e: CARS[(r + k) % CARS.length] }); x += w + minGap + Math.random() * 140; }
+    return { road: true, dir, v: Math.min(v, 420), span, cars };
+  }
+  const row = r => { while (rows.length <= r + 1) rows.push(mkRow(rows.length)); return rows[r]; };
+  const carX = (R, c) => { const p = ((c.x + R.dir * R.v * t) % R.span + R.span) % R.span; return p - 80; };
+  function reset(){ rows = []; br = 0; camY = 0; t = 0; pies = 0; over = false; creep = 0; for (let r = 0; r < 14; r++) row(r); }
+  function start(){ reset(); run = true; last = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); msg("가자! 🐗"); }
+  function step(){ if (over) { if (performance.now() - endAt > 600) start(); return; } if (!run) { start(); return; }
+    br++; hop = 1; const R = row(br); if (R.pie) { R.pie = false; pies++; msg("🥧 냠! +5"); } try { navigator.vibrate && navigator.vibrate(8); } catch(e) {} }
+  function bx(){ return W / 2 - 15; }
+  function loop(now){
+    const dt = Math.min((now - last) / 1000, 0.05); last = now; t += dt; hop = Math.max(0, hop - dt * 8);
+    // 카메라: 돼지 따라 올라가고, 사냥꾼이 점점 빨리 밀고 올라옴
+    creep = 0.25 + Math.min(br / 120, 1.6);
+    const target = Math.max(br - 2, 0); camY = Math.max(camY + creep * dt, camY + (target - camY) * Math.min(dt * 6, 1));
+    if (br < camY - 0.15) { end("사냥꾼한테 잡혔다! 꾸물대면 안 돼요"); return; }
+    const R = row(br);
+    if (R.road) { const x0 = bx() + 4, x1 = bx() + 26; for (const c of R.cars) { const cx0 = carX(R, c); if (cx0 < x1 && cx0 + c.w > x0) { end("빵! 차에 치였다 🚕"); return; } } }
+    draw(); $("#rnScore").textContent = score(); $("#rnLv").textContent = lvl();
+    raf = requestAnimationFrame(loop);
+  }
+  function end(why){ run = false; over = true; endAt = performance.now(); try { navigator.vibrate && navigator.vibrate([80, 50, 160]); } catch(e) {}
+    const sc = score(); let nb = false; if (sc > best) { best = sc; LS.set("dw-rnbest", best); nb = true; save(sc); }
+    draw(); msg((nb ? `🎉 신기록 ${sc}! ` : `${sc}점 · `) + why + " · 누르면 다시"); renderRunRank(); }
+  function save(sc){ const id = meKey || devKey || "dx"; const cur = (state.gm || {})[id] || {}; if ((cur.rn || 0) >= sc) return; try { change("gm", id, { rn: sc, rl: lvl(), who: meKey || "" }); } catch(e) {} }
+  function msg(x){ $("#rnMsg").textContent = x; }
+  const yOf = r => H - (r - camY + 1) * LH - 6;
+  function draw(){
+    if (!rows.length) reset();
+    cx.fillStyle = "#6fae5b"; cx.fillRect(0, 0, W, H);
+    const r0 = Math.floor(camY) - 1, r1 = r0 + Math.ceil(H / LH) + 2;
+    cx.textBaseline = "middle";
+    for (let r = Math.max(r0, 0); r <= r1; r++) { const R = row(r), y = yOf(r);
+      if (R.road) { cx.fillStyle = "#4a4d57"; cx.fillRect(0, y, W, LH); cx.fillStyle = "#e9e3c9"; for (let x = 0; x < W; x += 34) cx.fillRect(x + 6, y + LH - 2, 16, 2);
+        cx.font = "30px serif"; R.cars.forEach(c => { const x = carX(R, c); cx.save(); if (R.dir > 0) { cx.translate(x + c.w, 0); cx.scale(-1, 1); cx.fillText(c.e, 0 + (c.w - 34) / 2, y + LH / 2 + 1); } else cx.fillText(c.e, x + (c.w - 34) / 2, y + LH / 2 + 1); cx.restore(); }); }
+      else { cx.fillStyle = r % 2 ? "#79b864" : "#6fae5b"; cx.fillRect(0, y, W, LH); cx.font = "16px serif"; if (r > 1 && r % 3 === 0) { cx.fillText("🌿", 14, y + LH / 2); cx.fillText("🌸", W - 30, y + LH / 2); }
+        if (R.pie) { cx.font = "22px serif"; cx.fillText("🥧", bx() + 2, y + LH / 2); } }
+    }
+    // 사냥꾼 경계선
+    const hy = yOf(camY - 0.6) + LH; cx.fillStyle = "rgba(179,18,42,.28)"; cx.fillRect(0, hy, W, H - hy);
+    cx.fillStyle = "#000"; cx.font = "22px serif"; for (let x = 10; x < W; x += 70) cx.fillText("🏹", x, Math.min(H - 14, hy + 16));
+    // 돼지
+    const py = yOf(br) + LH / 2 - hop * 10; cx.fillStyle = "#000"; cx.font = "30px serif"; cx.textAlign = "center"; cx.fillText("🐗", bx() + 15, py); cx.textAlign = "left";
+    cx.textAlign = "center"; cx.fillStyle = "#fff"; cx.font = "700 15px sans-serif"; cx.shadowColor = "rgba(0,0,0,.5)"; cx.shadowBlur = 4;
+    if (!run && !over) cx.fillText("눌러서 출발!", W / 2, 40);
+    if (over) { cx.font = "700 20px sans-serif"; cx.fillText(`꽥! ${score()}점`, W / 2, 44); cx.font = "14px sans-serif"; cx.fillText("누르면 다시 시작", W / 2, 68); }
+    cx.shadowBlur = 0; cx.textAlign = "left";
+  }
+  cv.addEventListener("pointerdown", e => { e.preventDefault(); step(); });
+  cv.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("visibilitychange", () => { if (document.hidden && run) end("앱을 나가서 멈췄어요"); });
+  window.renderRunRank = function(){
+    $("#rnBest").textContent = best; const mine = meKey || devKey || "dx";
+    const rs = Object.entries(state.gm || {}).filter(([, r]) => r && r.rn && !r.del).map(([id, r]) => ({ id, n: r.who ? memLabel(r.who) : "이름 없는 폰", b: r.rn, l: r.rl || 1, me: id === mine })).sort((a, b) => b.b - a.b).slice(0, 10);
+    const R = $("#rnRank"); R.innerHTML = ""; if (!rs.length) { R.append(el("small", null, "아직 기록이 없어요. 제일 멀리 달려 보세요!")); return; }
+    R.append(el("h3", null, "🏆 돼지 돌진 순위"));
+    rs.forEach((r, i) => { const d = el("div", "r" + (r.me ? " me" : "")); const nm = el("span", null, `${["🥇","🥈","🥉"][i] || (i + 1) + "."} ${r.n} `); nm.append(el("small", null, `속도 ${r.l}`)); d.append(nm, el("b", null, r.b + "칸")); R.append(d); });
+    if (!rs[0].me && rs.some(r => r.me)) { const me = rs.find(r => r.me); R.append(el("small", null, `1등까지 ${rs[0].b - me.b + 1}칸 남았어요!`)); }
+  };
+  const prev = window.renderGameRank; window.renderGameRank = function(){ if (prev) prev(); renderRunRank(); };
+  addEventListener("resize", () => { if (curTab === 1) { size(); draw(); } });
+  setTab(curTab); renderRunRank();
 })();
 </script>
 </body>
