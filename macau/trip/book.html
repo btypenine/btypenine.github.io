@@ -102,7 +102,7 @@ let DAYS = [], DATA = null;
 const cache = {};
 async function getText(url){ const r = await fetch(url); if (!r.ok) throw 0; let t = await r.text(); if (t.startsWith('"')) { try { t = JSON.parse(t); } catch(e) {} } return t; }
 async function photo(id, full){ const k = (full ? "p" : "t") + id; if (cache[k]) return cache[k]; try { cache[k] = await getText(full ? PH(id) : TH(id)); } catch(e) { if (full) return photo(id, false); cache[k] = ""; } return cache[k]; }
-async function loadDays(){ const html = await (await fetch("index.html", { cache: "no-store" })).text(); const m = html.match(/const DAYS = (\[[\s\S]*?\n\]);/); DAYS = Function('"use strict";return ' + m[1])(); }
+async function loadDays(){ const html = await (await fetch("index.html", { cache: "no-store" })).text(); const m = html.match(/const DAYS = (\[[\s\S]*?\n\]);/); DAYS = Function('"use strict";return ' + m[1])(); DAYS.forEach(D => { D.items.forEach((it, i) => { if (!it.id) it.id = D.d + "#" + i; }); D.items.sort((x, y) => x[0].localeCompare(y[0])); }); }
 async function loadData(){ let t = await (await fetch(STORE, { cache: "no-store" })).text(); let v = JSON.parse(t); if (typeof v === "string") v = JSON.parse(v); DATA = v; }
 const memName = k => (DATA.mem && DATA.mem[k] && DATA.mem[k].name) || MEM0[+k.slice(1)];
 const BOAR = '<svg viewBox="0 0 64 100" aria-hidden="true"><rect x="1" y="1" width="62" height="98" rx="5" fill="#b3122a"/><rect x="5" y="5" width="54" height="90" rx="3" fill="#f3e6c8"/><g stroke="#b3122a" stroke-width="2.4" fill="none"><path d="M40 12 l8 -3 M44 18 l9 -2 M36 22 l7 -5"/></g><path d="M12 70 C12 58 22 50 34 50 C44 50 52 56 54 64 L58 66 L54 70 C52 78 44 82 34 82 C22 82 12 78 12 70Z" fill="#2b1c18"/><circle cx="48" cy="62" r="1.6" fill="#f3e6c8"/><path d="M18 82 v6 M28 82 v7 M40 82 v7 M48 80 v7" stroke="#2b1c18" stroke-width="3"/></svg>';
@@ -129,7 +129,7 @@ function render(full){
     const dh = el("div","dh"); dh.append(el("span","k", `DAY ${di+1} · ${+D.d.slice(5,7)}월 ${+D.d.slice(8)}일 ${D.w}요일`), el("h2", null, D.title), el("small", null, D.hotel ? D.hotel + "에서 묵은 날" : "집으로 돌아온 날")); sec.append(dh);
     let any = false;
     D.items.forEach((it, i) => {
-      const bid = D.d + "#" + i; const rs = revs.filter(r => r.b === bid).sort((a, b) => (a.c||0) - (b.c||0)); if (!rs.length) return; any = true;
+      const bid = it.id || D.d + "#" + i; const rs = revs.filter(r => r.b === bid).sort((a, b) => (a.c||0) - (b.c||0)); if (!rs.length) return; any = true;
       const pl = el("article","place"); const h = el("h3"); h.append(document.createTextNode(it[1]));
       const sts = rs.filter(r => r.st).map(r => r.st); const sm = el("small", null, it[0] + (sts.length ? " · " : "")); if (sts.length) sm.append(el("span","gold", "★ " + (sts.reduce((a,c)=>a+c,0)/sts.length).toFixed(1))); h.append(sm); pl.append(h);
       const pids = rs.flatMap(r => (r.ph || []).map(p => ({ p, who: r.who })));
@@ -151,7 +151,7 @@ function render(full){
   end.append(el("p","empty","누가 가장 많이 남겼을까요?"), bars);
   const ranks = {}; revs.filter(r => r.st).forEach(r => { (ranks[r.b] = ranks[r.b] || []).push(r.st); });
   const top = Object.entries(ranks).map(([b, a]) => [b, a.reduce((x,y)=>x+y,0)/a.length, a.length]).sort((a,b) => b[1]-a[1] || b[2]-a[2]).slice(0, 5);
-  if (top.length) { end.append(el("h3", null, "별점이 가장 높았던 곳")); const ol = el("ol","best"); top.forEach(([b, avg, n]) => { const [d, i] = b.split("#"); const D = DAYS.find(x => x.d === d); const it = D && D.items[+i]; ol.append(el("li", null, `${it ? it[1] : b} — ★${avg.toFixed(1)} (${n}명)`)); }); end.append(ol); }
+  if (top.length) { end.append(el("h3", null, "별점이 가장 높았던 곳")); const ol = el("ol","best"); top.forEach(([b, avg, n]) => { const [d] = b.split("#"); const D = DAYS.find(x => x.d === d); const it = D && D.items.find(x => x.id === b); ol.append(el("li", null, `${it ? it[1] : b} — ★${avg.toFixed(1)} (${n}명)`)); }); end.append(ol); }
   B.append(end);
   $("#st").textContent = `후기 ${revs.length}개 · 사진 ${nPh}장`;
 }
