@@ -1256,7 +1256,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.16-4";
+const APP_VER = "2026.10.16-5";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1390,13 +1390,27 @@ $("#trSpeak").onclick = () => { if (!trLast || !("speechSynthesis" in window)) r
 $("#trBig").onclick = () => { if (trLast) show(trLast.text, trLast.rom || "", trLast.q); };
 $("#trCopy").onclick = async () => { if (!trLast) return; try { await navigator.clipboard.writeText(trLast.text); $("#trCopy").textContent = "복사됨"; setTimeout(() => $("#trCopy").textContent = "복사", 1500); } catch(e) {} };
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition; let rec = null;
+// 음성인식 결과 합치기: 안드로이드 크롬은 앞 문장을 계속 덧붙인 결과를 여러 번 보내서 그냥 이으면 "뽑기를뽑기를…"처럼 반복됨 → 겹치는 부분은 하나로
+function srJoin(results){
+  const parts = [];
+  for (let i = 0; i < results.length; i++) {
+    const t = (results[i][0].transcript || "").trim(); if (!t) continue;
+    const all = parts.join(" "), last = parts[parts.length - 1] || "";
+    const nz = x => x.replace(/\s+/g, "");
+    if (all && nz(t).startsWith(nz(all))) { parts.length = 0; parts.push(t); }        // 지금까지 전체를 다시 보낸 경우
+    else if (last && nz(t).startsWith(nz(last))) parts[parts.length - 1] = t;          // 직전 조각이 길어진 경우
+    else if (last && nz(last).endsWith(nz(t))) continue;                               // 이미 들어간 말
+    else parts.push(t);
+  }
+  return parts.join(" ");
+}
 if (!SR) { $("#trMic").style.display = "none"; }
 $("#trMic").onclick = () => {
   if (!SR) return; if (rec) { rec.stop(); return; }
   rec = new SR(); rec.lang = trDir === "ko" ? "ko-KR" : trDir === "zh" ? "yue-Hant-HK" : "en-US"; rec.interimResults = true; rec.maxAlternatives = 1;
   $("#trMic").classList.add("on"); $("#trMic").textContent = "● 듣는 중";
   let final = "";
-  rec.onresult = e => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; $("#trIn").value = t; if (e.results[e.results.length-1].isFinal) final = t; };
+  rec.onresult = e => { const t = srJoin(e.results); $("#trIn").value = t; if (e.results[e.results.length-1].isFinal) final = t; };
   rec.onerror = () => {}; rec.onend = () => { rec = null; $("#trMic").classList.remove("on"); $("#trMic").textContent = "🎤 말하기"; if ($("#trIn").value.trim()) translate(); };
   try { rec.start(); } catch(e) { rec = null; }
 };
@@ -1483,7 +1497,7 @@ $("#bdMic").onclick = () => {
   recB = new SR(); recB.lang = $("#bdLang").value; recB.interimResults = true; recB.continuous = true;
   const base = $("#bdText").value ? $("#bdText").value.trim() + " " : "";
   $("#bdMic").classList.add("on"); $("#bdMic").textContent = "● 듣는 중 (누르면 끝)";
-  recB.onresult = e => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; $("#bdText").value = base + t; voiceUsed = true; LS.set("dw-draft-" + curBoard, $("#bdText").value); };
+  recB.onresult = e => { const t = srJoin(e.results); $("#bdText").value = base + t; voiceUsed = true; LS.set("dw-draft-" + curBoard, $("#bdText").value); };
   recB.onerror = ev => { $("#bdMsg").textContent = ev.error === "not-allowed" ? "마이크 권한을 허용해 주세요." : "잘 못 들었어요. 다시 눌러 주세요."; };
   recB.onend = () => { recB = null; $("#bdMic").classList.remove("on"); $("#bdMic").textContent = "🎤 말로 쓰기"; };
   try { recB.start(); } catch(e) { recB = null; }
