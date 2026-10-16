@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><title>야경버스 자리뽑기</title>
+<style>
+:root{--bg:#0f1530;--card:#1a2247;--ink:#f4f1e8;--mut:#a9b0cf;--gold:#ffd54a;--a:#5aa9ff;--k:#ff8fb3;--line:#2c3666}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#25306a,#0f1530 60%);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;min-height:100vh}
+main{max-width:520px;margin:0 auto;padding:18px 16px 40px}
+h1{font-size:22px;margin:4px 0 2px}p.s{color:var(--mut);font-size:13px;margin:0 0 14px;line-height:1.5}
+.grp{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px}
+.grp h2{font-size:14px;margin:0 0 8px;color:var(--mut);font-weight:600}
+.pp{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.pp button{border:0;border-radius:12px;padding:10px 2px 8px;background:#26305c;color:var(--ink);font:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;touch-action:manipulation}
+.pp button b{font-size:14px}.pp button i{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:22px;font-weight:700;min-height:26px}
+.pp button.ad i{color:var(--a)}.pp button.kd i{color:var(--k)}
+.pp button.done{background:#1f2850;outline:2px solid var(--line)}
+.pp button.roll i{animation:fl .08s infinite}@keyframes fl{50%{opacity:.4}}
+.row{display:flex;gap:8px;margin:6px 0 14px}.row button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:700}
+.go{background:var(--gold);color:#3a2a00}.rs{background:#2c3666;color:var(--ink)}
+.bus{background:#e7e9f2;color:#1b2140;border-radius:26px 26px 14px 14px;padding:14px 12px 12px;position:relative}
+.bus .front{text-align:center;font-size:12px;font-weight:700;color:#5b6390;margin-bottom:8px}
+.seat{display:grid;grid-template-columns:30px 1fr 1fr;gap:6px;align-items:center;margin-bottom:6px}
+.seat span{font-size:11px;color:#6b7299;text-align:center;font-weight:700}
+.seat div{border-radius:10px;padding:9px 6px;text-align:center;font-weight:700;background:#fff;border:2px dashed #c7cbe0;min-height:40px;font-size:15px}
+.seat div.ad{border:2px solid var(--a);background:#eaf3ff}.seat div.kd{border:2px solid var(--k);background:#fff0f5}
+.seat div small{display:block;font-weight:500;font-size:10px;color:#6b7299}
+.seat.best div{box-shadow:0 0 0 2px var(--gold)}
+.msg{text-align:center;font-weight:700;min-height:22px;margin:10px 0}
+.tip{font-size:12.5px;color:var(--mut);line-height:1.6;margin-top:14px}.tip b{color:var(--ink)}
+</style></head><body><main>
+<h1>🚌 야경버스 자리뽑기</h1>
+<p class="s">각자 자기 이름을 눌러 두 자리 숫자를 뽑아요. 다 뽑으면 <b>어른 숫자 1등 ↔ 아이 숫자 1등</b>처럼 같은 순위끼리 짝이 되고, 1등 짝부터 앞자리에 앉아요.</p>
+<div class="grp"><h2>👨‍👩 어른</h2><div class="pp" id="A"></div></div>
+<div class="grp"><h2>🧒 아이</h2><div class="pp" id="K"></div></div>
+<div class="row"><button class="go" id="all">🎲 한 번에 뽑기</button><button class="rs" id="reset">다시 하기</button></div>
+<div class="msg" id="msg">이름을 눌러 숫자를 뽑으세요!</div>
+<div class="bus"><div class="front">▲ 앞쪽 (운전석·앞 유리)</div><div id="seats"></div></div>
+<div class="tip">💡 <b>좋은 자리</b>: 2층 버스라면 <b>2층 맨 앞줄</b>이 앞 유리로 야경이 탁 트여 가장 좋아요. 지붕이 없는 오픈탑이면 앞쪽은 바람이 세니 아이 겉옷을 챙기세요. 1층만 있는 버스라면 창가 쪽 자리, 그리고 앞쪽 줄이 사진 찍기 좋아요. 몇 번 정류장에서 어느 쪽 창으로 무엇이 보이는지는 가이드에게 물어보세요.</div>
+</main>
+<script>
+const AD = ["성민","민희","윤이","미정","유복"], KD = ["주아","소윤","다빈","채윤","민준"];
+const KEY = "dw-seatdraw";
+let st; try { st = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { st = {}; }
+const used = () => new Set(Object.values(st));
+function draw(){ const u = used(); let n; do { n = 10 + Math.floor(Math.random() * 90); } while (u.has(n)); return n; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(st)); } catch(e) {} }
+function btns(){ [["A", AD, "ad"], ["K", KD, "kd"]].forEach(([id, L, c]) => { const B = document.getElementById(id); B.innerHTML = "";
+  L.forEach(n => { const b = document.createElement("button"); b.className = c + (st[n] ? " done" : ""); b.innerHTML = `<i>${st[n] || "??"}</i><b>${n}</b>`;
+    b.onclick = () => roll(n, b); B.append(b); }); }); }
+function roll(n, b){ if (st[n]) { msg(`${n}은(는) 이미 ${st[n]}을(를) 뽑았어요`); return; } const i = b.querySelector("i"); b.classList.add("roll");
+  let k = 0; const t = setInterval(() => { i.textContent = 10 + Math.floor(Math.random() * 90); if (++k > 12) { clearInterval(t); st[n] = draw(); save(); b.classList.remove("roll"); btns(); seats(); msg(`${n} → ${st[n]}!`); } }, 60); }
+function msg(t){ document.getElementById("msg").textContent = t; }
+function seats(){
+  const S = document.getElementById("seats"); S.innerHTML = "";
+  const a = AD.filter(n => st[n]).sort((x, y) => st[y] - st[x]), k = KD.filter(n => st[n]).sort((x, y) => st[y] - st[x]);
+  const done = a.length === 5 && k.length === 5;
+  for (let r = 0; r < 5; r++) { const row = document.createElement("div"); row.className = "seat" + (done && r === 0 ? " best" : "");
+    const A = done ? a[r] : null, K = done ? k[r] : null;
+    row.innerHTML = `<span>${r + 1}열</span><div class="${A ? "ad" : ""}">${A ? A + `<small>어른 · ${st[A]}</small>` : "?"}</div><div class="${K ? "kd" : ""}">${K ? K + `<small>아이 · ${st[K]}</small>` : "?"}</div>`;
+    S.append(row); }
+  if (done) msg("🎉 자리 배정 끝! 1열(맨 앞)부터 앉아요"); else msg(`뽑은 사람 ${a.length + k.length} / 10`);
+}
+document.getElementById("all").onclick = () => { [...AD, ...KD].forEach(n => { if (!st[n]) st[n] = draw(); }); save(); btns(); seats(); };
+document.getElementById("reset").onclick = () => { st = {}; save(); btns(); seats(); msg("새로 뽑아요!"); };
+btns(); seats();
+</script></body></html>
