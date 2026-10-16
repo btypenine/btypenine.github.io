@@ -1256,7 +1256,7 @@ function applyRate(){
 $("#rate").addEventListener("input", () => { renderPrice(); renderRecs(); renderGo(); });
 $("#rate").addEventListener("change", () => { rateAuto = false; LS.set("dw-rate-auto", false); applyRate(); });
 // ---------- install as app ----------
-const APP_VER = "2026.10.16-3";
+const APP_VER = "2026.10.16-4";
 let deferredPrompt = null;
 const UA = navigator.userAgent;
 const isIOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -1629,7 +1629,7 @@ function renderGmTotal(meId){
 }
 
 // ---------- 여행 OX퀴즈 + 게임 도전권 ----------
-// 도전권 = ① 매시 정각 무료 10장(안 쓰면 최대 2시간치 20장까지 쌓임) + ② 모은 도전권(퀴즈 10점마다 1장 · 일정마다 첫 후기 1장 · 일정마다 첫 댓글 1장, 계속 누적)
+// 도전권 = ① 매시 정각 무료 2장(안 쓰면 최대 2시간치 4장까지 쌓임) + ② 모은 도전권(퀴즈 10점마다 1장 · 일정마다 첫 후기 1장 · 일정마다 첫 댓글 1장, 계속 누적)
 const QZ = [
  ["q01","10/13","첫날 인천공항 집결 시간은 오전 11시였다.",1,"11:00 인천공항 집결 → 14:00 비행기 출발이었어요."],
  ["q02","10/13","마카오 공항에서는 HSBC ATM에서 돈을 뽑기로 했다.",1,"마카오공항 HSBC ATM에서 트래블로그 카드로 출금했어요."],
@@ -1829,7 +1829,7 @@ const MC = [
 const MC_PT = 3, MC_MIN = 10, MC_MAX = 30;        // 객관식: 정답 3점 · 10초 지나야 고를 수 있음 · 30초 넘으면 오답
 const QZ_PT = 2;                                   // 정답 1개 = 2점 · 10점마다 도전권 1장
 const QZ_HOUR = 50;                                // 퀴즈는 한 시간에 50문제까지 (매시 정각 초기화)
-const TK_HOUR = 10, TK_CAP = 20;                   // 매시 정각 무료 10장 · 최대 2시간치(20장)까지
+const TK_HOUR = 2, TK_CAP = 4;                      // 매시 정각 무료 2장 · 최대 2시간치(4장)까지
 const tkId = () => meKey || LS.get("dw-gmdev", "") || (() => { const k = "d" + Math.random().toString(36).slice(2, 8); LS.set("dw-gmdev", k); return k; })();
 const tkRec = () => (state.gm || {})[tkId()] || {};
 const hourNow = () => Math.floor(Date.now() / 3600e3);
