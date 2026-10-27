@@ -201,6 +201,15 @@ body.exporting [data-edit]:empty{display:none}
 .cvr .ed2{position:absolute;bottom:70px;left:0;right:0;text-align:center;color:#fff;font-family:var(--mono);letter-spacing:.25em;font-size:16px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .cover-shade,.full-txt,.cover-txt,.chno,.ed2{pointer-events:none}
 .full-txt [data-edit]{pointer-events:auto}
+.teaser-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,10,6,.55) 0%,rgba(15,10,6,.78) 55%,rgba(15,10,6,.92) 100%);pointer-events:none}
+.teaser-txt{position:absolute;left:var(--m);right:var(--m);top:90px;bottom:70px;color:#fff;display:flex;flex-direction:column;gap:10px}
+.teaser-txt .tk{font-family:var(--mono);letter-spacing:.3em;font-size:14px;color:#fee500}
+.teaser-txt .th1{font-size:24px;opacity:.9;margin-top:10px;word-break:keep-all}
+.teaser-txt .th2{font-family:var(--display);font-size:84px;line-height:1.1;word-break:keep-all;color:#fee500}
+.teaser-txt .th3{font-size:18px;opacity:.85;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:14px}
+.teaser-txt .th4{font-size:22px;line-height:1.9;margin-top:6px;word-break:keep-all}
+.teaser-txt .th5{margin-top:auto;font-family:var(--mono);font-size:16px;letter-spacing:.06em;color:#fee500}
+.teaser-txt .th6{font-size:13px;opacity:.7}
 .stage{position:absolute;left:-99999px;top:0}
 </style>
 </head>
@@ -882,17 +891,25 @@ function buildCh10(ed, pno) {
   const a = opener(st, ed, "10", "다음은 2배로", "after the trip");
   (M.chat.귀국 || []).forEach(([t, w, msg]) => a.inn.append(h("div", "say", `<b>${esc(t)} ${esc(w)}</b> “${esc(msg)}”`)));
   { const p = newPage(st); runner(p, "CHAPTER 10 · 에필로그", ed); const inn = h("div", "inner");
-    const kids = Object.keys(FAMILY).filter(n => FAMILY[n] === ed && KIDS.includes(n));
-    inn.append(h("div", "sec", `${kids.join("·")}에게`));
-    const t = editable("div", "letter", "", "부모님이 아이들에게 남기는 한마디를 적어 주세요 (판마다 따로)", false); t.style.cssText = "font-size:20px;line-height:1.9;min-height:200px;word-break:keep-all"; inn.append(t);
-    const kp = spreadOut(famPhotos(ed, true).filter(p => kids.some(k => (p.people || "").includes(k))), 2); const g = grid(kp, 2, 1); g.style.marginTop = "18px"; inn.append(g);
+    const L = M.chat.편지 || {};
+    inn.append(editable("div", "letter-title", L.제목 || "책을 만들며", "제목", true)); inn.lastChild.className = "sec";
+    const t = editable("div", "letter-all", L.본문 || "", "책을 만들며 하고 싶은 말을 적어 주세요 (세 판 공통)", true);
+    t.style.cssText = "font-size:18px;line-height:1.85;word-break:keep-all;color:#2c2721"; inn.append(t);
+    const sg = editable("div", "letter-sign", L["보내는 사람"] || "", "보내는 사람", true); sg.style.cssText = "text-align:right;font-family:var(--display);font-size:22px;margin-top:14px"; inn.append(sg);
+    const g = grid(spreadOut(coverCands(tripPhotos()).slice(2), 3), 3, 1); g.style.marginTop = "18px"; inn.append(g);
     p.append(inn); }
-  { const p = newPage(st, "phfull"); const last = M.days[M.days.length - 1];
-    const ph = coverCands(Object.keys(M.items).filter(k => k.startsWith(last.d)).flatMap(k => M.items[k].photos))[0] || coverCands(tripPhotos())[1];
-    const f = h("div", "full"); if (ph) f.append(figure(ph)); p.append(f); p.append(h("div", "cover-shade"));
-    const tx = h("div", "full-txt"); tx.append(h("h2", "", "다음 여행에서 만나요"));
-    const nx = editable("p", "next", M.chat.다음여행 || "", "다음 여행 약속", true); tx.append(nx);
-    tx.append(h("p", "", "1년 뒤 오늘, 2027년 10월 13일에 이 책을 다시 펼쳐 보기"));
+  { const p = newPage(st, "phfull teaser"); const T = M.chat.예고 || {};
+    const ph = (shared2().text["teaser-ph"] && tripPhotos().find(x => x.file === shared2().text["teaser-ph"])) || outerCands()[3] || coverCands(tripPhotos())[1];
+    const f = h("div", "full"); f.dataset.pick = "teaser-ph"; if (ph) f.append(figure(ph)); p.append(f);
+    p.append(h("div", "teaser-shade"));
+    const tx = h("div", "teaser-txt");
+    tx.append(h("div", "tk", "NEXT TRIP · COMING SOON"));
+    const a1 = editable("div", "teaser-head", T.머리말 || "", "머리말", true); a1.className = "th1"; tx.append(a1);
+    const a2 = editable("div", "teaser-title", T.제목 || "다음 여행은 ○○이다!!", "제목", true); a2.className = "th2"; tx.append(a2);
+    const a3 = editable("div", "teaser-sub", T.부제 || "", "부제", true); a3.className = "th3"; tx.append(a3);
+    const a4 = editable("div", "teaser-list", T.목록 || "", "할 것들 (줄마다 하나)", true); a4.className = "th4"; tx.append(a4);
+    const a5 = editable("div", "teaser-date", T.개봉 || "", "개봉 예정", true); a5.className = "th5"; tx.append(a5);
+    tx.append(h("div", "th6", "1년 뒤 오늘, 2027년 10월 13일에 이 책을 다시 펼쳐 보기"));
     p.append(tx); p.querySelector(".folio").remove(); }
   return st.pages;
 }
@@ -995,7 +1012,7 @@ $("#book").addEventListener("click", e => {
   }
   const pk = e.target.closest("[data-pick]");
   if (pk) {
-    const key = pk.dataset.pick, fam = key.split("-")[1], cands = key === "cover-all" ? outerCands() : famCoverCands(fam);
+    const key = pk.dataset.pick, fam = key.split("-")[1], cands = (key === "cover-all" || key === "teaser-ph") ? outerCands() : famCoverCands(fam);
     const cur = (pk.querySelector("figure") || {}).dataset?.file, i = cands.findIndex(x => x.file === cur);
     if (cands.length) { shared2().text[key] = cands[(i + 1) % cands.length].file; rerender(); }
     return;
