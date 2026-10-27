@@ -152,6 +152,53 @@ body:not(.exporting) [data-slot]:hover{outline:4px solid #fee500;outline-offset:
 body:not(.exporting) .card:hover{outline:2px dashed var(--rose)}
 .who-tag{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;border-radius:6px;padding:1px 6px;pointer-events:none}
 body.exporting .who-tag,body.exporting .ed{display:none}
+/* 추가 장 공통 */
+.op .num{font-family:var(--display);font-size:170px;line-height:1;color:var(--rose)}
+.op h2{font-family:var(--display);font-weight:400;font-size:62px;line-height:1.15;margin:6px 0 10px;word-break:keep-all}
+.op .sub{font-family:var(--mono);font-size:14px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.op .body{font-size:19px;line-height:1.8;margin-top:20px;word-break:keep-all;color:#3a342c}
+.op .art{position:absolute;right:var(--m);bottom:110px;width:190px;transform:rotate(9deg);opacity:.95}
+.sec{font-family:var(--display);font-weight:400;font-size:32px;border-bottom:2px solid var(--ink);padding-bottom:6px;margin:0 0 14px}
+.sec small{font-family:var(--mono);font-size:13px;color:var(--muted);margin-left:8px;letter-spacing:.08em}
+.pgrid{display:grid;gap:8px;flex:1;min-height:0}
+.pgrid figure{margin:0;border-radius:10px;overflow:hidden;position:relative;min-height:0;background:var(--line)}
+.bars{display:grid;gap:7px;margin:4px 0 18px}
+.bars .r{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;font-size:15px}
+.bars .bar{height:14px;border-radius:7px;background:var(--azul)}
+.bars .r.me .bar{background:var(--rose)} .bars .r.me span:first-child{color:var(--rose);font-weight:600}
+.bars .r span:last-child{font-family:var(--mono);text-align:right}
+.big3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 18px}
+.big3 div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big3 b{display:block;font-family:var(--mono);font-weight:500;font-size:34px}
+.big3 small{color:var(--muted);font-size:13px}
+.tline{list-style:none;margin:0;padding:0 0 0 8px;border-left:2px solid var(--ink)}
+.tline li{position:relative;padding:0 0 18px 30px;font-size:19px;line-height:1.45;word-break:keep-all}
+.tline li:before{content:"";position:absolute;left:-9px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--rose)}
+.tline li b{display:block;font-family:var(--mono);font-size:14px;color:var(--rose);font-weight:500;letter-spacing:.06em}
+.prof .nick{font-family:var(--display);font-size:46px;line-height:1.15;word-break:keep-all}
+.prof .real{font-size:16px;color:var(--muted);margin:4px 0 8px}
+.prof .one{font-size:18px;line-height:1.6;border-left:4px solid var(--rose);padding-left:12px;margin:10px 0 12px;word-break:keep-all}
+.prof .pst{display:flex;gap:8px;margin-bottom:12px}
+.prof .pst span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px}
+.say{font-size:15px;color:var(--muted);margin:2px 0}
+.say b{color:var(--ink);font-weight:500}
+.qbox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px}
+.qbox .q{font-size:17px;font-weight:500;line-height:1.5}
+.qbox .a{font-size:14px;color:var(--muted);margin-top:4px}
+.qbox .rate{font-family:var(--mono);font-size:13px;color:var(--rose)}
+.full{position:absolute;inset:0}
+.full figure{margin:0;position:absolute;inset:0}
+.full-txt{position:absolute;left:var(--m);right:var(--m);bottom:90px;color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.5)}
+.full-txt h2{font-family:var(--display);font-weight:400;font-size:56px;line-height:1.2;margin:0 0 10px;word-break:keep-all}
+.full-txt p{font-size:19px;margin:0}
+[data-edit]{white-space:pre-wrap}
+body:not(.exporting) [data-edit]{outline:1px dashed rgba(179,18,42,.45);outline-offset:4px;cursor:text}
+body:not(.exporting) [data-edit]:empty:before{content:attr(data-ph);color:#b8a98f}
+body.exporting [data-edit]:empty{display:none}
+/* 겉표지 */
+.cvr .full-txt{bottom:auto;top:110px;text-align:center}
+.cvr .full-txt h2{font-size:78px}
+.cvr .ed2{position:absolute;bottom:70px;left:0;right:0;text-align:center;color:#fff;font-family:var(--mono);letter-spacing:.25em;font-size:16px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .stage{position:absolute;left:-99999px;top:0}
 </style>
 </head>
@@ -173,7 +220,8 @@ body.exporting .who-tag,body.exporting .ed{display:none}
     <li>위에서 <b>판</b>을 고르면 그 집 기준으로 사진·후기가 다시 배치됨</li>
     <li>고치기: <b>사진 클릭</b> = 같은 일정의 다음 후보 사진으로 바꿈 · <b>후기 카드 클릭</b> = 빼기/다시 넣기 · <b>오늘의 한 줄 클릭</b> = 다른 후기로 · <b>장 표지 클릭</b> = 다른 단체 사진 (표지는 세 판 공통)</li>
     <li><b>💾 편집 저장</b> → NAS <code>06_결과물/책_원고/편집.json</code>에 저장 (다음에 열어도 그대로)</li>
-    <li><b>🖼 JPG 내보내기</b> → <code>06_결과물/책_JPG/판이름/</code>에 쪽별 JPG(2468×2468, 도련 3mm 포함) 저장 → 퍼블로그에 순서대로 올림</li>
+    <li><b>🖼 JPG 내보내기</b> → <code>06_결과물/책_JPG/판이름/</code>에 내지 100쪽(p001~p100) + 표지_앞·표지_뒤 JPG(2468×2468, 도련 3mm 포함) 저장 → 퍼블로그에 순서대로 올림</li>
+    <li>점선 칸은 글을 직접 고칠 수 있는 곳 (비워 두면 인쇄 안 됨) · 여행 전 사진은 <code>05_베스트컷/여행전</code> 폴더에 넣으면 0·1장에 들어감</li>
   </ol>
   <p>필요한 파일: <code>06_결과물/책_사진/photos.json</code>(정리 스크립트), <code>06_결과물/책_원고/</code> 안의 앱 백업 JSON, <code>단톡_인용.json</code>. 사진과 글은 이 PC 안에서만 처리되고 어디에도 올라가지 않음.</p>
 </div>
@@ -194,7 +242,8 @@ const NICK = { "참돔파닥파닥": "성민", "오른5": "민희", "그대춤�
 const MKEY = { m0: "성민", m1: "윤이", m2: "미정", m3: "유복", m4: "민희", m5: "소윤", m6: "다빈", m7: "민준", m8: "주아", m9: "채윤" };
 // 장별 목표 쪽수 (기획서 8절) · 2장 시작 쪽 (속표지1 + 0장4 + 1장8 = 13쪽 다음)
 const PLAN = { 2: 10, 3: 12, 4: 18, 5: 10, 6: 6 }; // 후기 양에 맞춘 배분 (합계 56쪽)
-const START = 14;
+const START = 14; // 속표지 1 + 0장 4 + 1장 8 = 13쪽 다음
+const KIDS = ["다빈", "민준", "소윤", "채윤", "주아"];
 const DAYSTART = "03:00";
 const wordy = t => { const n = (t.match(/[가-힣]/g) || []).length; return n >= 5 && n / t.length >= 0.4; }; // 새벽 3시 전 사진은 전날 밤 일정으로
 
@@ -267,9 +316,14 @@ async function openFolder() {
   let chat = { 장면: [], 명대사: [] }; try { chat = await Src.json("06_결과물/책_원고/단톡_인용.json"); } catch (e) {}
   try { EDITS = await Src.json("06_결과물/책_원고/편집.json"); } catch (e) { try { EDITS = JSON.parse(localStorage.getItem("dw-book-edits") || "{}"); } catch (e2) { EDITS = {}; } }
   M = build(photos, bk, chat);
+  M.pre = (await Src.list("05_베스트컷/여행전")).filter(n => /\.(jpe?g|png|webp)$/i.test(n)).sort().map(n => ({ file: "05_베스트컷/여행전/" + n, w: 4, h: 3 }));
+  try { M.quiz = await loadQuiz(); } catch (e) { M.quiz = { QZ: [], MC: [] }; }
   $("#help").remove();
   ["#ed", "#ch", "#save", "#exp"].forEach(s => $(s).disabled = false);
-  const ch = $("#ch"); M.days.forEach((d, i) => ch.append(new Option(`${i + 2}장 · ${d.d.slice(5).replace("-", ".")}`, String(i + 2))));
+  const ch = $("#ch");
+  [["cover", "겉표지"], ["t", "속표지"], ["0", "0장 · 탄생"], ["1", "1장 · 준비"]].forEach(([v, t]) => ch.append(new Option(t, v)));
+  M.days.forEach((d, i) => ch.append(new Option(`${i + 2}장 · ${d.d.slice(5).replace("-", ".")}`, String(i + 2))));
+  [["7", "7장 · 우리 10명"], ["fam", "우리 집 이야기"], ["8", "8장 · 놀이"], ["9", "9장 · 숫자"], ["10", "10장 · 에필로그"]].forEach(([v, t]) => ch.append(new Option(t, v)));
   render();
 }
 
@@ -298,7 +352,8 @@ function build(photos, bk, chat) {
   }
   const dayCount = {}; photos.forEach(p => { if (p.day) dayCount[p.day] = (dayCount[p.day] || 0) + 1; });
   const mem = Object.keys(D.mem || {}).sort().map(k => ({ nick: D.mem[k].name, who: who(k) }));
-  return { days, revs, items, prog: D.prog || {}, chat, mem, dayCount, nPhotos: photos.filter(p => p.day).length, nRevs: revs.length, nPlaces: days.reduce((s, d) => s + d.items.length, 0) };
+  const gm = Object.entries(D.gm || {}).map(([k, r]) => ({ ...r, who: MKEY[r && r.who] || MKEY[k] || "", nick: nick(r && r.who || k) })).filter(r => r.who);
+  return { photos, gm, days, revs, items, prog: D.prog || {}, chat, mem, dayCount, nPhotos: photos.filter(p => p.day).length, nRevs: revs.length, nPlaces: days.reduce((s, d) => s + d.items.length, 0) };
 }
 
 /* 장 표지: 판과 상관없이 세 집이 함께, 가장 많은 사람이 나온 가로 사진 (세 판 공통) */
@@ -531,8 +586,322 @@ function card(r, ed) {
   c.dataset.rev = r.id; return c;
 }
 
+/* ---------------- 그 밖의 장 (0·1·7·우리 집·8·9·10장, 겉표지) ---------------- */
+const CARD_SVG = `<svg viewBox="0 0 100 150" aria-hidden="true"><rect x="4" y="4" width="92" height="142" rx="8" fill="#f4e6c8" stroke="#b3122a" stroke-width="6"/><path d="M60 22 l14 -4 M58 30 l16 -4" stroke="#b3122a" stroke-width="4"/><ellipse cx="50" cy="98" rx="30" ry="20" fill="#2a2018"/><circle cx="70" cy="92" r="2.5" fill="#f4e6c8"/><path d="M30 116 v10 M42 118 v10 M56 118 v10 M68 116 v10" stroke="#2a2018" stroke-width="4"/></svg>`;
+const shared2 = () => { const x = shared(); x.text = x.text || {}; return x; };
+function editable(tag, key, def, ph, isShared) {
+  const store = isShared ? shared2().text : (edOf().text = edOf().text || {});
+  const e = h(tag, ""); e.dataset.edit = key; e.dataset.shared = isShared ? "1" : ""; if (ph) e.dataset.ph = ph;
+  e.textContent = store[key] != null ? store[key] : (def || "");
+  e.contentEditable = "true"; return e;
+}
+async function loadQuiz() {
+  const t = await (await fetch("index.html", { cache: "no-store" })).text();
+  const grab = name => { const i = t.indexOf("const " + name + " = ["); if (i < 0) return []; const j = t.indexOf("\n];", i); return Function("return " + t.slice(t.indexOf("[", i), j + 2))(); };
+  return { QZ: grab("QZ"), MC: grab("MC") };
+}
+const nPeople = p => (p.people ? p.people.split("·").length : 0);
+function chatBox(sc, ed) {
+  const c = h("div", "chat", `<div class="hd">단톡방 · ${esc(sc.date ? sc.date.slice(5).replace("-", ".") + " · " : "")}${esc(sc.title || "")}</div>`);
+  sc.lines.forEach(([t, w, msg]) => c.append(h("div", "m" + (FAMILY[w] === ed ? " me" : ""), `<span class="nm">${esc(w)}</span><span class="bb">${esc(msg)}</span><span class="tm">${esc(t)}</span>`)));
+  return c;
+}
+function grid(list, cols, rows) {
+  const g = h("div", "pgrid"); g.style.gridTemplateColumns = `repeat(${cols},1fr)`; g.style.gridTemplateRows = `repeat(${rows},1fr)`;
+  list.slice(0, cols * rows).forEach(p => g.append(figure(p))); return g;
+}
+function bars(rows, ed, fmt) {
+  const max = Math.max(1, ...rows.map(r => r[1]));
+  const b = h("div", "bars");
+  rows.forEach(([label, v, who]) => b.append(h("div", "r" + (who && FAMILY[who] === ed ? " me" : ""), `<span>${esc(label)}</span><div class="bar" style="width:${Math.max(2, v / max * 100)}%"></div><span>${fmt ? fmt(v) : v.toLocaleString()}</span>`)));
+  return b;
+}
+function opener(st, ed, num, title, sub, body) {
+  const p = newPage(st, "op"); const inn = h("div", "inner");
+  inn.append(h("div", "num", esc(num)), h("h2", "", esc(title)));
+  if (sub) inn.append(h("div", "sub", esc(sub)));
+  if (body) { const b = h("div", "body"); b.append(body); inn.append(b); }
+  p.append(inn); return { p, inn };
+}
+function runner(p, label, ed) { p.append(h("div", "running", label)); p.append(h("div", "ed", ed + " 판")); }
+// 사진 고르기 도우미
+const tripPhotos = () => M.photos.filter(p => p.kind === "사진" && p.day && p.print_ok && p.print_ok !== "작게" && p.w);
+function personPicks(name, n, ed) {
+  const L = tripPhotos().filter(p => (p.people || "").split("·").includes(name) && !(p.people_src || "").startsWith("추정"));
+  const sc = p => (p.print_ok === "전면" ? 2 : 0) + (nPeople(p) === 1 ? 4 : nPeople(p) === 2 ? 2.5 : nPeople(p) <= 4 ? 1 : 0) + (p.best ? 5 : 0);
+  const sorted = L.sort((a, b) => sc(b) - sc(a) || (a.taken < b.taken ? -1 : 1));
+  const out = [], days = new Set();
+  for (const p of sorted) { if (out.length >= n) break; if (!days.has(p.day)) { out.push(p); days.add(p.day); } }
+  for (const p of sorted) { if (out.length >= n) break; if (!out.includes(p) && !out.some(q => Math.abs(Date.parse(q.taken.replace(" ", "T")) - Date.parse(p.taken.replace(" ", "T"))) < 60000)) out.push(p); }
+  return out;
+}
+function famPhotos(fam, onlyFam) {
+  const mem = Object.keys(FAMILY).filter(n => FAMILY[n] === fam);
+  return tripPhotos().filter(p => {
+    const ppl = (p.people || "").split("·").filter(Boolean); if (!ppl.length) return false;
+    if (onlyFam && ppl.some(n => FAMILY[n] !== fam)) return false;
+    return ppl.some(n => mem.includes(n));
+  }).sort((a, b) => (b["score_" + fam] || 0) - (a["score_" + fam] || 0));
+}
+function spreadOut(list, n) { // 비슷한 시간 사진 거르기
+  const out = []; for (const p of list) { if (out.length >= n) break; if (!out.some(q => Math.abs(Date.parse(q.taken.replace(" ", "T")) - Date.parse(p.taken.replace(" ", "T"))) < 90000)) out.push(p); } return out;
+}
+function famLines(fam) {
+  const scenes = [...(M.chat.장면 || []), ...((M.chat.탄생 || {}).장면 || []), ...(M.chat.준비장면 || [])];
+  return scenes.map(sc => ({ sc, n: sc.lines.filter(l => FAMILY[l[1]] === fam).length })).filter(x => x.n).sort((a, b) => b.n - a.n).map(x => x.sc);
+}
+
+function buildCh0(ed, pno) {
+  const st = { pno, pages: [], stage: $("#stage") }, C = M.chat.탄생 || {};
+  const a = opener(st, ed, "0", "돼지사냥꾼의 탄생", "2026.05.17 — 모임의 시작", editable("div", "ch0-body", C.글 || "", "모임이 시작된 이야기를 적어 주세요", true));
+  a.p.append(h("div", "art", CARD_SVG));
+  { const p = newPage(st); runner(p, "CHAPTER 0 · 탄생", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "그날의 단톡방"));
+    (C.장면 || []).slice(0, 2).forEach(sc => inn.append(chatBox(sc, ed))); p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 0 · 탄생", ed); const inn = h("div", "inner");
+    const sc = (C.장면 || [])[2];
+    if (sc) inn.append(h("div", "quote", `<div class="k">${esc(sc.date.slice(5).replace("-", "."))} · 마카오가 처음 나온 날</div><p>“${esc(sc.lines[0][2])}”</p><small>— ${esc(sc.lines[0][1])}</small>`));
+    inn.querySelector(".quote") && (inn.querySelector(".quote").style.marginTop = "0");
+    const N = M.chat.숫자 || {};
+    if (N.메시지) {
+      inn.append(h("div", "sec", `다섯 달 동안의 단톡방<small>${esc(N.기간 || "")}</small>`));
+      inn.append(h("div", "big3", `<div><b>${(N.메시지).toLocaleString()}</b><small>메시지</small></div><div><b>${N["대화한 날"] || ""}</b><small>대화한 날</small></div><div><b>${(N["ㅋ 개수"] || 0).toLocaleString()}</b><small>ㅋ</small></div>`));
+      inn.append(bars(Object.entries(N.사람별 || {}).map(([k, v]) => [k, v, k]), ed));
+    }
+    p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 0 · 탄생", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "열 명"));
+    if (M.pre.length >= 2) inn.append(grid(M.pre, 2, 2));
+    else {
+      const fams = ["구씨네", "조씨네", "홍씨네"];
+      fams.forEach(f => { const ppl = Object.keys(FAMILY).filter(n => FAMILY[n] === f);
+        inn.append(h("div", "prof", `<div class="nick" style="font-size:34px;${f === ed ? "color:var(--rose)" : ""}">${f}</div><div class="real" style="font-size:18px">${ppl.map(n => FULL[n]).join(" · ")}</div>`)); });
+      const ph = coverCands(tripPhotos())[0]; if (ph) { const g = grid([ph], 1, 1); g.style.marginTop = "10px"; inn.append(g); }
+    }
+    p.append(inn); }
+  return st.pages;
+}
+
+function buildCh1(ed, pno) {
+  const st = { pno, pages: [], stage: $("#stage") }, T = M.chat.연표 || [];
+  const pre = M.pre.slice(4);
+  const a = opener(st, ed, "1", "떠나기 전", "D-149 → D-DAY", editable("div", "ch1-body", "여행은 출발하기 다섯 달 전부터 시작됐다. 회비를 모으고, 잠옷을 맞추고, 결항에 놀라고, 고객센터와 싸우고, 캠핑으로 미리 손발을 맞췄다.", "", true));
+  { const half = Math.ceil(T.length / 2);
+    [T.slice(0, half), T.slice(half)].forEach((part, k) => { const p = newPage(st); runner(p, "CHAPTER 1 · 준비", ed); const inn = h("div", "inner");
+      inn.append(h("div", "sec", k ? "떠나기까지 (2)" : "떠나기까지 (1)"));
+      const ul = h("ul", "tline"); part.forEach(([d, t]) => ul.append(h("li", "", `<b>${esc(d)}</b>${esc(t)}`))); inn.append(ul); p.append(inn); }); }
+  { const p = newPage(st); runner(p, "CHAPTER 1 · 준비", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "출발 비행기가 사라졌다"));
+    (M.chat.준비장면 || []).slice(0, 3).forEach(sc => inn.append(chatBox(sc, ed))); p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 1 · 준비", ed); const inn = h("div", "inner");
+    const sc = (M.chat.준비장면 || [])[3]; if (sc) { inn.append(h("div", "sec", "그냥 여행 가는 게 아니야")); inn.append(chatBox(sc, ed)); }
+    inn.append(h("div", "sec", "준비의 숫자"));
+    inn.append(h("div", "big3", `<div><b>25만</b><small>한 달 회비 (6월부터)</small></div><div><b>30만</b><small>아이들이 직접 낸 비행기값</small></div><div><b>30번</b><small>고객센터에 건 전화</small></div>`));
+    inn.append(h("div", "big3", `<div><b>30만</b><small>숙소 다시 예약해 아낀 돈 (세 집)</small></div><div><b>10장</b><small>댄싱워터 표</small></div><div><b>1개</b><small>여행 앱 (10/3 공개)</small></div>`));
+    p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 1 · 준비", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "미리 맞춘 손발"));
+    const list = pre.length ? pre : spreadOut(ranked(M.items[M.days[0].d + "#0"].photos, ed), 4);
+    inn.append(grid(list, 2, 2)); p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 1 · 준비", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "출발 전날"));
+    inn.append(editable("div", "ch1-eve", "", "출발 전날 짐 싸던 이야기, 설렘을 적어 주세요 (비워 두면 인쇄 안 됨)", true));
+    const list = pre.length > 4 ? pre.slice(4) : spreadOut(ranked(M.items[M.days[0].d + "#0"].photos, ed).slice(4), 2);
+    inn.append(grid(list, 2, 1)); p.append(inn); }
+  { const p = newPage(st, "phfull"); const ph = coverCands(M.items[M.days[0].d + "#0"].photos.concat(M.items[M.days[0].d + "#1"].photos))[0] || ranked(M.items[M.days[0].d + "#0"].photos, ed)[0];
+    if (ph) { const f = h("div", "full"); f.append(figure(ph)); p.append(f); }
+    p.append(h("div", "cover-shade")); p.append(h("div", "full-txt", `<h2>그리고 10월 13일</h2><p>열 명이 인천공항에 모였다</p>`)); p.querySelector(".folio").remove(); }
+  return st.pages;
+}
+
+function personPage(st, name, ed, big) {
+  const revs = M.revs.filter(r => r.who === name);
+  const shot = M.photos.filter(p => p.person === name && p.day).length;
+  const seen = tripPhotos().filter(p => (p.people || "").split("·").includes(name)).length;
+  const said = [...(M.chat.장면 || []), ...((M.chat.탄생 || {}).장면 || []), ...(M.chat.준비장면 || [])].flatMap(sc => sc.lines.filter(l => l[1] === name).map(l => l[2]));
+  const bestRev = [...revs].filter(r => wordy(r.text)).sort((a, b) => (b.st - a.st) || (b.cm.length - a.cm.length) || (b.text.length - a.text.length));
+  const picks = personPicks(name, big ? 7 : 3, ed);
+  const nickName = (M.mem.find(m => m.who === name) || {}).nick || name;
+  const prof = () => { const d = h("div", "prof");
+    d.append(h("div", "nick", esc(nickName)), h("div", "real", `${esc(FULL[name])} · ${FAMILY[name]}`));
+    d.append(editable("div", "p-" + name, (M.chat.사람 || {})[name] || "", "한 줄 소개", true)); d.lastChild.className = "one";
+    d.append(h("div", "pst", `<span>사진에 나옴 ${seen}</span><span>찍은 사진 ${shot}</span><span>후기 ${revs.length}</span>`));
+    return d; };
+  if (big) {
+    const p1 = newPage(st, "phfull"); const f = h("div", "full"); if (picks[0]) f.append(figure(picks[0])); p1.append(f); p1.append(h("div", "cover-shade"));
+    p1.append(h("div", "full-txt", `<h2>${esc(nickName)}</h2><p>${esc(FULL[name])}</p>`));
+    const p2 = newPage(st); runner(p2, "CHAPTER 7 · 우리 10명", ed); const inn = h("div", "inner"); inn.append(prof());
+    const g = grid(picks.slice(1), 3, 2); inn.append(g);
+    const tail = h("div", ""); tail.style.marginTop = "10px";
+    bestRev.slice(0, 2).forEach(r => tail.append(card(r, ed)));
+    if (!bestRev.length) said.slice(0, 3).forEach(t => tail.append(h("div", "say", `<b>단톡방</b> “${esc(t)}”`)));
+    inn.append(tail); p2.append(inn);
+  } else {
+    const p = newPage(st); runner(p, "CHAPTER 7 · 우리 10명", ed); const inn = h("div", "inner"); inn.append(prof());
+    inn.append(grid(picks, 3, 1));
+    const tail = h("div", ""); tail.style.marginTop = "10px";
+    if (bestRev[0]) tail.append(card(bestRev[0], ed)); else said.slice(0, 2).forEach(t => tail.append(h("div", "say", `<b>단톡방</b> “${esc(t)}”`)));
+    inn.append(tail); p.append(inn);
+  }
+}
+function buildCh7(ed, pno) {
+  const st = { pno, pages: [], stage: $("#stage") };
+  const order = Object.keys(FAMILY).sort((a, b) => ((FAMILY[b] === ed) - (FAMILY[a] === ed)));
+  const mine = order.filter(n => FAMILY[n] === ed), others = order.filter(n => FAMILY[n] !== ed);
+  if (mine.length * 2 + others.length < 14) { // 홍씨네: 남는 2쪽은 '우리 10명' 여는 쪽
+    const a = opener(st, ed, "7", "우리 10명", "열 명의 한 쪽씩");
+    const g = grid(coverCands(tripPhotos()).slice(0, 1), 1, 1); g.style.marginTop = "16px"; a.inn.append(g);
+    const p = newPage(st); runner(p, "CHAPTER 7 · 우리 10명", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "모두 함께 나온 사진")); inn.append(grid(spreadOut(coverCands(tripPhotos()).slice(1), 4), 2, 2)); p.append(inn);
+  }
+  mine.forEach(n => personPage(st, n, ed, true));
+  others.forEach(n => personPage(st, n, ed, false));
+  return st.pages;
+}
+
+function buildFam(ed, pno) {
+  const st = { pno, pages: [], stage: $("#stage") };
+  const mem = Object.keys(FAMILY).filter(n => FAMILY[n] === ed);
+  const all = famPhotos(ed, false), only = famPhotos(ed, true);
+  const whole = only.filter(p => mem.every(n => (p.people || "").includes(n)));
+  { const p = newPage(st, "phfull"); const f = h("div", "full"); const ph = (whole[0] || only[0] || all[0]); if (ph) f.append(figure(ph)); p.append(f); p.append(h("div", "cover-shade"));
+    p.append(h("div", "full-txt", `<h2>우리 집 이야기 · ${ed}</h2><p>${mem.map(n => FULL[n]).join(" · ")}</p>`)); p.querySelector(".folio").remove(); }
+  { const p = newPage(st); runner(p, "우리 집 이야기", ed); const inn = h("div", "inner");
+    const revs = M.revs.filter(r => FAMILY[r.who] === ed);
+    inn.append(h("div", "sec", `${ed}의 숫자`));
+    inn.append(h("div", "big3", `<div><b>${all.length}</b><small>우리 가족이 나온 사진</small></div><div><b>${M.photos.filter(p => FAMILY[p.person] === ed && p.day).length}</b><small>우리 가족이 찍은 사진</small></div><div><b>${revs.length}</b><small>우리 가족이 쓴 후기</small></div>`));
+    inn.append(bars(mem.map(n => [n, tripPhotos().filter(p => (p.people || "").split("·").includes(n)).length, n]), ed));
+    inn.append(h("div", "sec", "우리 가족 후기 베스트"));
+    const best = revs.filter(r => wordy(r.text) && r.text.length < 90).sort((a, b) => (b.st - a.st) || (b.cm.length - a.cm.length) || (b.text.length - a.text.length)).slice(0, 4);
+    const cc = h("div", "cards"); best.forEach(r => cc.append(card(r, ed))); inn.append(cc); p.append(inn); }
+  { const p = newPage(st); runner(p, "우리 집 이야기", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "우리끼리"));
+    inn.append(grid(spreadOut(only.length ? only : all, 6), 3, 2)); p.append(inn); }
+  { const p = newPage(st); runner(p, "우리 집 이야기", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "우리 가족만의 시간 · 자유 시간"));
+    const free = (only.length ? only : all).filter(p => (p.day === "2026-10-16" && p.taken.slice(11, 16) < "10:00") || (p.day === "2026-10-17" && p.taken.slice(11, 16) < "13:00"));
+    inn.append(grid(spreadOut(free.length >= 3 ? free : only.slice(6), 4), 2, 2)); p.append(inn); }
+  { const p = newPage(st); runner(p, "우리 집 이야기", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "단톡방 속 우리 집"));
+    famLines(ed).slice(0, 2).forEach(sc => inn.append(chatBox(sc, ed))); p.append(inn); }
+  { const p = newPage(st); runner(p, "우리 집 이야기", ed); const inn = h("div", "inner");
+    const kids = mem.filter(n => KIDS.includes(n));
+    inn.append(h("div", "sec", `${kids.join("·")}의 마카오`));
+    const kr = M.revs.filter(r => kids.includes(r.who) && wordy(r.text)).sort((a, b) => (b.text.length - a.text.length)).slice(0, 4);
+    const cc = h("div", "cards"); kr.forEach(r => cc.append(card(r, ed))); inn.append(cc);
+    const kp = spreadOut(tripPhotos().filter(p => kids.some(k => (p.people || "").split("·").includes(k)) && nPeople(p) <= 3).sort((a, b) => (b["score_" + ed] || 0) - (a["score_" + ed] || 0)), 3);
+    inn.append(grid(kp, 3, 1)); p.append(inn); }
+  return st.pages;
+}
+
+function buildCh8(ed, pno) {
+  const st = { pno, pages: [], stage: $("#stage") };
+  const G = M.gm;
+  const a = opener(st, ed, "8", "놀이의 기록", "돼지친구들 · 셈왕 · 퀴즈");
+  a.inn.append(h("div", "sec", "🐷 돼지친구들"));
+  a.inn.append(bars(G.filter(r => r.pf).sort((x, y) => y.pf - x.pf).map(r => [`${r.who} (레벨 ${r.pl || 0})`, +r.pf, r.who]), ed, v => v + "점"));
+  { const p = newPage(st); runner(p, "CHAPTER 8 · 놀이", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "🧮 셈왕"));
+    inn.append(bars(G.filter(r => +r.sm).sort((x, y) => y.sm - x.sm).map(r => [`${r.who} (레벨 ${r.sl || 0})`, +r.sm, r.who]), ed, v => v + "점"));
+    inn.append(h("div", "sec", "🏆 여행 박사 (OX·객관식)"));
+    const pts = r => Object.values(r.qz || {}).filter(v => v === 1).length * 2 + Object.values(r.mc || {}).filter(v => v === 1).length * 3;
+    inn.append(bars(G.filter(r => pts(r)).sort((x, y) => pts(y) - pts(x)).map(r => [r.who, pts(r), r.who]), ed, v => v + "점"));
+    p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 8 · 놀이", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "다들 가장 많이 틀린 문제"));
+    const stat = {}; G.forEach(r => { Object.entries(r.qz || {}).forEach(([k, v]) => { (stat[k] = stat[k] || [0, 0])[v === 1 ? 0 : 1]++; }); Object.entries(r.mc || {}).forEach(([k, v]) => { (stat[k] = stat[k] || [0, 0])[v === 1 ? 0 : 1]++; }); });
+    const qmap = {}; (M.quiz.QZ || []).forEach(q => qmap[q[0]] = { q: q[2], a: (q[3] ? "⭕ 맞다" : "❌ 아니다") + " · " + q[4] });
+    (M.quiz.MC || []).forEach(q => qmap[q[0]] = { q: q[2], a: "정답: " + q[3][q[4]] + " · " + q[5] });
+    const worst = Object.entries(stat).filter(([k, v]) => qmap[k] && v[0] + v[1] >= 3).sort((x, y) => (y[1][1] / (y[1][0] + y[1][1])) - (x[1][1] / (x[1][0] + x[1][1])) || (y[1][1] - x[1][1])).slice(0, 4);
+    worst.forEach(([k, v]) => inn.append(h("div", "qbox", `<div class="rate">${v[0] + v[1]}명 중 ${v[1]}명이 틀림</div><div class="q">${esc(qmap[k].q)}</div><div class="a">${esc(qmap[k].a)}</div>`)));
+    p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 8 · 놀이", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "아이들 다섯"));
+    const kp = tripPhotos().filter(p => KIDS.filter(k => (p.people || "").split("·").includes(k)).length >= 4).sort((a, b) => (b["score_" + ed] || 0) - (a["score_" + ed] || 0));
+    inn.append(grid(spreadOut(kp, 4), 2, 2)); p.append(inn); }
+  return st.pages;
+}
+
+function buildCh9(ed, pno) {
+  const st = { pno, pages: [], stage: $("#stage") };
+  const P = M.photos.filter(p => p.day), T = tripPhotos();
+  const a = opener(st, ed, "9", "숫자로 본 여행", "photos · reviews · chat");
+  a.inn.append(h("div", "big3", `<div><b>${P.length.toLocaleString()}</b><small>사진·영상</small></div><div><b>${M.revs.length}</b><small>후기</small></div><div><b>${M.revs.reduce((s, r) => s + r.cm.length, 0)}</b><small>댓글</small></div>`));
+  a.inn.append(h("div", "sec", "누가 많이 찍었나"));
+  const by = {}; P.forEach(p => by[p.person] = (by[p.person] || 0) + 1);
+  a.inn.append(bars(Object.entries(by).filter(([k]) => FAMILY[k]).sort((x, y) => y[1] - x[1]).map(([k, v]) => [k, v, k]), ed));
+  { const p = newPage(st); runner(p, "CHAPTER 9 · 숫자", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "누가 많이 나왔나 <small>얼굴 인식</small>"));
+    inn.append(bars(Object.keys(FAMILY).map(n => [n, T.filter(p => (p.people || "").split("·").includes(n)).length, n]).sort((x, y) => y[1] - x[1]), ed));
+    inn.append(h("div", "sec", "날짜별 사진"));
+    inn.append(bars(M.days.map((d, i) => [`DAY ${i + 1} · ${d.d.slice(5).replace("-", ".")}`, M.dayCount[d.d] || 0]), ed));
+    p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 9 · 숫자", ed); const inn = h("div", "inner");
+    inn.append(h("div", "sec", "누가 후기를 많이 썼나"));
+    const rb = {}; M.revs.forEach(r => rb[r.who] = (rb[r.who] || 0) + 1);
+    inn.append(bars(Object.entries(rb).sort((x, y) => y[1] - x[1]).map(([k, v]) => [k, v, k]), ed));
+    inn.append(h("div", "sec", "별점 높은 곳 <small>후기 3개 이상</small>"));
+    const per = {}; M.revs.filter(r => r.st).forEach(r => (per[r.b] = per[r.b] || []).push(r.st));
+    const top = Object.entries(per).filter(([, v]) => v.length >= 3).map(([k, v]) => [M.items[k] ? M.items[k].title.replace(/^(아침|점심|저녁) · /, "") : k, v.reduce((s, x) => s + x, 0) / v.length]).sort((x, y) => y[1] - x[1]).slice(0, 6);
+    inn.append(bars(top, ed, v => "★ " + v.toFixed(1)));
+    p.append(inn); }
+  { const p = newPage(st); runner(p, "CHAPTER 9 · 숫자", ed); const inn = h("div", "inner");
+    const N = M.chat.숫자 || {};
+    inn.append(h("div", "sec", "단톡방 숫자"));
+    inn.append(h("div", "big3", `<div><b>${(N.메시지 || 0).toLocaleString()}</b><small>메시지</small></div><div><b>${(N["공유 사진"] || 0).toLocaleString()}</b><small>공유한 사진</small></div><div><b>${(N["ㅋ 개수"] || 0).toLocaleString()}</b><small>ㅋ</small></div>`));
+    inn.append(bars(Object.entries(N.사람별 || {}).map(([k, v]) => [k, v, k]), ed));
+    if (N["가장 뜨거운 날"]) inn.append(h("div", "say", `<b>가장 뜨거운 날</b> ${esc(N["가장 뜨거운 날"])}`));
+    const fams = ["구씨네", "조씨네", "홍씨네"];
+    inn.append(h("div", "sec", "집별로 나온 사진"));
+    inn.append(bars(fams.map(f => [f, T.filter(p => (p.families || "").includes(f)).length, Object.keys(FAMILY).find(n => FAMILY[n] === f)]).concat([["세 집 모두", T.filter(p => (p.families || "").split("·").length === 3).length]]), ed));
+    p.append(inn); }
+  return st.pages;
+}
+
+function buildCh10(ed, pno) {
+  const st = { pno, pages: [], stage: $("#stage") };
+  const a = opener(st, ed, "10", "다음은 2배로", "after the trip");
+  (M.chat.귀국 || []).forEach(([t, w, msg]) => a.inn.append(h("div", "say", `<b>${esc(t)} ${esc(w)}</b> “${esc(msg)}”`)));
+  { const p = newPage(st); runner(p, "CHAPTER 10 · 에필로그", ed); const inn = h("div", "inner");
+    const kids = Object.keys(FAMILY).filter(n => FAMILY[n] === ed && KIDS.includes(n));
+    inn.append(h("div", "sec", `${kids.join("·")}에게`));
+    const t = editable("div", "letter", "", "부모님이 아이들에게 남기는 한마디를 적어 주세요 (판마다 따로)", false); t.style.cssText = "font-size:20px;line-height:1.9;min-height:200px;word-break:keep-all"; inn.append(t);
+    const kp = spreadOut(famPhotos(ed, true).filter(p => kids.some(k => (p.people || "").includes(k))), 2); const g = grid(kp, 2, 1); g.style.marginTop = "18px"; inn.append(g);
+    p.append(inn); }
+  { const p = newPage(st, "phfull"); const last = M.days[M.days.length - 1];
+    const ph = coverCands(Object.keys(M.items).filter(k => k.startsWith(last.d)).flatMap(k => M.items[k].photos))[0] || coverCands(tripPhotos())[1];
+    const f = h("div", "full"); if (ph) f.append(figure(ph)); p.append(f); p.append(h("div", "cover-shade"));
+    const tx = h("div", "full-txt"); tx.append(h("h2", "", "다음 여행에서 만나요"));
+    const nx = editable("p", "next", M.chat.다음여행 || "", "다음 여행 약속", true); tx.append(nx);
+    tx.append(h("p", "", "1년 뒤 오늘, 2027년 10월 13일에 이 책을 다시 펼쳐 보기"));
+    p.append(tx); p.querySelector(".folio").remove(); }
+  return st.pages;
+}
+
+function buildOuter(ed) {
+  const st = { pno: 0, pages: [], stage: $("#stage") };
+  const mem = Object.keys(FAMILY).filter(n => FAMILY[n] === ed);
+  const fam = famPhotos(ed, true).filter(p => mem.every(n => (p.people || "").includes(n)) && p.shape === "가로");
+  const front = newPage(st, "cvr"); front.dataset.out = "표지_앞"; front.querySelector(".folio").remove();
+  const ph = (shared2().text["cover-" + ed] && tripPhotos().find(p => p.file === shared2().text["cover-" + ed])) || fam[0] || coverCands(tripPhotos())[0];
+  const f = h("div", "full"); if (ph) f.append(figure(ph)); front.append(f); front.append(h("div", "cover-shade"));
+  front.append(h("div", "full-txt", `<h2>돼지사냥꾼 가족들의<br>마카오 4박 5일</h2><p>2026.10.13 – 10.17</p>`));
+  front.append(h("div", "ed2", `${ed.toUpperCase()} 판 · ${mem.map(n => FULL[n]).join(" · ")}`));
+  const back = newPage(st, "cvr"); back.dataset.out = "표지_뒤"; back.querySelector(".folio").remove();
+  const inn = h("div", "inner"); inn.style.cssText = "justify-content:center;align-items:center;text-align:center;gap:18px";
+  inn.innerHTML = `<div style="width:120px;transform:rotate(8deg)">${CARD_SVG}</div><p style="font-family:var(--display);font-size:40px;margin:0">“행복한 한 주였어”</p><small style="color:var(--muted);font-size:16px">— 단톡방, 2026.10.18</small><div style="font-family:var(--mono);color:var(--muted);letter-spacing:.2em;margin-top:30px">구씨네 · 조씨네 · 홍씨네</div>`;
+  back.append(inn);
+  return st.pages;
+}
+document.addEventListener("input", e => {
+  const el = e.target.closest && e.target.closest("[data-edit]"); if (!el || !M) return;
+  const store = el.dataset.shared ? shared2().text : (edOf().text = edOf().text || {});
+  store[el.dataset.edit] = el.innerText.replace(/\n$/, "");
+  try { localStorage.setItem("dw-book-edits", JSON.stringify(EDITS)); } catch (err) {}
+});
+
 /* ---------------- 화면에 그리기 ---------------- */
-let PAGES = [];
+let PAGES = [], OUTER = [];
 async function render() {
   const ed = E(), only = $("#ch").value;
   $("#st").textContent = `${ed} 판 배치 중…`;
@@ -568,14 +937,32 @@ async function render() {
       book.append(sp);
     }
   };
-  if (only === "all") { show(title, "속표지"); PAGES.push(...title); }
-  for (const c of chapters) if (only === "all" || only === String(c.ch)) { show(c.pages, `${c.ch}장 · ${c.day.d.slice(5).replace("-", ".")} ${c.day.title}`); PAGES.push(...c.pages); }
+  const end = START + Object.values(PLAN).reduce((a, b) => a + b, 0);
+  const extra = [
+    { key: "0", label: "0장 · 돼지사냥꾼의 탄생", pages: buildCh0(ed, 2), want: 4 },
+    { key: "1", label: "1장 · 떠나기 전", pages: buildCh1(ed, 6), want: 8 },
+    { key: "7", label: "7장 · 우리 10명", pages: buildCh7(ed, end), want: 14 },
+    { key: "fam", label: "우리 집 이야기 · " + ed, pages: buildFam(ed, end + 14), want: 6 },
+    { key: "8", label: "8장 · 놀이의 기록", pages: buildCh8(ed, end + 20), want: 4 },
+    { key: "9", label: "9장 · 숫자로 본 여행", pages: buildCh9(ed, end + 24), want: 4 },
+    { key: "10", label: "10장 · 다음은 2배로", pages: buildCh10(ed, end + 28), want: 3 }];
+  const outer = buildOuter(ed);
+  stage.innerHTML = "";
+  extra.forEach(x => counts.append(h("span", x.pages.length !== x.want ? "warn" : "", `${x.key === "fam" ? "우리 집" : x.key + "장"} ${x.pages.length}/${x.want}쪽`)));
+  const total = 1 + extra.reduce((s2, x) => s2 + x.pages.length, 0) + chapters.reduce((s2, c) => s2 + c.pages.length, 0);
+  counts.append(h("span", total !== 100 ? "warn" : "", `내지 ${total}쪽`));
+  const seq = [{ key: "t", label: "속표지", pages: title }, extra[0], extra[1],
+    ...chapters.map(c => ({ key: String(c.ch), label: `${c.ch}장 · ${c.day.d.slice(5).replace("-", ".")} ${c.day.title}`, pages: c.pages })),
+    ...extra.slice(2)];
+  for (const x of seq) if (only === "all" || only === x.key) { show(x.pages, x.label); PAGES.push(...x.pages); }
+  if (only === "all" || only === "cover") { book.append(h("div", "chap-h", "겉표지 (앞 · 뒤) — 퍼블로그 표지에 따로 올림")); const sp = h("div", "spread"); outer.forEach(p => sp.append(p)); book.append(sp); OUTER = outer; }
   $("#st").textContent = `${ed} 판 · ${PAGES.length}쪽 표시 · 사진·후기를 눌러 고칠 수 있어요`;
 }
 
 /* ---------------- 클릭으로 고치기 ---------------- */
 $("#book").addEventListener("click", e => {
   if (document.body.classList.contains("exporting")) return;
+  if (e.target.closest("[data-edit]")) return;
   const ex = edOf();
   const slotEl = e.target.closest("[data-slot]");
   if (slotEl) {
@@ -644,7 +1031,15 @@ $("#exp").onclick = async () => {
       imgs.forEach(im => { im.src = im.dataset.small; });
       pg.classList.remove("bleed");
     }
-    $("#st").textContent = `${ed} 판 ${PAGES.length}쪽을 06_결과물/책_JPG/${ed}/ 에 저장했어요`;
+    for (const pg of OUTER) {
+      pg.classList.add("bleed");
+      const imgs = [...pg.querySelectorAll("img[data-file]")];
+      await Promise.all(imgs.map(async im => { im.dataset.small = im.src; im.src = await loadImg(im.dataset.file, true); await im.decode().catch(() => {}); }));
+      const url = await htmlToImage.toJpeg(pg, { quality: 0.92, pixelRatio: 2468 / 1045, width: 1045, height: 1045, fontEmbedCSS: fontCSS, backgroundColor: "#f7f3ea" });
+      await Src.write(`06_결과물/책_JPG/${ed}/${pg.dataset.out}.jpg`, await (await fetch(url)).blob());
+      imgs.forEach(im => { im.src = im.dataset.small; }); pg.classList.remove("bleed");
+    }
+    $("#st").textContent = `${ed} 판 ${PAGES.length}쪽 + 겉표지를 06_결과물/책_JPG/${ed}/ 에 저장했어요`;
   } catch (e) { console.error(e); $("#st").textContent = "내보내기 실패: " + e.message; }
   finally { document.body.classList.remove("exporting"); btns.forEach(b => b.disabled = false); }
 };
