@@ -639,6 +639,10 @@ $("#exp").onclick = async () => {
   } catch (e) { console.error(e); $("#st").textContent = "내보내기 실패: " + e.message; }
   finally { document.body.classList.remove("exporting"); btns.forEach(b => b.disabled = false); }
 };
+// 화면 폭에 맞춰 펼침면을 줄여 보여 줌 (내보낼 때는 원래 크기)
+function fitZoom() { const z = Math.min(1, (innerWidth - 48) / 2060); $("#book").style.zoom = document.body.classList.contains("exporting") ? 1 : z; }
+addEventListener("resize", fitZoom); fitZoom();
+new MutationObserver(fitZoom).observe(document.body, { attributes: true, attributeFilter: ["class"] });
 if (Src.http) openFolder();
 </script>
 </body>
