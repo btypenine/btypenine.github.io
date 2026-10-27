@@ -220,7 +220,7 @@ body.exporting [data-edit]:empty{display:none}
     <li>집 PC에서 <b>파일 탐색기 → 주소창에 <code>\\192.168.219.112</code></b> 입력 → <code>2026_마카오_돼지사냥꾼</code> 폴더가 보이는지 확인 (NAS 아이디로 로그인)</li>
     <li>이 화면에서 <b>📂 NAS 폴더 열기</b> → 그 폴더 선택 → ‘파일 보기 허용’, 내보낼 때 ‘변경사항 저장 허용’</li>
     <li>위에서 <b>판</b>을 고르면 그 집 기준으로 사진·후기가 다시 배치됨</li>
-    <li>고치기: <b>사진 클릭</b> = 같은 일정의 다음 후보 사진으로 바꿈 · <b>후기 카드 클릭</b> = 빼기/다시 넣기 · <b>오늘의 한 줄 클릭</b> = 다른 후기로 · <b>장 표지 클릭</b> = 다른 단체 사진 (표지는 세 판 공통) · <b>겉표지·우리 집 첫 쪽 클릭</b> = 우리 가족 전원이 얼굴로 확인된 다른 사진</li>
+    <li>고치기: <b>사진 클릭</b> = 같은 일정의 다음 후보 사진으로 바꿈 · <b>후기 카드 클릭</b> = 빼기/다시 넣기 · <b>오늘의 한 줄 클릭</b> = 다른 후기로 · <b>장 표지 클릭</b> = 다른 단체 사진 (표지는 세 판 공통) · <b>겉표지 클릭</b> = 다른 마카오 단체 사진 (세 판 공통) · <b>우리 집 첫 쪽 클릭</b> = 우리 가족 전원이 나온 다른 사진</li>
     <li><b>💾 편집 저장</b> → NAS <code>06_결과물/책_원고/편집.json</code>에 저장 (다음에 열어도 그대로)</li>
     <li><b>🖼 JPG 내보내기</b> → <code>06_결과물/책_JPG/판이름/</code>에 내지 100쪽(p001~p100) + 표지_앞·표지_뒤 JPG(2468×2468, 도련 3mm 포함) 저장 → 퍼블로그에 순서대로 올림</li>
     <li>점선 칸은 글을 직접 고칠 수 있는 곳 (비워 두면 인쇄 안 됨) · 여행 전 사진은 <code>05_베스트컷/여행전</code> 폴더에 넣으면 0·1장에 들어감</li>
@@ -645,6 +645,14 @@ function famCoverCands(fam) {
   const others = p => p.people.split("·").filter(n => FAMILY[n] !== fam).length;
   return L.sort((a, b) => (others(a) - others(b)) || ((b.shape === "가로") - (a.shape === "가로")) || ((b.print_ok === "전면") - (a.print_ok === "전면")) || ((b["score_" + fam] || 0) - (a["score_" + fam] || 0)));
 }
+function outerCands() {
+  // 겉표지: 세 판 공통 · 세 집 모두 얼굴로 확인된 마카오 단체 사진 (인천공항·기내 제외)
+  const inKorea = p => (p.lat && +p.lat > 30) || (p.day === "2026-10-13" && p.taken.slice(11, 16) < "17:00") || (p.day === "2026-10-17" && p.taken.slice(11, 16) >= "17:30");
+  const L = coverCands(tripPhotos().filter(p => sure(p) && !inKorea(p)));
+  const seen = new Set(), out = [];
+  for (const p of (L.length ? L : coverCands(tripPhotos()))) { const k = p.file.replace(/_\d+(\.\w+)$/, "$1"); if (!seen.has(k)) { seen.add(k); out.push(p); } }
+  return out;
+}
 function famPhotos(fam, onlyFam) {
   const mem = Object.keys(FAMILY).filter(n => FAMILY[n] === fam);
   return tripPhotos().filter(p => {
@@ -892,10 +900,10 @@ function buildCh10(ed, pno) {
 function buildOuter(ed) {
   const st = { pno: 0, pages: [], stage: $("#stage") };
   const mem = Object.keys(FAMILY).filter(n => FAMILY[n] === ed);
-  const fc = famCoverCands(ed), pk = shared2().text["cover-" + ed];
+  const fc = outerCands(), pk = shared2().text["cover-all"];
   const front = newPage(st, "cvr"); front.dataset.out = "표지_앞"; front.querySelector(".folio").remove();
-  const ph = (pk && fc.find(p => p.file === pk)) || fc[0] || coverCands(tripPhotos())[0];
-  const f = h("div", "full"); f.dataset.pick = "cover-" + ed; if (ph) f.append(figure(ph)); front.append(f); front.append(h("div", "cover-shade"));
+  const ph = (pk && fc.find(p => p.file === pk)) || fc[0];
+  const f = h("div", "full"); f.dataset.pick = "cover-all"; if (ph) f.append(figure(ph)); front.append(f); front.append(h("div", "cover-shade"));
   front.append(h("div", "full-txt", `<h2>돼지사냥꾼 가족들의<br>마카오 4박 5일</h2><p>2026.10.13 – 10.17</p>`));
   front.append(h("div", "ed2", `${ed.toUpperCase()} 판 · ${mem.map(n => FULL[n]).join(" · ")}`));
   const back = newPage(st, "cvr"); back.dataset.out = "표지_뒤"; back.querySelector(".folio").remove();
@@ -987,7 +995,7 @@ $("#book").addEventListener("click", e => {
   }
   const pk = e.target.closest("[data-pick]");
   if (pk) {
-    const key = pk.dataset.pick, fam = key.split("-")[1], cands = famCoverCands(fam);
+    const key = pk.dataset.pick, fam = key.split("-")[1], cands = key === "cover-all" ? outerCands() : famCoverCands(fam);
     const cur = (pk.querySelector("figure") || {}).dataset?.file, i = cands.findIndex(x => x.file === cur);
     if (cands.length) { shared2().text[key] = cands[(i + 1) % cands.length].file; rerender(); }
     return;
