@@ -171,7 +171,7 @@ body.exporting .who-tag,body.exporting .ed{display:none}
     <li>집 PC에서 <b>파일 탐색기 → 주소창에 <code>\\192.168.219.112</code></b> 입력 → <code>2026_마카오_돼지사냥꾼</code> 폴더가 보이는지 확인 (NAS 아이디로 로그인)</li>
     <li>이 화면에서 <b>📂 NAS 폴더 열기</b> → 그 폴더 선택 → ‘파일 보기 허용’, 내보낼 때 ‘변경사항 저장 허용’</li>
     <li>위에서 <b>판</b>을 고르면 그 집 기준으로 사진·후기가 다시 배치됨</li>
-    <li>고치기: <b>사진 클릭</b> = 같은 일정의 다음 후보 사진으로 바꿈 · <b>후기 카드 클릭</b> = 빼기/다시 넣기 · <b>오늘의 한 줄 클릭</b> = 다른 후기로 · <b>장 표지 클릭</b> = 다른 표지 사진</li>
+    <li>고치기: <b>사진 클릭</b> = 같은 일정의 다음 후보 사진으로 바꿈 · <b>후기 카드 클릭</b> = 빼기/다시 넣기 · <b>오늘의 한 줄 클릭</b> = 다른 후기로 · <b>장 표지 클릭</b> = 다른 단체 사진 (표지는 세 판 공통)</li>
     <li><b>💾 편집 저장</b> → NAS <code>06_결과물/책_원고/편집.json</code>에 저장 (다음에 열어도 그대로)</li>
     <li><b>🖼 JPG 내보내기</b> → <code>06_결과물/책_JPG/판이름/</code>에 쪽별 JPG(2468×2468, 도련 3mm 포함) 저장 → 퍼블로그에 순서대로 올림</li>
   </ol>
@@ -301,6 +301,15 @@ function build(photos, bk, chat) {
   return { days, revs, items, prog: D.prog || {}, chat, mem, dayCount, nPhotos: photos.filter(p => p.day).length, nRevs: revs.length, nPlaces: days.reduce((s, d) => s + d.items.length, 0) };
 }
 
+/* 장 표지: 판과 상관없이 세 집이 함께, 가장 많은 사람이 나온 가로 사진 (세 판 공통) */
+function coverCands(all) {
+  const n = p => (p.people ? p.people.split("·").length : 0), f = p => (p.families ? p.families.split("·").length : 0);
+  const good = all.filter(x => x.shape === "가로" && x.print_ok === "전면");
+  const list = (good.length ? good : all.filter(x => x.shape === "가로")).filter(x => (x.people_src || "").includes("얼굴") || !x.people_src);
+  return list.sort((a, b) => (f(b) - f(a)) || (n(b) - n(a)) || ((b.best ? 1 : 0) - (a.best ? 1 : 0)) || (a.taken < b.taken ? -1 : 1));
+}
+const shared = () => (EDITS._공통 = EDITS._공통 || { cover: {} });
+
 /* 판별 사진 고르기: 점수순 + 연사 거르기 + 다른 집 최소 1컷 */
 function ranked(list, ed) {
   const sc = p => (p["score_" + ed] || 0) + (p.print_ok === "전면" ? 0 : -0.5);
@@ -374,9 +383,9 @@ function buildDay(day, di, ed, per, startPno) {
   {
     const p = newPage(st, "cover"); p.querySelector(".folio").remove();
     const all = Object.values(plan).flatMap(x => x.pool);
-    const cands = ranked(all.filter(x => x.shape === "가로" && x.print_ok === "전면"), ed);
+    const cands = coverCands(all);
     let cov = cands[0];
-    const cf = ex.cover[day.d]; if (cf) cov = all.find(x => x.file === cf) || cov;
+    const cf = shared().cover[day.d]; if (cf) cov = all.find(x => x.file === cf) || cov;
     if (cov) { const c = h("div", "cover-ph"); c.dataset.cover = day.d; c.append(figure(cov)); c.firstChild.style.cssText = "position:absolute;inset:0;margin:0"; p.append(c); used.add(cov.file); }
     p.append(h("div", "cover-shade"));
     p.append(h("div", "chno", String(ch)));
@@ -581,9 +590,9 @@ $("#book").addEventListener("click", e => {
   const cov = e.target.closest("[data-cover]");
   if (cov) {
     const d = cov.dataset.cover, all = Object.keys(M.items).filter(k => k.startsWith(d)).flatMap(k => M.items[k].photos);
-    const cands = ranked(all.filter(x => x.shape === "가로" && x.print_ok === "전면"), E());
+    const cands = coverCands(all);
     const cur = cov.querySelector("figure").dataset.file, i = cands.findIndex(x => x.file === cur);
-    if (cands.length) { ex.cover[d] = cands[(i + 1) % cands.length].file; rerender(); }
+    if (cands.length) { shared().cover[d] = cands[(i + 1) % cands.length].file; rerender(); }
     return;
   }
   const bp = e.target.closest("[data-best]");
