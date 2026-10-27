@@ -650,7 +650,7 @@ function outerCands() {
   const inKorea = p => (p.lat && +p.lat > 30) || (p.day === "2026-10-13" && p.taken.slice(11, 16) < "17:00") || (p.day === "2026-10-17" && p.taken.slice(11, 16) >= "17:30");
   const L = coverCands(tripPhotos().filter(p => sure(p) && !inKorea(p)));
   const seen = new Set(), out = [];
-  for (const p of (L.length ? L : coverCands(tripPhotos()))) { const k = p.file.replace(/_\d+(\.\w+)$/, "$1"); if (!seen.has(k)) { seen.add(k); out.push(p); } }
+  for (const p of (L.length ? L : coverCands(tripPhotos()))) { const k = p.taken.slice(0, 16); if (!seen.has(k)) { seen.add(k); out.push(p); } }
   return out;
 }
 function famPhotos(fam, onlyFam) {
