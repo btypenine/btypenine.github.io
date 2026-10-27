@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>여행책 편집기</title>
+<link rel="icon" href="icon-192.png">
+<script>
+// 글꼴: 기본은 jsDelivr, 시험용으로 ?fontbase= 로 바꿀 수 있음
+(function () {
+  const q = new URLSearchParams(location.search), base = q.get("fontbase") || "https://cdn.jsdelivr.net/npm/";
+  const ver = base.includes("jsdelivr") ? { "song-myung": "@5.3.1", "ibm-plex-sans-kr": "@5.3.0", "ibm-plex-mono": "@5.3.0" } : {};
+  [["song-myung", "400"], ["ibm-plex-sans-kr", "400"], ["ibm-plex-sans-kr", "500"], ["ibm-plex-sans-kr", "600"], ["ibm-plex-mono", "400"], ["ibm-plex-mono", "500"]].forEach(([f, w]) => {
+    const l = document.createElement("link"); l.rel = "stylesheet"; l.crossOrigin = "anonymous";
+    l.href = `${base}@fontsource/${f}${ver[f] || ""}/${w}.css`; document.head.append(l);
+  });
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<style>
+/* 1mm = 5px · 쪽 203mm = 1015px, 도련 포함 209mm = 1045px */
+:root{
+  --paper:#f7f3ea; --card:#fffdf8; --ink:#1d1a16; --muted:#6f675c; --line:#e4dccd;
+  --rose:#b3122a; --azul:#1d4ea6; --gold:#c9952b;
+  --display:"Song Myung",serif; --body:"IBM Plex Sans KR",sans-serif; --mono:"IBM Plex Mono",monospace;
+  --pg:1015px; --m:65px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#7d776e;font-family:var(--body);color:var(--ink)}
+/* 도구 모음 (책에는 안 나감) */
+.bar{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px;background:#1d1a16;color:#efe8db;font-size:14px}
+.bar b{font-family:var(--display);font-weight:400;font-size:20px;margin-right:6px}
+.bar button,.bar select{font:inherit;font-size:14px;border:1px solid #4a443a;background:#2a2620;color:#efe8db;border-radius:9px;padding:7px 12px;cursor:pointer}
+.bar button.pri{background:#b3122a;border-color:#b3122a;color:#fff}
+.bar button:disabled{opacity:.4;cursor:default}
+.bar .st{color:#c9bfae;font-size:13px;margin-left:auto}
+.help{max-width:880px;margin:24px auto;background:#f7f3ea;border-radius:14px;padding:22px 26px;font-size:15px;line-height:1.7}
+.help h2{font-family:var(--display);font-weight:400;font-size:28px;margin:0 0 8px}
+.help code{background:#ece4d5;border-radius:5px;padding:1px 6px}
+.help ol{padding-left:20px}
+.counts{max-width:1100px;margin:12px auto 0;display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.counts span{background:#2a2620;color:#efe8db;border-radius:999px;padding:3px 12px;font-size:13px}
+.counts span.warn{background:#b3122a}
+.book{display:flex;flex-direction:column;align-items:center;gap:34px;padding:30px 16px 80px}
+.chap-h{color:#fff;font-family:var(--display);font-size:26px;margin-top:20px}
+.spread{display:flex;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.spread.solo{justify-content:flex-end}
+.page{width:var(--pg);height:var(--pg);background:var(--paper);position:relative;overflow:hidden;flex:none}
+.page.l{box-shadow:inset -18px 0 30px -24px rgba(0,0,0,.35)}
+.page.r{box-shadow:inset 18px 0 30px -24px rgba(0,0,0,.35)}
+.page.bleed{--pg:1045px;--m:80px;box-shadow:none}
+.inner{position:absolute;inset:var(--m);display:flex;flex-direction:column}
+.folio{position:absolute;bottom:30px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em}
+.page.bleed .folio{bottom:45px}
+.page.l .folio{left:var(--m)} .page.r .folio{right:var(--m)}
+.running{position:absolute;top:30px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.page.bleed .running{top:45px}
+.page.l .running{left:var(--m)} .page.r .running{right:var(--m)}
+.ed{position:absolute;top:30px;font-size:11px;color:var(--rose);letter-spacing:.1em}
+.page.l .ed{right:var(--m)} .page.r .ed{left:var(--m)}
+img{display:block;width:100%;height:100%;object-fit:cover}
+/* 속표지 */
+.title .inner{align-items:center;justify-content:center;text-align:center;gap:16px}
+.title svg{width:96px;transform:rotate(8deg)}
+.title .k{font-family:var(--mono);font-size:15px;letter-spacing:.22em;color:var(--muted)}
+.title h1{font-family:var(--display);font-weight:400;font-size:74px;line-height:1.15;margin:0;word-break:keep-all}
+.title .sub{font-size:19px;color:var(--muted)}
+.crew{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:780px}
+.crew span{border:1px solid var(--line);border-radius:999px;padding:4px 14px;font-size:15px;background:var(--card)}
+.crew span.me{border-color:var(--rose);color:var(--rose)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:560px;margin-top:6px}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px}
+.stats b{display:block;font-family:var(--mono);font-size:30px;font-weight:500}
+.stats small{font-size:13px;color:var(--muted)}
+.owner{margin-top:18px;font-size:16px;color:var(--ink);border-top:1px solid var(--line);padding-top:14px}
+/* 장 표지 */
+.cover-ph{position:absolute;inset:0}
+.cover-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,0) 45%,rgba(10,8,6,.82) 100%)}
+.cover-txt{position:absolute;left:var(--m);right:var(--m);bottom:90px;color:#fff}
+.cover-txt .k{font-family:var(--mono);font-size:15px;letter-spacing:.24em;opacity:.85}
+.cover-txt h1{font-family:var(--display);font-weight:400;font-size:80px;line-height:1.12;margin:14px 0 18px;word-break:keep-all}
+.cover-txt .s{font-size:18px;opacity:.9}
+.chno{position:absolute;top:60px;left:var(--m);font-family:var(--display);font-size:150px;line-height:1;color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.35)}
+/* 하루 개요 */
+.ov-date{font-family:var(--mono);font-size:15px;letter-spacing:.2em;color:var(--rose)}
+.ov h2{font-family:var(--display);font-weight:400;font-size:48px;line-height:1.2;margin:10px 0 6px;word-break:keep-all}
+.ov .hotel{color:var(--muted);font-size:16px}
+.nums{display:flex;gap:10px;margin:22px 0 24px}
+.nums div{flex:1;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px 14px}
+.nums b{display:block;font-family:var(--mono);font-weight:500;font-size:30px}
+.nums small{color:var(--muted);font-size:13px}
+.tl{list-style:none;margin:0;padding:0;border-left:2px solid var(--ink);margin-left:6px}
+.tl li{position:relative;padding:0 0 13px 26px;font-size:17px}
+.tl li:before{content:"";position:absolute;left:-7px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--ink)}
+.tl .t{font-family:var(--mono);font-size:14px;color:var(--muted);margin-right:10px}
+.tl .n{font-weight:500}
+.tl .dots{color:var(--rose);font-size:11px;letter-spacing:2px;margin-left:8px}
+.tl .tag{display:inline-block;font-size:12px;border:1px solid var(--rose);color:var(--rose);border-radius:999px;padding:0 8px;margin-left:8px;vertical-align:2px}
+.tips{margin-top:auto;border-top:2px solid var(--ink);padding-top:12px}
+.tips h4{font-family:var(--display);font-weight:400;font-size:22px;margin:0 0 6px}
+.tips ul{margin:0;padding-left:20px}
+.tips li{font-size:14px;color:var(--muted);margin:3px 0}
+/* 일정 블록 */
+.blk{margin-bottom:24px}
+.bh{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:12px}
+.bh .t{font-family:var(--mono);font-size:16px;color:var(--rose)}
+.bh h3{font-family:var(--display);font-weight:400;font-size:30px;margin:0;line-height:1.2;word-break:keep-all;flex:1}
+.bh .tag{font-size:12px;border:1px solid var(--rose);color:var(--rose);border-radius:999px;padding:1px 9px;white-space:nowrap}
+.strip{display:flex;gap:8px;margin-bottom:12px}
+.strip figure{margin:0;border-radius:10px;overflow:hidden;background:var(--line);min-width:0;position:relative}
+.cards{columns:2;column-gap:12px}
+.cards.one{columns:1}
+.card{break-inside:avoid;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 14px 10px;margin:0 0 12px}
+.card.mine{border-color:#d9b9a0;background:#fffaf1}
+.card .w{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:6px}
+.card .w b{color:var(--ink);font-weight:600}
+.card .st{color:var(--gold);letter-spacing:1px;white-space:nowrap}
+.card .x{font-size:16px;line-height:1.55;margin-top:4px;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.card.mine .x{font-size:17px}
+.card .v{font-size:12px;color:var(--azul);margin-left:4px}
+.card .cm{margin-top:7px;border-top:1px dashed var(--line);padding-top:5px}
+.card .cm div{font-size:13px;color:var(--muted);line-height:1.45}
+.card .cm div:before{content:"↳ "}
+.card .cm b{color:var(--ink);font-weight:500;margin-right:4px}
+/* 단톡 장면 */
+.chat{background:#b2c7d9;border-radius:16px;padding:14px 14px 8px;margin:0 0 12px;break-inside:avoid}
+.chat .hd{font-size:12px;color:#3b4a57;margin-bottom:8px;font-family:var(--mono);letter-spacing:.06em}
+.chat .m{display:flex;gap:8px;margin-bottom:6px;align-items:flex-end}
+.chat .m.me{flex-direction:row-reverse}
+.chat .nm{font-size:12px;color:#3b4a57;min-width:30px}
+.chat .bb{background:#fff;border-radius:12px;padding:6px 11px;font-size:15px;max-width:72%}
+.chat .m.me .bb{background:#fee500}
+.chat .tm{font-size:10px;color:#3b4a57;font-family:var(--mono)}
+/* 오늘의 한 줄 */
+.quote{margin-top:auto;border-top:2px solid var(--ink);padding-top:16px}
+.quote .k{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--rose)}
+.quote p{font-family:var(--display);font-size:34px;line-height:1.35;margin:8px 0 6px;word-break:keep-all}
+.quote small{color:var(--muted);font-size:14px}
+.mini{display:grid;gap:4px;margin-top:12px}
+.mini div{font-size:14px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+.mini b{color:var(--ink);font-weight:500}
+/* 사진 쪽 */
+.phpage .grid{position:absolute;inset:var(--m);display:flex;gap:10px}
+.phpage .grid figure{margin:0;flex:1;border-radius:12px;overflow:hidden;position:relative}
+.phpage .cap{position:absolute;left:var(--m);bottom:28px;font-size:13px;color:var(--muted)}
+.page.bleed.phpage .cap{bottom:43px}
+/* 화면 편집용 표시 (내보낼 때 숨김) */
+body:not(.exporting) [data-slot],body:not(.exporting) .card,body:not(.exporting) .quote p,body:not(.exporting) .cover-ph{cursor:pointer}
+body:not(.exporting) [data-slot]:hover{outline:4px solid #fee500;outline-offset:-4px}
+body:not(.exporting) .card:hover{outline:2px dashed var(--rose)}
+.who-tag{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;border-radius:6px;padding:1px 6px;pointer-events:none}
+body.exporting .who-tag,body.exporting .ed{display:none}
+.stage{position:absolute;left:-99999px;top:0}
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>여행책 편집기</b>
+  <button id="open" class="pri">📂 NAS 폴더 열기</button>
+  <select id="ed" disabled><option value="구씨네">구씨네 판</option><option value="조씨네">조씨네 판</option><option value="홍씨네">홍씨네 판</option></select>
+  <select id="ch" disabled><option value="all">전체 장</option></select>
+  <button id="save" disabled>💾 편집 저장</button>
+  <button id="exp" disabled>🖼 이 판 JPG 내보내기</button>
+  <span class="st" id="st">NAS의 2026_마카오_돼지사냥꾼 폴더를 열어 주세요</span>
+</div>
+<div class="help" id="help">
+  <h2>처음 쓰는 방법</h2>
+  <ol>
+    <li>집 PC에서 <b>파일 탐색기 → 주소창에 <code>\\192.168.219.112</code></b> 입력 → <code>2026_마카오_돼지사냥꾼</code> 폴더가 보이는지 확인 (NAS 아이디로 로그인)</li>
+    <li>이 화면에서 <b>📂 NAS 폴더 열기</b> → 그 폴더 선택 → ‘파일 보기 허용’, 내보낼 때 ‘변경사항 저장 허용’</li>
+    <li>위에서 <b>판</b>을 고르면 그 집 기준으로 사진·후기가 다시 배치됨</li>
+    <li>고치기: <b>사진 클릭</b> = 같은 일정의 다음 후보 사진으로 바꿈 · <b>후기 카드 클릭</b> = 빼기/다시 넣기 · <b>오늘의 한 줄 클릭</b> = 다른 후기로 · <b>장 표지 클릭</b> = 다른 표지 사진</li>
+    <li><b>💾 편집 저장</b> → NAS <code>06_결과물/책_원고/편집.json</code>에 저장 (다음에 열어도 그대로)</li>
+    <li><b>🖼 JPG 내보내기</b> → <code>06_결과물/책_JPG/판이름/</code>에 쪽별 JPG(2468×2468, 도련 3mm 포함) 저장 → 퍼블로그에 순서대로 올림</li>
+  </ol>
+  <p>필요한 파일: <code>06_결과물/책_사진/photos.json</code>(정리 스크립트), <code>06_결과물/책_원고/</code> 안의 앱 백업 JSON, <code>단톡_인용.json</code>. 사진과 글은 이 PC 안에서만 처리되고 어디에도 올라가지 않음.</p>
+</div>
+<div class="counts" id="counts"></div>
+<div class="book" id="book"></div>
+<div class="stage" id="stage"></div>
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const h = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const stars = n => n ? "★".repeat(n) + "☆".repeat(5 - n) : "";
+const WK = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const CW = 885;
+const FAMILY = { 성민: "구씨네", 민희: "구씨네", 다빈: "구씨네", 민준: "구씨네", 유복: "조씨네", 미정: "조씨네", 소윤: "조씨네", 채윤: "조씨네", 윤이: "홍씨네", 주아: "홍씨네" };
+const FULL = { 성민: "구성민", 민희: "조민희", 다빈: "구다빈", 민준: "구민준", 유복: "이유복", 미정: "조미정", 소윤: "이소윤", 채윤: "이채윤", 윤이: "홍윤이", 주아: "김주아" };
+const NICK = { "참돔파닥파닥": "성민", "오른5": "민희", "그대춤을추는나물같아요": "다빈", "과연그는구민준일까여?": "민준", "이소 이채 아빠": "유복", "쪼미": "미정", "입천장아퍄냐무냐무": "소윤", "핸드폰 잃어버린 사람?": "채윤", "윤이 홍홍홍": "윤이", "몬치치": "주아" };
+const MKEY = { m0: "성민", m1: "윤이", m2: "미정", m3: "유복", m4: "민희", m5: "소윤", m6: "다빈", m7: "민준", m8: "주아", m9: "채윤" };
+// 장별 목표 쪽수 (기획서 8절) · 2장 시작 쪽 (속표지1 + 0장4 + 1장8 = 13쪽 다음)
+const PLAN = { 2: 10, 3: 12, 4: 18, 5: 10, 6: 6 }; // 후기 양에 맞춘 배분 (합계 56쪽)
+const START = 14;
+const DAYSTART = "03:00";
+const wordy = t => { const n = (t.match(/[가-힣]/g) || []).length; return n >= 5 && n / t.length >= 0.4; }; // 새벽 3시 전 사진은 전날 밤 일정으로
+
+/* ---------------- 파일 읽기·쓰기 (NAS 폴더 또는 시험용 주소) ---------------- */
+const Src = {
+  root: null, http: new URLSearchParams(location.search).get("src"),
+  async dir(parts, create) { let d = this.root; for (const p of parts) d = await d.getDirectoryHandle(p, { create: !!create }); return d; },
+  async file(path) {
+    if (this.http) { const r = await fetch(this.http + "/" + path.split("/").map(encodeURIComponent).join("/")); if (!r.ok) throw new Error(path); return await r.blob(); }
+    const parts = path.split("/"), name = parts.pop(); const d = await this.dir(parts); return await (await d.getFileHandle(name)).getFile();
+  },
+  async json(path) { return JSON.parse(await (await this.file(path)).text()); },
+  async list(path) {
+    if (this.http) { const r = await fetch(this.http + "/__list/" + path.split("/").map(encodeURIComponent).join("/")); return r.ok ? await r.json() : []; }
+    try { const d = await this.dir(path.split("/")); const out = []; for await (const [n, e] of d.entries()) if (e.kind === "file") out.push(n); return out; } catch (e) { return []; }
+  },
+  async write(path, blob) {
+    if (this.http) { await fetch(this.http + "/__write/" + path.split("/").map(encodeURIComponent).join("/"), { method: "POST", body: blob }); return; }
+    const parts = path.split("/"), name = parts.pop(); const d = await this.dir(parts, true);
+    const fh = await d.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(blob); await w.close();
+  }
+};
+
+/* ---------------- 사진 불러오기 (화면용 작은 사진 / 인쇄용 큰 사진) ---------------- */
+const IMG = { small: new Map(), big: new Map(), q: [], busy: 0 };
+function loadImg(file, big) {
+  const m = big ? IMG.big : IMG.small;
+  if (m.has(file)) return m.get(file);
+  const p = new Promise((res, rej) => { IMG.q.push({ file, big, res, rej }); pump(); });
+  m.set(file, p); return p;
+}
+function pump() {
+  while (IMG.busy < 4 && IMG.q.length) {
+    const job = IMG.q.shift(); IMG.busy++;
+    (async () => {
+      const blob = await Src.file(job.file);
+      const bmp = await createImageBitmap(blob);
+      const lim = job.big ? 2600 : 900, sc = Math.min(1, lim / Math.max(bmp.width, bmp.height));
+      const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * sc); cv.height = Math.round(bmp.height * sc);
+      cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height); bmp.close();
+      const out = await new Promise(r => cv.toBlob(r, "image/jpeg", job.big ? 0.92 : 0.8));
+      return URL.createObjectURL(out);
+    })().then(job.res, job.rej).finally(() => { IMG.busy--; pump(); });
+  }
+}
+function figure(ph, slot) {
+  const f = h("figure"); if (slot) f.dataset.slot = slot; f.dataset.file = ph.file;
+  const im = h("img"); im.alt = ""; im.dataset.file = ph.file; f.append(im);
+  if (ph.people) f.append(h("span", "who-tag", esc(ph.people)));
+  loadImg(ph.file, false).then(u => { if (!im.src) im.src = u; }).catch(() => { f.style.background = "#d9cfbf"; });
+  return f;
+}
+
+/* ---------------- 데이터 정리 ---------------- */
+let M = null; // 전체 자료
+let EDITS = {};
+const E = () => $("#ed").value;
+const edOf = () => (EDITS[E()] = EDITS[E()] || { swap: {}, hide: {}, best: {}, cover: {} });
+
+async function openFolder() {
+  if (!Src.http) {
+    if (!window.showDirectoryPicker) { alert("크롬(또는 엣지) PC 브라우저에서 열어 주세요."); return; }
+    Src.root = await window.showDirectoryPicker({ id: "dwaeji-book", mode: "readwrite" });
+  }
+  $("#st").textContent = "자료 읽는 중…";
+  const photos = (await Src.json("06_결과물/책_사진/photos.json")).photos;
+  const names = (await Src.list("06_결과물/책_원고")).filter(n => /\.json$/i.test(n) && n.includes("백업")).sort();
+  if (!names.length) { $("#st").textContent = "06_결과물/책_원고 폴더에 앱 백업 JSON이 없어요"; return; }
+  const bk = await Src.json("06_결과물/책_원고/" + names[names.length - 1]);
+  let chat = { 장면: [], 명대사: [] }; try { chat = await Src.json("06_결과물/책_원고/단톡_인용.json"); } catch (e) {}
+  try { EDITS = await Src.json("06_결과물/책_원고/편집.json"); } catch (e) { try { EDITS = JSON.parse(localStorage.getItem("dw-book-edits") || "{}"); } catch (e2) { EDITS = {}; } }
+  M = build(photos, bk, chat);
+  $("#help").remove();
+  ["#ed", "#ch", "#save", "#exp"].forEach(s => $(s).disabled = false);
+  const ch = $("#ch"); M.days.forEach((d, i) => ch.append(new Option(`${i + 2}장 · ${d.d.slice(5).replace("-", ".")}`, String(i + 2))));
+  render();
+}
+
+function build(photos, bk, chat) {
+  const D = bk.data;
+  const who = k => NICK[(D.mem[k] || {}).name] || MKEY[k] || "";
+  const nick = k => (D.mem[k] || {}).name || k;
+  const cmts = Object.entries(D.cmt || {}).map(([id, c]) => ({ id, ...c })).filter(c => c && !c.del).sort((a, b) => a.c - b.c);
+  const revs = Object.entries(D.rev || {}).filter(([, r]) => r && !r.del).map(([id, r]) => ({
+    id, b: r.b, who: who(r.who), nick: nick(r.who), st: r.st || 0, text: r.text || "", voice: !!r.voice, c: r.c,
+    cm: cmts.filter(c => c.r === id).map(c => ({ who: nick(c.who), text: c.text }))
+  })).sort((a, b) => a.c - b.c);
+  const days = bk.days;
+  // 사진을 일정 시간대에 배정 (앱 일정 시각 기준, 새벽 3시 전은 전날 밤)
+  const prevDay = d => { const t = new Date(d + "T12:00:00"); t.setDate(t.getDate() - 1); return t.toISOString().slice(0, 10); };
+  const items = {};
+  days.forEach(d => d.items.forEach((it, i) => items[d.d + "#" + i] = { day: d.d, i, t: it[0], title: it[1], sub: it[2] || "", photos: [] }));
+  for (const p of photos) {
+    if (p.kind !== "사진" || !p.taken || p.print_ok === "작게" || !p.w) continue;
+    let d = p.taken.slice(0, 10), hm = p.taken.slice(11, 16);
+    if (hm < DAYSTART) d = prevDay(d);
+    const day = days.find(x => x.d === d); if (!day) continue;
+    let idx = 0; day.items.forEach((it, i) => { if (it[0] <= hm || hm < DAYSTART) idx = i; });
+    if (hm < DAYSTART) idx = day.items.length - 1;
+    items[d + "#" + idx].photos.push(p);
+  }
+  const dayCount = {}; photos.forEach(p => { if (p.day) dayCount[p.day] = (dayCount[p.day] || 0) + 1; });
+  const mem = Object.keys(D.mem || {}).sort().map(k => ({ nick: D.mem[k].name, who: who(k) }));
+  return { days, revs, items, prog: D.prog || {}, chat, mem, dayCount, nPhotos: photos.filter(p => p.day).length, nRevs: revs.length, nPlaces: days.reduce((s, d) => s + d.items.length, 0) };
+}
+
+/* 판별 사진 고르기: 점수순 + 연사 거르기 + 다른 집 최소 1컷 */
+function ranked(list, ed) {
+  const sc = p => (p["score_" + ed] || 0) + (p.print_ok === "전면" ? 0 : -0.5);
+  const sorted = [...list].sort((a, b) => sc(b) - sc(a));
+  const out = [], tsec = p => Date.parse(p.taken.replace(" ", "T"));
+  for (const p of sorted) {
+    const base = p.file.replace(/_\d+(\.\w+)$/, "$1");
+    if (out.some(q => (q.person === p.person && Math.abs(tsec(q) - tsec(p)) < 40000) || q.file.replace(/_\d+(\.\w+)$/, "$1") === base)) continue;
+    out.push(p);
+  }
+  // 연사에 걸러진 사진은 뒤에 붙여 후보로만
+  return out.concat(sorted.filter(p => !out.includes(p)));
+}
+function planDay(day, ed, per) {
+  const ex = edOf(), plan = {};
+  day.items.forEach((it, i) => {
+    const id = day.d + "#" + i, pool = ranked(M.items[id].photos, ed);
+    const pick = pool.slice(0, per);
+    // 직접 바꾼 사진
+    for (let k = 0; k < per; k++) { const f = ex.swap[id + ":" + k]; if (f) { const p = pool.find(x => x.file === f); if (p) pick[k] = p; } }
+    plan[id] = { pool, pick: pick.filter(Boolean) };
+  });
+  // 다른 집도 하루에 최소 1컷
+  for (const fam of ["구씨네", "조씨네", "홍씨네"]) {
+    if (fam === ed) continue;
+    const has = Object.values(plan).some(x => x.pick.some(p => (p.families || "").includes(fam)));
+    if (has) continue;
+    let best = null, bid = null;
+    for (const [id, x] of Object.entries(plan)) for (const p of x.pool) if ((p.families || "").includes(fam) && !x.pick.includes(p) && (!best || p["score_" + fam] > best["score_" + fam])) { best = p; bid = id; }
+    if (best) { const x = plan[bid]; if (x.pick.length < 3) x.pick.push(best); else x.pick[x.pick.length - 1] = best; }
+  }
+  return plan;
+}
+
+/* ---------------- 쪽 만들기 ---------------- */
+function newPage(st, cls) {
+  const p = h("div", "page " + (st.pno % 2 ? "r" : "l") + (cls ? " " + cls : ""));
+  p.dataset.pno = st.pno;
+  p.append(h("div", "folio", String(st.pno)));
+  st.pno++; st.pages.push(p); st.stage.append(p); return p;
+}
+
+function titlePage(ed) {
+  const st = { pno: 1, pages: [], stage: $("#stage") };
+  const p = newPage(st, "title"); p.querySelector(".folio").remove();
+  const famPeople = Object.keys(FAMILY).filter(n => FAMILY[n] === ed);
+  const inn = h("div", "inner");
+  inn.innerHTML = `<svg viewBox="0 0 100 150" aria-hidden="true"><rect x="4" y="4" width="92" height="142" rx="8" fill="#f4e6c8" stroke="#b3122a" stroke-width="6"/><path d="M60 22 l14 -4 M58 30 l16 -4" stroke="#b3122a" stroke-width="4"/><ellipse cx="50" cy="98" rx="30" ry="20" fill="#2a2018"/><circle cx="70" cy="92" r="2.5" fill="#f4e6c8"/><path d="M30 116 v10 M42 118 v10 M56 118 v10 M68 116 v10" stroke="#2a2018" stroke-width="4"/></svg>
+    <div class="k">MACAU · 2026.10.13 – 10.17</div>
+    <h1>돼지사냥꾼 가족들의<br>마카오 4박 5일</h1>
+    <div class="sub">열 명이 함께 쓴 여행 기록</div>
+    <div class="crew">${M.mem.map(m => `<span class="${FAMILY[m.who] === ed ? "me" : ""}">${esc(m.nick)}</span>`).join("")}</div>
+    <div class="stats"><div><b>${M.nRevs}</b><small>후기</small></div><div><b>${M.nPhotos.toLocaleString()}</b><small>사진</small></div><div><b>${M.nPlaces}</b><small>장소</small></div></div>
+    <div class="owner">이 책은 <b>${famPeople.map(n => FULL[n]).join(" · ")}</b>의 책입니다 · ${ed} 판</div>`;
+  p.append(inn);
+  return st.pages;
+}
+
+function buildDay(day, di, ed, per, startPno) {
+  const ch = di + 2, ex = edOf();
+  const st = { pno: startPno, pages: [], stage: $("#stage") };
+  const md = day.d.slice(5).replace("-", "."), dt = new Date(day.d + "T00:00:00");
+  const plan = planDay(day, ed, per);
+  const used = new Set(Object.values(plan).flatMap(x => x.pick.map(p => p.file)));
+  const dayRevs = M.revs.filter(r => r.b.startsWith(day.d) && !ex.hide[r.id]);
+  const allDayRevs = M.revs.filter(r => r.b.startsWith(day.d));
+  const nDayPhotos = M.dayCount[day.d] || 0;
+  const running = p => { p.append(h("div", "running", `DAY ${di + 1} · ${md}`)); p.append(h("div", "ed", ed + " 판")); };
+
+  // 장 표지
+  {
+    const p = newPage(st, "cover"); p.querySelector(".folio").remove();
+    const all = Object.values(plan).flatMap(x => x.pool);
+    const cands = ranked(all.filter(x => x.shape === "가로" && x.print_ok === "전면"), ed);
+    let cov = cands[0];
+    const cf = ex.cover[day.d]; if (cf) cov = all.find(x => x.file === cf) || cov;
+    if (cov) { const c = h("div", "cover-ph"); c.dataset.cover = day.d; c.append(figure(cov)); c.firstChild.style.cssText = "position:absolute;inset:0;margin:0"; p.append(c); used.add(cov.file); }
+    p.append(h("div", "cover-shade"));
+    p.append(h("div", "chno", String(ch)));
+    p.append(h("div", "cover-txt", `<div class="k">DAY ${di + 1} · ${md} ${WK[dt.getDay()]}</div><h1>${esc(day.title)}</h1><div class="s">${esc(day.hotel)}에서 묵은 밤 · 사진 ${nDayPhotos}장 · 후기 ${allDayRevs.length}개</div>`));
+  }
+  // 하루 개요
+  const byItem = {}; dayRevs.forEach(r => (byItem[r.b] = byItem[r.b] || []).push(r));
+  {
+    const p = newPage(st); running(p);
+    const inn = h("div", "inner ov");
+    inn.append(h("div", "ov-date", `${day.d.replace(/-/g, ".")} ${day.w}요일`));
+    inn.append(h("h2", "", esc(day.title)));
+    inn.append(h("div", "hotel", `🏨 ${esc(day.hotel)}`));
+    inn.append(h("div", "nums", `<div><b>${nDayPhotos}</b><small>찍은 사진</small></div><div><b>${allDayRevs.length}</b><small>남긴 후기</small></div><div><b>${day.items.length}</b><small>일정</small></div>`));
+    const ul = h("ul", "tl");
+    day.items.forEach((it, i) => {
+      const id = day.d + "#" + i, n = (byItem[id] || []).length, pg = M.prog[id] || {};
+      const tag = pg.ext ? `<span class="tag">${pg.ext}분 연장</span>` : pg.skip ? `<span class="tag">건너뜀</span>` : "";
+      ul.append(h("li", "", `<span class="t">${it[0]}</span><span class="n">${esc(it[1])}</span><span class="dots">${"●".repeat(Math.min(n, 10))}</span>${tag}`));
+    });
+    inn.append(ul);
+    const tips = (day.tips || []).map(t => `<li>${esc(t[1])}</li>`).join("");
+    if (tips) inn.append(h("div", "tips", `<h4>다음 사람을 위한 팁</h4><ul>${tips}</ul>`));
+    p.append(inn);
+  }
+  // 일정 블록
+  const blocks = [], last = day.items.length - 1;
+  const mineFirst = rs => [...rs].sort((a, b) => ((FAMILY[b.who] === ed) - (FAMILY[a.who] === ed)) || (a.c - b.c));
+  day.items.forEach((it, i) => {
+    if (i === last && day.items.length > 3) return;
+    const id = day.d + "#" + i, rs = mineFirst(byItem[id] || []), pg = M.prog[id] || {};
+    const b = h("div", "blk"); b.dataset.item = id;
+    b.append(h("div", "bh", `<span class="t">${it[0]}</span><h3>${esc(it[1])}</h3>${pg.ext ? `<span class="tag">계획보다 ${pg.ext}분 더</span>` : ""}`));
+    (M.chat.장면 || []).filter(s => s.day === day.d && s.item === i).forEach(s => {
+      const c = h("div", "chat", `<div class="hd">단톡방 · ${esc(s.title || "돼지사냥꾼들")}</div>`);
+      s.lines.forEach(([t, w, msg]) => c.append(h("div", "m" + (FAMILY[w] === ed ? " me" : ""), `<span class="nm">${esc(w)}</span><span class="bb">${esc(msg)}</span><span class="tm">${esc(t)}</span>`)));
+      b.append(c);
+    });
+    const pick = plan[id].pick;
+    if (pick.length) {
+      const ratio = pick.reduce((s, p) => s + p.w / p.h, 0);
+      const H = Math.round(Math.min(pick.length === 1 ? 420 : 340, (CW - 8 * (pick.length - 1)) / ratio));
+      const sp = h("div", "strip"); sp.dataset.h = H; sp.style.height = H + "px";
+      pick.forEach((p, k) => { const f = figure(p, id + ":" + k); f.style.flex = (p.w / p.h).toFixed(3) + " 1 0"; sp.append(f); });
+      b.append(sp);
+    }
+    if (rs.length) {
+      const cards = h("div", "cards" + (rs.length === 1 ? " one" : ""));
+      rs.forEach(r => cards.append(card(r, ed)));
+      b.append(cards);
+    }
+    blocks.push(b);
+  });
+  // 오늘의 한 줄
+  {
+    const cand = allDayRevs.filter(r => r.st >= 4 && r.text.length >= 6 && r.text.length <= 70 && wordy(r.text) && !ex.hide[r.id])
+      .sort((a, b) => ((FAMILY[b.who] === ed) - (FAMILY[a.who] === ed)) || (b.st - a.st) || (b.cm.length - a.cm.length) || (b.text.length - a.text.length));
+    let best = cand[0]; const bf = ex.best[day.d]; if (bf) best = cand.find(r => r.id === bf) || best;
+    if (best) {
+      const q = h("div", "quote", `<div class="k">오늘의 한 줄</div><p data-best="${day.d}">“${esc(best.text.split("\n")[0])}”</p><small>— ${esc(best.nick)}</small>`);
+      const lastId = day.d + "#" + last, night = day.items.length > 3 ? (byItem[lastId] || []) : [];
+      const lines = (M.chat.명대사 || []).filter(x => x.day === day.d);
+      if (night.length || lines.length) q.append(h("div", "mini",
+        (night.length ? `<div><b>${day.items[last][0]} ${esc(day.items[last][1])}</b> ` + night.map(r => `“${esc(r.text)}” — ${esc(r.nick)}`).join(" · ") + `</div>` : "") +
+        lines.map(x => `<div><b>단톡방</b> “${esc(x.text)}” — ${esc(x.who)}</div>`).join("")));
+      blocks.push(q);
+    }
+  }
+  // 흘려 넣기
+  let cur = null;
+  const fits = () => cur.scrollHeight <= cur.clientHeight + 1;
+  const flow = () => { const p = newPage(st); running(p); cur = h("div", "inner"); p.append(cur); };
+  const cont = (b, moved) => {
+    const b2 = h("div", "blk"); b2.dataset.item = b.dataset.item; const bh = b.querySelector(".bh").cloneNode(true); bh.querySelector(".tag")?.remove();
+    bh.querySelector("h3").innerHTML += " <small style='font-size:16px;color:var(--muted)'>(이어서)</small>"; b2.append(bh);
+    const cc = h("div", "cards"); moved.forEach(c => cc.append(c)); b2.append(cc); return b2;
+  };
+  const shrink = b => { const sp = b.querySelector(".strip"); if (!sp) return; let H = +sp.dataset.h; while (!fits() && H > 210) { H -= 15; sp.style.height = H + "px"; } };
+  const place = (b, fresh, depth = 0) => {
+    cur.append(b); if (fits()) return;
+    shrink(b); if (fits()) return;
+    const cards = [...b.querySelectorAll(".card")], moved = [];
+    while (!fits() && cards.length) { const c = cards.pop(); moved.unshift(c); c.remove(); }
+    if ((!fits() || (cards.length === 0 && moved.length && !fresh)) && depth < 2) {
+      moved.forEach(c => b.querySelector(".cards")?.append(c));
+      const sp = b.querySelector(".strip"); if (sp) sp.style.height = sp.dataset.h + "px";
+      b.remove(); flow(); place(b, true, depth + 1); return;
+    }
+    if (moved.length) { flow(); place(cont(b, moved), true, depth + 1); }
+  };
+  flow();
+  for (const b of blocks) place(b, false);
+  // 빈 자리 채우기: 같은 일정의 다음 후보 사진
+  const fillers = [];
+  st.pages.forEach(p => {
+    const inn = p.querySelector(".inner"); if (!inn || p.querySelector(".ov")) return;
+    const usedH = [...inn.children].reduce((s, c) => s + c.offsetHeight, 0) + 24 * inn.children.length;
+    const free = inn.clientHeight - usedH; if (free < 170) return;
+    const its = [...inn.querySelectorAll(".blk")].map(b => b.dataset.item);
+    const n = free > 430 ? 2 : 1, H = free - 12;
+    const sp = h("div", "strip fill"); sp.style.height = H + "px";
+    for (let k = 0; k < n; k++) {
+      const ar = (CW / n) / H;
+      let pool = its.flatMap(id => plan[id].pool).filter(x => !used.has(x.file));
+      if (!pool.length) pool = Object.values(plan).flatMap(x => x.pool).filter(x => !used.has(x.file)); // 한 줄 쪽 등: 그날 전체 사진에서
+      const pick = pool.sort((a, b) => Math.abs(a.w / a.h - ar) - Math.abs(b.w / b.h - ar) || (b["score_" + ed] - a["score_" + ed]))[0];
+      if (!pick) break; used.add(pick.file);
+      const f = figure(pick); f.style.flex = "1 1 0"; sp.append(f);
+    }
+    if (!sp.children.length) return;
+    const q = inn.querySelector(".quote"); if (q) inn.insertBefore(sp, q); else inn.append(sp);
+  });
+  // 목표 쪽수까지 사진 쪽으로 채우기 (짝수 쪽으로 끝나게)
+  const target = PLAN[ch] || st.pages.length;
+  const rest = ranked(Object.values(plan).flatMap(x => x.pool).filter(x => !used.has(x.file)), ed);
+  while (st.pages.length < target && rest.length) {
+    const p = newPage(st, "phpage"); running(p);
+    const g = h("div", "grid"); p.append(g);
+    const a = rest.shift(); used.add(a.file); p.dataset.t = a.taken;
+    const pair = a.shape === "가로" ? [a] : [a, rest.find(x => x.shape !== "가로")].filter(Boolean);
+    if (pair[1]) { rest.splice(rest.indexOf(pair[1]), 1); used.add(pair[1].file); }
+    pair.forEach(x => g.append(figure(x)));
+    const it = M.items[Object.keys(M.items).find(k => M.items[k].photos.includes(a))];
+    p.append(h("div", "cap", `${esc(it ? it.t + " " + it.title : "")}`));
+  }
+  // 사진 쪽을 마지막 쪽(오늘의 한 줄) 앞에 시간순으로 넣고 쪽 번호·좌우 다시 매김
+  const photoPages = st.pages.filter(p => p.classList.contains("phpage")).sort((a, b) => a.dataset.t < b.dataset.t ? -1 : 1);
+  const rest2 = st.pages.filter(p => !p.classList.contains("phpage"));
+  const lastFlow = rest2.pop();
+  const order = rest2.concat(photoPages, lastFlow ? [lastFlow] : []);
+  order.forEach((p, i) => {
+    const n = startPno + i; p.dataset.pno = n;
+    p.classList.toggle("l", n % 2 === 0); p.classList.toggle("r", n % 2 === 1);
+    const f = p.querySelector(".folio"); if (f) f.textContent = String(n);
+  });
+  return order;
+}
+
+function card(r, ed) {
+  const mine = FAMILY[r.who] === ed;
+  const cm = r.cm.length ? `<div class="cm">${r.cm.map(c => `<div><b>${esc(c.who)}</b>${esc(c.text)}</div>`).join("")}</div>` : "";
+  const c = h("div", "card" + (mine ? " mine" : ""), `<div class="w"><span><b>${esc(r.nick)}</b>${r.voice ? '<span class="v">🎙 음성</span>' : ""}</span><span class="st">${stars(r.st)}</span></div><div class="x">${esc(r.text)}</div>${cm}`);
+  c.dataset.rev = r.id; return c;
+}
+
+/* ---------------- 화면에 그리기 ---------------- */
+let PAGES = [];
+async function render() {
+  const ed = E(), only = $("#ch").value;
+  $("#st").textContent = `${ed} 판 배치 중…`;
+  await document.fonts.ready;
+  const stage = $("#stage"); stage.innerHTML = "";
+  const book = $("#book"); book.innerHTML = "";
+  const counts = $("#counts"); counts.innerHTML = "";
+  PAGES = [];
+  const title = titlePage(ed);
+  let pno = START;
+  const chapters = [];
+  for (let di = 0; di < M.days.length; di++) {
+    const ch = di + 2, day = M.days[di];
+    let pages = null;
+    // 사진 수를 3→2→1장으로 줄여 가며 목표 쪽수 안에 맞추기
+    for (const per of [3, 2, 1]) {
+      stage.innerHTML = "";
+      pages = buildDay(day, di, ed, per, pno);
+      if (pages.length <= (PLAN[ch] || 99)) break;
+    }
+    chapters.push({ ch, day, pages: [...pages] });
+    const tgt = PLAN[ch];
+    counts.append(h("span", pages.length > tgt ? "warn" : "", `${ch}장 ${pages.length}/${tgt}쪽`));
+    pno += tgt || pages.length;
+  }
+  stage.innerHTML = "";
+  const show = (pages, label) => {
+    if (label) book.append(h("div", "chap-h", label));
+    for (let i = 0; i < pages.length;) {
+      const sp = h("div", "spread");
+      if (pages[i].classList.contains("r") && (i === 0)) { sp.classList.add("solo"); sp.append(pages[i++]); }
+      else { sp.append(pages[i++]); if (pages[i] && pages[i].classList.contains("r")) sp.append(pages[i++]); }
+      book.append(sp);
+    }
+  };
+  if (only === "all") { show(title, "속표지"); PAGES.push(...title); }
+  for (const c of chapters) if (only === "all" || only === String(c.ch)) { show(c.pages, `${c.ch}장 · ${c.day.d.slice(5).replace("-", ".")} ${c.day.title}`); PAGES.push(...c.pages); }
+  $("#st").textContent = `${ed} 판 · ${PAGES.length}쪽 표시 · 사진·후기를 눌러 고칠 수 있어요`;
+}
+
+/* ---------------- 클릭으로 고치기 ---------------- */
+$("#book").addEventListener("click", e => {
+  if (document.body.classList.contains("exporting")) return;
+  const ex = edOf();
+  const slotEl = e.target.closest("[data-slot]");
+  if (slotEl) {
+    const slot = slotEl.dataset.slot, id = slot.split(":")[0];
+    const pool = ranked(M.items[id].photos, E());
+    const inUse = new Set([...document.querySelectorAll(`[data-slot^="${CSS.escape(id)}:"]`)].map(x => x.dataset.file));
+    const curIdx = pool.findIndex(p => p.file === slotEl.dataset.file);
+    let nxt = null; for (let k = 1; k <= pool.length; k++) { const p = pool[(curIdx + k) % pool.length]; if (!inUse.has(p.file)) { nxt = p; break; } }
+    if (nxt) { ex.swap[slot] = nxt.file; rerender(); }
+    return;
+  }
+  const cov = e.target.closest("[data-cover]");
+  if (cov) {
+    const d = cov.dataset.cover, all = Object.keys(M.items).filter(k => k.startsWith(d)).flatMap(k => M.items[k].photos);
+    const cands = ranked(all.filter(x => x.shape === "가로" && x.print_ok === "전면"), E());
+    const cur = cov.querySelector("figure").dataset.file, i = cands.findIndex(x => x.file === cur);
+    if (cands.length) { ex.cover[d] = cands[(i + 1) % cands.length].file; rerender(); }
+    return;
+  }
+  const bp = e.target.closest("[data-best]");
+  if (bp) {
+    const d = bp.dataset.best, ed = E();
+    const cand = M.revs.filter(r => r.b.startsWith(d) && r.st >= 4 && r.text.length >= 6 && r.text.length <= 70 && wordy(r.text) && !ex.hide[r.id])
+      .sort((a, b) => ((FAMILY[b.who] === ed) - (FAMILY[a.who] === ed)) || (b.st - a.st) || (b.cm.length - a.cm.length) || (b.text.length - a.text.length));
+    const cur = ex.best[d] ? cand.findIndex(r => r.id === ex.best[d]) : 0;
+    if (cand.length) { ex.best[d] = cand[(cur + 1) % cand.length].id; rerender(); }
+    return;
+  }
+  const cd = e.target.closest(".card");
+  if (cd && cd.dataset.rev) {
+    if (!confirmHide(cd)) return;
+    ex.hide[cd.dataset.rev] = true; rerender();
+  }
+});
+function confirmHide(cd) { return window.confirm("이 후기를 이 판에서 뺄까요? (편집.json에서 되돌릴 수 있어요)"); }
+let rt = null;
+function rerender() { clearTimeout(rt); rt = setTimeout(async () => { const y = scrollY; await render(); scrollTo(0, y); try { localStorage.setItem("dw-book-edits", JSON.stringify(EDITS)); } catch (e) {} }, 30); }
+
+$("#open").onclick = () => openFolder().catch(err => { console.error(err); $("#st").textContent = "열기 실패: " + err.message; });
+$("#ed").onchange = render;
+$("#ch").onchange = render;
+$("#save").onclick = async () => {
+  try { await Src.write("06_결과물/책_원고/편집.json", new Blob([JSON.stringify(EDITS, null, 1)], { type: "application/json" })); $("#st").textContent = "편집 내용을 NAS에 저장했어요"; }
+  catch (e) { $("#st").textContent = "저장 실패: " + e.message; }
+};
+
+/* ---------------- JPG 내보내기 ---------------- */
+$("#exp").onclick = async () => {
+  const ed = E(); if ($("#ch").value !== "all") { $("#ch").value = "all"; await render(); }
+  if (!window.htmlToImage) { alert("내보내기 도구를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요."); return; }
+  document.body.classList.add("exporting");
+  const btns = ["#open", "#ed", "#ch", "#save", "#exp"].map(s => $(s)); btns.forEach(b => b.disabled = true);
+  let fontCSS = null;
+  try {
+    for (let i = 0; i < PAGES.length; i++) {
+      const pg = PAGES[i];
+      $("#st").textContent = `${ed} 판 내보내는 중… ${i + 1} / ${PAGES.length}쪽`;
+      pg.classList.add("bleed");
+      const imgs = [...pg.querySelectorAll("img[data-file]")];
+      await Promise.all(imgs.map(async im => { im.dataset.small = im.src; im.src = await loadImg(im.dataset.file, true); await im.decode().catch(() => {}); }));
+      if (!fontCSS) fontCSS = await htmlToImage.getFontEmbedCSS(pg);
+      const url = await htmlToImage.toJpeg(pg, { quality: 0.92, pixelRatio: 2468 / 1045, width: 1045, height: 1045, fontEmbedCSS: fontCSS, backgroundColor: "#f7f3ea", cacheBust: false });
+      const blob = await (await fetch(url)).blob();
+      const name = `p${String(pg.dataset.pno).padStart(3, "0")}.jpg`;
+      await Src.write(`06_결과물/책_JPG/${ed}/${name}`, blob);
+      imgs.forEach(im => { im.src = im.dataset.small; });
+      pg.classList.remove("bleed");
+    }
+    $("#st").textContent = `${ed} 판 ${PAGES.length}쪽을 06_결과물/책_JPG/${ed}/ 에 저장했어요`;
+  } catch (e) { console.error(e); $("#st").textContent = "내보내기 실패: " + e.message; }
+  finally { document.body.classList.remove("exporting"); btns.forEach(b => b.disabled = false); }
+};
+if (Src.http) openFolder();
+</script>
+</body>
+</html>
