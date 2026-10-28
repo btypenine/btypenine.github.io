@@ -211,9 +211,9 @@ body:not(.exporting) [data-edit]{outline:1px dashed rgba(179,18,42,.45);outline-
 body:not(.exporting) [data-edit]:empty:before{content:attr(data-ph);color:#b8a98f}
 body.exporting [data-edit]:empty{display:none}
 /* 겉표지 */
-.cvr .full-txt{bottom:auto;top:110px;text-align:center}
-.cvr .full-txt h2{font-size:78px}
-.cvr .ed2{position:absolute;bottom:70px;left:0;right:0;text-align:center;color:#fff;font-family:var(--mono);letter-spacing:.25em;font-size:16px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.cvr .full-txt{bottom:auto;top:175px;text-align:center} /* 하드커버 감싸기 여백 */
+.cvr .full-txt h2{font-size:72px}
+.cvr .ed2{position:absolute;bottom:150px;left:0;right:0;text-align:center;color:#fff;font-family:var(--mono);letter-spacing:.25em;font-size:16px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
 .cover-shade,.full-txt,.cover-txt,.chno,.ed2{pointer-events:none}
 .full-txt [data-edit]{pointer-events:auto}
 .teaser-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,10,6,.55) 0%,rgba(15,10,6,.78) 55%,rgba(15,10,6,.92) 100%);pointer-events:none}
@@ -231,7 +231,8 @@ body.exporting [data-edit]:empty{display:none}
 .soon .s2{font-family:var(--display);font-size:40px;line-height:1.15;color:#fee500;margin:2px 0 6px;word-break:keep-all}
 .soon .s3{font-size:14px;line-height:1.7;opacity:.9}
 .soon .s4{font-family:var(--mono);font-size:13px;color:#fee500;margin-top:6px}
-.colophon .inner{justify-content:flex-end}
+.colophon .inner{justify-content:flex-end;padding-bottom:40px}
+.colophon .folio{display:none} /* 퍼블로그 QR 자리 */
 .colophon .cw{width:70px;transform:rotate(8deg);margin-bottom:14px}
 .colophon .ct{font-family:var(--display);font-size:30px}
 .colophon .cs{font-size:14px;color:var(--rose);margin:4px 0 16px}
