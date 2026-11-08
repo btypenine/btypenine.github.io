@@ -1,0 +1,16 @@
+{
+  "name": "Block Village - Night Raid",
+  "short_name": "Block Village",
+  "description": "Merge materials, build your village, survive the night.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#1b2350",
+  "theme_color": "#1b2350",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

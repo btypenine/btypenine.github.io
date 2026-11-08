@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<script src="https://bridge.playgama.com/v2/stable/playgama-bridge.js"></script>
+<title>블록 빌리지 — 밤의 습격 (프로토타입)</title>
+<style>
+html,body{margin:0;height:100%;background:#0f1424;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none}
+#wrap{position:fixed;inset:0}
+canvas{display:block;touch-action:none}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c"></canvas></div>
+<script>
+'use strict';
+/* =========================================================
+   블록 빌리지 — 밤의 습격 / Block Village — Night Raid  (프로토타입 v0.3)
+   루프: 아침(블록 퍼즐) → 낮(마을 건설) → 밤(생존 전투) → 새벽(정산)
+   v0.2: 언어 설정(한국어/English), 장비·가방, 전투 아이템, 퍼즐 망치
+   ========================================================= */
+const W = 720, H = 1280;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let S = 1, DPR = 1, OX = 0, OY = 0, VW = W, VH = H;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  VW = innerWidth; VH = innerHeight;
+  S = Math.min(VW / W, VH / H); OX = (VW - W * S) / 2; OY = (VH - H * S) / 2;
+  cv.style.width = VW + 'px'; cv.style.height = VH + 'px';
+  cv.width = Math.round(VW * DPR); cv.height = Math.round(VH * DPR);
+}
+const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
+const needRotate = () => IS_TOUCH && VW > VH * 1.05;
+addEventListener('resize', resize); resize();
+const FONT = '"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Noto Sans CJK KR",sans-serif';
+
+/* ---------- 유틸 ---------- */
+const rand = (a, b) => a + Math.random() * (b - a);
+const randi = (a, b) => Math.floor(rand(a, b + 1));
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+function pick(w) { let t = 0; for (const k in w) t += w[k]; let r = Math.random() * t; for (const k in w) { r -= w[k]; if (r <= 0) return k; } return Object.keys(w)[0]; }
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function hash2(a, b) { let h = Math.imul(a, 374761393) + Math.imul(b, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967295; }
+function mmss(s) { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
+function localDate(off = 0) { const d = new Date(Date.now() + off * 86400000); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+
+/* =========================================================
+   언어 (새 언어는 아래 사전에 같은 키로 추가하면 됨)
+   ========================================================= */
+const LANGS = { ko: '한국어', en: 'English' };
+const L = {
+  ko: {
+    title: '블록 빌리지', subtitle: '밤의 습격', tagline: '합쳐서 모으고 · 마을을 키우고 · 밤을 버텨라',
+    start: '게임 시작', cont: '이어하기', dayN: '{n}일차', jumpIn: '튜토리얼 없이 바로 시작',
+    streakT: '출석 보상 · {n}일째', streakDay: '{n}일', streakTmr: '내일: {r}', streakMiss: '하루라도 빠지면 1일부터 다시 시작해요', gx2: '광고 보고 2배 받기', rGear: '장비', rGearR: '희귀 장비',
+    qT: '오늘의 도전', qBtn: '도전 {a}/{b}', q_merge: '재료 {n}번 합치기', q_tier6: '금화 이상 만들기', q_gather: '아침에 재료 {n}개 모으기', q_kills: '몬스터 {n}마리 처치', q_boss: '체크포인트 보스 처치', q_build: '건물 {n}번 짓기·강화', q_survive: '밤 1번 끝까지 버티기', q_chain3: '3연속 합체 {n}번', qReward: '보상 {g} 골드', qClaim: '보상 받기 +{g} 골드', qDoneLbl: '받기 완료', qAll: '장비 1개 + 망치 1개', qAllBtn: '모두 완료 보너스 받기', qToast: '도전 완료! {n}', qReset: '도전은 매일 새로 열려요',
+    fillAd: '광고로 채우기', fillLeft: '오늘 {n}번', lvReroll: '광고 보고 다시 뽑기', newsT: '업데이트 소식 v{v}', newsBtn: '업데이트 소식', addHome: '홈 화면에 추가', favAdd: '즐겨찾기 추가', iosHowT: '홈 화면에 추가하기', iosHow1: '아래쪽 공유 버튼을 누르고', iosHow2: "'홈 화면에 추가'를 고르세요", installed: '설치 완료!',
+    shopBtn: '상점', shopT: '상점', p_remove_ads: '광고 제거', p_remove_adsD: '중간 광고 없음', p_starter_pack: '시작 패키지', p_starter_packD: '망치 5 + 골드 500 + 희귀 장비', p_gold_pack: '골드 주머니', p_gold_packD: '골드 1000', owned: '보유 중', buyOk: '구매 완료!', buyFail: '구매가 완료되지 않았어요',
+    contact: '문의 및 연락', cBody: '버그·의견은 언제든 환영해요!', cLink: 'itch.io 게임 페이지 댓글로 남겨 주세요', cHere: '이 게임 페이지의 댓글·평가로 남겨 주세요', cOpen: 'itch.io 페이지 열기', cId: '버전 {v} · 기록 ID {id}',
+    records: '기록', recTitle: '영역별 기록', lbDay: '생존', lbGather: '재료', lbKills: '사냥', lbVillage: '마을', lbDayD: '가장 멀리 간 날', lbGatherD: '아침 한 번에 모은 재료 최고', lbKillsD: '하룻밤 최다 처치', lbVillageD: '마을 건물 레벨 합계', myBest: '내 최고 기록', unitDay: '{n}일차', unitRes: '{n}개', unitKill: '{n}마리', unitLv: 'Lv.{n}', rankTop: '전체 순위 TOP 10', rankLoading: '순위를 불러오는 중…', rankFail: '순위를 불러오지 못했어요', rankEmpty: '아직 등록된 기록이 없어요', rankOpen: '순위표 열기', rankPopup: '버튼을 누르면 전체 순위를 볼 수 있어요', rankNative: '전체 순위는 이 사이트의 순위표에서 확인할 수 있어요', rankLocal: '이 사이트에서는 내 기록만 보여요', rankLocal2: '기록은 자동으로 저장돼요', newBest: '새 기록! {n}',
+    best: '최고 기록: {d}일차 · 누적 처치 {k}', settings: '설정', language: '언어 / Language', sound: '사운드', music: '배경음악', sfx: '효과음', on: '켜짐', off: '꺼짐', close: '닫기', ok: '확인', cancel: '취소', back: '돌아가기',
+    wood: '나무', stone: '돌', gold: '골드', goldN: '+{g} 골드',
+    offTitle: '자리를 비운 동안', offBody: '상점이 {m}분 동안 골드를 벌었어요', x2: '2배로 받기', claim: '그냥 받기',
+    attTitle: '출석 보상', attBody: '오늘도 마을에 와 주셨네요!', hammerPlus: '망치 +1',
+    pHead: '{d}일차 아침 · 재료 모으기', left: '남은 기회 {n}', nextMat: '다음', tapDrop: '원하는 곳을 눌러 떨어뜨려요', newMat: '새 재료 발견: {n}!', harvest: '판에 남은 재료도 절반 가져왔어요', full: '항아리가 가득 찼어요!', fullBody: '오늘 모은 재료는 그대로 가져가요', tidy: '정리하고 계속하기', tidyS: '작은 재료를 치워 줘요',
+    mat0: '도토리', mat1: '솔방울', mat2: '통나무', mat3: '조약돌', mat4: '바위', mat5: '철광석', mat6: '금화', mat7: '금덩이', mat8: '보석', mat9: '보물상자',
+    pT1: '재료를 위에서 떨어뜨려요', pT2: '같은 재료끼리 닿으면 합쳐져요', pT3: '합칠 때마다 나무·돌·금을 얻어요', pT4: '빨간 선 위로 넘치지 않게! (시작 {n}번)', pT5: '크게 합칠수록 기회가 늘어나요!', plusDrop: '기회 +{n}', bonusDrops: '합체 보너스로 기회 +{n}번', pStart: '채집 시작',
+    reroll: '블록 교체', endG: '채집 끝내기', stuck: '더 놓을 곳이 없어요!', pHint: '줄을 채우면 그 색깔 자원을 얻어요',
+    combo: '{n}연속 합체!', gDone: '채집 완료!', today: '오늘 모은 자원', noLines: '이번엔 하나도 못 합쳤어요',
+    bLocked: '마을 건설은 2일차부터 열려요', goBuild: '마을 건설하러 가기', goNight: '밤 맞이하기',
+    hammer: '망치 {n}', hamHint: '치울 재료를 누르세요', smash: '쾅!',
+    bHead: '{d}일차 낮 · 마을 건설', bOpenT: '마을 건설 개방!', bOpen1: '모은 자원으로 건물을 올리면', bOpen2: '밤 전투에서 더 강해져요', bOpen3: '상점은 접속 안 해도 골드를 벌어요', good: '좋아요',
+    max: '최대', upg: '강화', build: '건설', notBuilt: '아직 없음', next: '다음: {e}', nightSub: '몬스터 습격 준비 완료',
+    smith: '대장간', farm: '농장', wall: '성벽', shop: '상점',
+    eSmith: '공격력 +{x}%', eFarm: '최대 체력 +{x}', eWall: '받는 피해 -{x}%', eShop: '자동 골드 {a}/분 · 밤 골드 +{b}%', eShop0: '자동 골드 생산 없음',
+    nT: '첫 번째 밤', n1: '몬스터가 마을로 몰려옵니다!', n2: '화면을 누른 채 끌어서 이동', n3: '(PC는 방향키·WASD)', n4: '공격은 자동, 상자·아이템은 밟으면 획득', n5: '{s}초 동안 살아남으세요', n6: '보스를 잡으면 밤 시간 +{c}초 (체크포인트)', cpBoss: '체크포인트 보스! 잡으면 +{s}초', timePlus: '+{s}초 연장!', go: '시작!',
+    king: '대왕 슬라임', lord: '밤의 군주', appear: '{n} 등장!', slain: '{n} 처치!',
+    bolt: '마법탄', axe: '회전 도끼', lightning: '번개', aura: '화염 오라', arrow: '화살 다발',
+    bolt1: '가장 가까운 적에게 마법탄 발사', boltU: '발사 속도·피해 증가', axe1: '몸 주위를 도는 도끼 2개', axeU: '도끼 +1, 피해 증가',
+    lightning1: '화면 속 무작위 적에게 낙뢰', lightningU: '낙뢰 횟수·피해 증가', aura1: '주변 적에게 지속 피해', auraU: '범위·피해 증가', arrow1: '이동 방향으로 화살 부채꼴', arrowU: '화살 +1, 피해 증가',
+    speed: '날쌘 발', speedD: '이동 속도 +10%', vital: '튼튼한 몸', vitalD: '최대 체력 +20, 체력 회복', magnet: '자석', magnetD: '경험치 흡수 범위 +40%', haste: '신속', hasteD: '공격 속도 +8%', power: '힘', powerD: '모든 피해 +10%',
+    lvUp: '레벨 업! Lv.{l}', choose: '능력 하나를 고르세요', getW: '{n} 획득', heal: '체력 회복', heal50: '체력 50 회복',
+    dead: '쓰러졌습니다!', deadInfo: '처치 {k} · {s}초 버팀', revive: '부활하기', reviveS: '체력 50%로 다시 일어나기', retreat: '마을로 후퇴', retreatS: '주운 골드의 절반만 챙기기',
+    nHead: '{d}일차 밤', dawnIn: '아침까지 {t}', hpT: '체력 {a}/{b}', kg: '처치 {k}   골드 +{g}',
+    pause: '일시정지', pauseB: '잠시 쉬어가요', resume: '계속하기',
+    fMeat: '+체력', fMagnet: '자석!', fBomb: '펑!', fChest: '장비 획득!',
+    dWin: '아침이 밝았습니다!', dLose: '마을로 후퇴했습니다', dRes: '{d}일차 밤 결과',
+    rKills: '처치한 몬스터', rKv: '{k}마리', rTime: '버틴 시간', rTv: '{s}초', rGold: '주운 골드', rBonus: '생존 보너스', rShop: '상점·장비 보너스', none: '없음', half: '후퇴하면 골드 절반', earned: '받은 골드',
+    dbl: '보상 2배', dblS: '+{g} 골드', moreChest: '상자 하나 더', moreChestS: '장비 1개 추가', nextDay: '{d}일차 시작', loot: '오늘 얻은 장비 {n}개', noLoot: '오늘 얻은 장비 없음', openBag: '가방 열기',
+    adR: '보상형 광고 자리', adRS: '출시 버전에서는 포털 광고가 재생됩니다', adI: '전면 광고 자리', adIS: '하루가 끝날 때 1회만 노출', adChip: '▶ 광고',
+    rar0: '일반', rar1: '희귀', rar2: '영웅', rar3: '전설',
+    weapon: '무기', armor: '방어구', trinket: '장신구',
+    sword: '검', staff: '지팡이', bow: '활', mail: '갑옷', shieldI: '방패', cloak: '망토', ring: '반지', amulet: '목걸이', charm: '부적',
+    sAtk: '공격력 +{v}%', sCdr: '공격 속도 +{v}%', sHp: '최대 체력 +{v}', sDr: '받는 피해 -{v}%', sSpd: '이동 속도 +{v}%', sMag: '흡수 범위 +{v}%', sGold: '골드 획득 +{v}%', sXp: '경험치 +{v}%',
+    itemName: '{r} {b}', bag: '가방', equipped: '장착 중', empty: '비어 있음', storage: '보관함 {a}/{b}', equip: '장착', unequip: '해제', salvage: '분해 (+{g} 골드)',
+    rotate: '기기를 세로로 돌려 주세요', testAd: '테스트 모드: 광고 없이 지급', adFail: '광고를 불러오지 못했어요',
+    gearTotal: '장비 효과', noGear: '장비가 없어요. 밤에 상자를 찾아보세요!', autoSalv: '가방이 가득 차 자동 분해 +{g} 골드', vs: '지금 장착: {n}',
+  },
+  en: {
+    title: 'Block Village', subtitle: 'Night Raid', tagline: 'Merge to gather · Build your village · Survive the night',
+    start: 'Play', cont: 'Continue', dayN: 'Day {n}', jumpIn: 'Jump right in',
+    streakT: 'Daily Reward · Day {n}', streakDay: 'D{n}', streakTmr: 'Tomorrow: {r}', streakMiss: 'Miss a day and the streak starts over', gx2: 'Watch Ad: Claim x2', rGear: 'Gear', rGearR: 'Rare Gear',
+    qT: "Today's Challenges", qBtn: 'Tasks {a}/{b}', q_merge: 'Merge {n} times', q_tier6: 'Make a Gold Coin or better', q_gather: 'Gather {n} materials', q_kills: 'Defeat {n} monsters', q_boss: 'Defeat a checkpoint boss', q_build: 'Build or upgrade {n} times', q_survive: 'Survive a whole night', q_chain3: 'Get a 3x combo {n} times', qReward: 'Reward {g} Gold', qClaim: 'Claim +{g} Gold', qDoneLbl: 'Claimed', qAll: '1 gear + 1 hammer', qAllBtn: 'Claim All-Clear Bonus', qToast: 'Challenge done! {n}', qReset: 'New challenges every day',
+    fillAd: 'Fill (Ad)', fillLeft: '{n} left today', lvReroll: 'Watch Ad: Reroll', newsT: "What's New v{v}", newsBtn: "What's New", addHome: 'Add to Home', favAdd: 'Add to Favorites', iosHowT: 'Add to Home Screen', iosHow1: 'Tap the Share button below', iosHow2: "then choose 'Add to Home Screen'", installed: 'Installed!',
+    shopBtn: 'Shop', shopT: 'Shop', p_remove_ads: 'Remove Ads', p_remove_adsD: 'No interstitial ads', p_starter_pack: 'Starter Pack', p_starter_packD: '5 hammers + 500 gold + rare gear', p_gold_pack: 'Gold Pouch', p_gold_packD: '1000 gold', owned: 'Owned', buyOk: 'Purchase complete!', buyFail: 'Purchase not completed',
+    contact: 'Contact & Feedback', cBody: 'Bug reports and ideas are always welcome!', cLink: 'Leave a comment on the itch.io game page', cHere: 'Leave a comment or rating on this game page', cOpen: 'Open itch.io page', cId: 'Version {v} · Save ID {id}',
+    records: 'Records', recTitle: 'Records', lbDay: 'Survival', lbGather: 'Gather', lbKills: 'Hunt', lbVillage: 'Village', lbDayD: 'Furthest day reached', lbGatherD: 'Most materials in one morning', lbKillsD: 'Most kills in one night', lbVillageD: 'Total building level', myBest: 'My best', unitDay: 'Day {n}', unitRes: '{n}', unitKill: '{n} kills', unitLv: 'Lv.{n}', rankTop: 'Top 10', rankLoading: 'Loading ranking…', rankFail: 'Could not load the ranking', rankEmpty: 'No scores yet', rankOpen: 'Open Leaderboard', rankPopup: 'Tap the button to see the full ranking', rankNative: 'See the full ranking on this site\'s leaderboard', rankLocal: 'Only your own records are shown on this site', rankLocal2: 'Records are saved automatically', newBest: 'New record! {n}',
+    best: 'Best: Day {d} · Total kills {k}', settings: 'Settings', language: 'Language / 언어', sound: 'Sound', music: 'Music', sfx: 'Sound effects', on: 'ON', off: 'OFF', close: 'Close', ok: 'OK', cancel: 'Cancel', back: 'Back',
+    wood: 'Wood', stone: 'Stone', gold: 'Gold', goldN: '+{g} Gold',
+    offTitle: 'While You Were Away', offBody: 'Your shop earned gold for {m} min', x2: 'Claim x2', claim: 'Claim',
+    attTitle: 'Daily Reward', attBody: 'Welcome back to the village!', hammerPlus: 'Hammer +1',
+    pHead: 'Day {d} Morning · Gathering', left: 'Drops left {n}', nextMat: 'Next', tapDrop: 'Tap where to drop', newMat: 'New material: {n}!', harvest: 'Leftovers on the board: half collected', full: 'The jar is full!', fullBody: 'You keep everything collected today', tidy: 'Tidy Up & Continue', tidyS: 'Clears small materials',
+    mat0: 'Acorn', mat1: 'Pinecone', mat2: 'Log', mat3: 'Pebble', mat4: 'Rock', mat5: 'Iron Ore', mat6: 'Gold Coin', mat7: 'Gold Nugget', mat8: 'Gem', mat9: 'Treasure Chest',
+    pT1: 'Drop materials from the top', pT2: 'Same materials merge when they touch', pT3: 'Every merge gives wood, stone or gold', pT4: 'Don\'t overflow the red line! ({n} drops to start)', pT5: 'Bigger merges give you more drops!', plusDrop: '+{n} drop', bonusDrops: 'Merge bonus: +{n} drops', pStart: 'Start',
+    reroll: 'New Blocks', endG: 'Finish', stuck: 'No room left!', pHint: 'Clear lines to collect resources',
+    combo: '{n}x COMBO!', gDone: 'Gathering Done!', today: 'Collected today', noLines: 'No merges this time',
+    bLocked: 'Building unlocks on Day 2', goBuild: 'Go Build', goNight: 'Face the Night',
+    hammer: 'Hammer {n}', hamHint: 'Tap a material to remove it', smash: 'SMASH!',
+    bHead: 'Day {d} · Build', bOpenT: 'Building Unlocked!', bOpen1: 'Spend resources on buildings', bOpen2: 'to grow stronger at night', bOpen3: 'Shops earn gold even offline', good: 'Got it',
+    max: 'MAX', upg: 'Upgrade', build: 'Build', notBuilt: 'Not built', next: 'Next: {e}', nightSub: 'Ready for the raid',
+    smith: 'Forge', farm: 'Farm', wall: 'Wall', shop: 'Shop',
+    eSmith: 'Attack +{x}%', eFarm: 'Max HP +{x}', eWall: 'Damage taken -{x}%', eShop: 'Auto {a}g/min · Night +{b}%', eShop0: 'No auto gold',
+    nT: 'The First Night', n1: 'Monsters are coming!', n2: 'Hold and drag to move', n3: '(PC: Arrow keys / WASD)', n4: 'Auto attack · step on chests & items', n5: 'Survive for {s} seconds', n6: 'Defeat a boss: +{c}s of night (checkpoint)', cpBoss: 'Checkpoint boss! Defeat it: +{s}s', timePlus: '+{s}s EXTENDED!', go: 'Go!',
+    king: 'King Slime', lord: 'Night Lord', appear: '{n} appears!', slain: '{n} defeated!',
+    bolt: 'Magic Bolt', axe: 'Spin Axe', lightning: 'Lightning', aura: 'Fire Aura', arrow: 'Arrow Volley',
+    bolt1: 'Shoots the nearest enemy', boltU: 'Faster, more damage', axe1: '2 axes orbit around you', axeU: '+1 axe, more damage',
+    lightning1: 'Strikes random enemies', lightningU: 'More strikes, more damage', aura1: 'Burns nearby enemies', auraU: 'Bigger, more damage', arrow1: 'Arrow fan where you move', arrowU: '+1 arrow, more damage',
+    speed: 'Swift Feet', speedD: 'Move speed +10%', vital: 'Sturdy Body', vitalD: 'Max HP +20, heal', magnet: 'Magnet', magnetD: 'Pickup range +40%', haste: 'Haste', hasteD: 'Attack speed +8%', power: 'Might', powerD: 'All damage +10%',
+    lvUp: 'Level Up! Lv.{l}', choose: 'Choose one', getW: 'Get {n}', heal: 'Heal', heal50: 'Restore 50 HP',
+    dead: 'You Fell!', deadInfo: '{k} kills · {s}s survived', revive: 'Revive', reviveS: 'Get up with 50% HP', retreat: 'Retreat', retreatS: 'Keep only half the gold',
+    nHead: 'Night {d}', dawnIn: 'Dawn in {t}', hpT: 'HP {a}/{b}', kg: 'Kills {k}   Gold +{g}',
+    pause: 'Paused', pauseB: 'Take a breather', resume: 'Resume',
+    fMeat: '+HP', fMagnet: 'Magnet!', fBomb: 'BOOM!', fChest: 'Gear found!',
+    dWin: 'Dawn Has Come!', dLose: 'You Retreated', dRes: 'Night {d} Results',
+    rKills: 'Monsters defeated', rKv: '{k}', rTime: 'Time survived', rTv: '{s}s', rGold: 'Gold picked up', rBonus: 'Survival bonus', rShop: 'Shop & gear bonus', none: 'None', half: 'Retreat: half gold', earned: 'Gold earned',
+    dbl: 'Double', dblS: '+{g} Gold', moreChest: 'One More Chest', moreChestS: '+1 gear', nextDay: 'Start Day {d}', loot: 'Gear found today: {n}', noLoot: 'No gear found today', openBag: 'Open Bag',
+    adR: 'Rewarded ad slot', adRS: 'A portal ad plays in the release build', adI: 'Interstitial ad slot', adIS: 'Shown once at the end of a day', adChip: '▶ AD',
+    rar0: 'Common', rar1: 'Rare', rar2: 'Epic', rar3: 'Legendary',
+    weapon: 'Weapon', armor: 'Armor', trinket: 'Trinket',
+    sword: 'Sword', staff: 'Staff', bow: 'Bow', mail: 'Mail', shieldI: 'Shield', cloak: 'Cloak', ring: 'Ring', amulet: 'Amulet', charm: 'Charm',
+    sAtk: 'Attack +{v}%', sCdr: 'Attack speed +{v}%', sHp: 'Max HP +{v}', sDr: 'Damage taken -{v}%', sSpd: 'Move speed +{v}%', sMag: 'Pickup range +{v}%', sGold: 'Gold gain +{v}%', sXp: 'XP +{v}%',
+    itemName: '{r} {b}', bag: 'Bag', equipped: 'Equipped', empty: 'Empty', storage: 'Storage {a}/{b}', equip: 'Equip', unequip: 'Unequip', salvage: 'Salvage (+{g} Gold)',
+    rotate: 'Please rotate your device', testAd: 'Test mode: reward without ad', adFail: 'Ad unavailable, try again later',
+    gearTotal: 'Gear bonus', noGear: 'No gear yet. Find chests at night!', autoSalv: 'Bag full, auto-salvaged +{g} Gold', vs: 'Now equipped: {n}',
+  }
+};
+function t(k, p) {
+  const lang = (save && save.lang) || 'ko';
+  let s = (L[lang] && L[lang][k]) ?? L.ko[k] ?? k;
+  if (p) for (const q in p) s = s.split('{' + q + '}').join(p[q]);
+  return s;
+}
+
+/* ---------- 저장 (업데이트해도 기존 데이터 유지: 기본값 위에 덮어쓰기) ---------- */
+const SAVE_KEY = 'blockVillage.save';
+function defaults() {
+  return { v: 2, lang: null, day: 1, phase: 'puzzle', wood: 0, stone: 0, gold: 0,
+    b: { smith: 0, farm: 0, wall: 0, shop: 0 },
+    tut: { puzzle: false, build: false, night: false, merge: false, merge2: false }, bestTier: 0, muted: false, musicOn: true, sfxOn: true,
+    inv: [], eq: { weapon: null, armor: null, trinket: null }, hammer: 2, nextId: 1,
+    lastSeen: Date.now(), lastLogin: '', bestDay: 1, totalKills: 0, bestGather: 0, bestKills: 0, pid: '', streakN: 0, daily: null, seenVer: '', noAds: false, iap: { starter: false } };
+}
+function merge(base, src) {
+  for (const k in src) {
+    if (src[k] && typeof src[k] === 'object' && !Array.isArray(src[k]) && base[k] && typeof base[k] === 'object') merge(base[k], src[k]);
+    else base[k] = src[k];
+  }
+  return base;
+}
+/* ---------- 플랫폼 (Playgama Bridge) ---------- */
+const Platform = { b: null, mode: 'none', id: 'none', paused: false, audio: true };
+async function initBridge() {
+  if (!window.bridge) return;                      // SDK를 못 불러온 환경(오프라인·미리보기): 브라우저 저장으로 동작
+  try {
+    await Promise.race([window.bridge.initialize(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000))]);
+    const b = window.bridge; Platform.b = b; Platform.id = b.platform.id; Platform.mode = Platform.id === 'mock' ? 'mock' : 'live';
+    Platform.audio = b.platform.isAudioEnabled !== false;
+    b.platform.on(b.EVENT_NAME.PAUSE_STATE_CHANGED, p => { Platform.paused = !!p; if (p) onPlatformPause(); });
+    b.platform.on(b.EVENT_NAME.AUDIO_STATE_CHANGED, a => { Platform.audio = !!a; Sound.applyMute(); });
+    b.advertisement.on(b.EVENT_NAME.REWARDED_STATE_CHANGED, st => AdBridge.onRewarded(st));
+    b.advertisement.on(b.EVENT_NAME.INTERSTITIAL_STATE_CHANGED, st => AdBridge.onInterstitial(st));
+    if (b.advertisement.interstitialState === 'opened') AdBridge.active = true;
+  } catch (e) { Platform.b = null; Platform.mode = 'none'; }
+}
+/* ---------- 소리 (실제 음원 파일: Kenney CC0 효과음 + CC0 배경음악) ---------- */
+const SFX_FILES = ['click', 'place', 'clear', 'combo', 'coin', 'gem', 'levelup', 'hurt', 'kill', 'chest', 'bomb', 'build', 'hammer', 'defeat', 'dawn', 'night', 'revive', 'w_bolt', 'w_axe', 'w_lightning', 'w_aura', 'w_arrow', 'checkpoint', 'drop', 'merge'];
+const SFX_VOL = { click: .5, place: .55, clear: .6, combo: .7, coin: .35, gem: .18, levelup: .6, hurt: .5, kill: .22, chest: .7, bomb: .7, build: .6, hammer: .6, defeat: .6, dawn: .6, night: .55, revive: .6, w_bolt: .32, w_axe: .42, w_lightning: .45, w_aura: .3, w_arrow: .4, checkpoint: .8, drop: .55, merge: .7 };
+const Sound = {
+  ctx: null, master: null, music: null, sfx: null, buf: {}, mbuf: {}, cur: null, curName: null, last: {}, want: null,
+  init() {
+    try { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; this.ctx = new AC(); } catch (e) { return; }
+    const c = this.ctx; this.master = c.createGain(); this.master.connect(c.destination);
+    this.music = c.createGain(); this.music.connect(this.master);
+    this.sfx = c.createGain(); this.sfx.connect(this.master);
+    this.applyMute();
+    const load = (url, cb) => fetch(url).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(a => new Promise((res, rej) => c.decodeAudioData(a, res, rej))).then(cb).catch(() => {});
+    for (const n of SFX_FILES) load(`sounds/sfx_${n}.mp3`, b => { this.buf[n] = b; });
+    // 배경음악: 끊김 없는 ogg 우선, 못 읽는 브라우저는 mp3
+    const loadAny = (urls, cb) => { const [u, ...rest] = urls; if (!u) return; fetch(u).then(r => r.ok ? r.arrayBuffer() : Promise.reject()).then(a => new Promise((res, rej) => c.decodeAudioData(a, res, rej))).then(cb).catch(() => loadAny(rest, cb)); };
+    for (const n of ['day', 'night']) loadAny([`music/music_${n}.ogg`, `music/music_${n}.mp3`], b => { this.mbuf[n] = b; if (this.want === n) this.playMusic(n, true); });
+  },
+  allOff() { return save.muted || (!save.musicOn && !save.sfxOn); },   // 스피커 버튼 표시용
+  muted() { return this.allOff() || !Platform.audio; },
+  applyMute() {
+    if (!this.master) return;
+    this.master.gain.value = (save.muted || !Platform.audio) ? 0 : 1;
+    this.music.gain.value = save.musicOn ? 0.38 : 0;
+    this.sfx.gain.value = save.sfxOn ? 1 : 0;
+  },
+  unlock() { if (this.ctx && this.ctx.state === 'suspended' && this.shouldRun()) this.ctx.resume().catch(() => {}); },
+  shouldRun() { return !document.hidden && !AdBridge.active && !Platform.paused; },
+  tick() {
+    if (!this.ctx) return;
+    const run = this.shouldRun();
+    if (!run && this.ctx.state === 'running') this.ctx.suspend().catch(() => {});
+    else if (run && this.ctx.state === 'suspended' && this.userGesture) this.ctx.resume().catch(() => {});
+  },
+  play(n, rate) {
+    if (!this.ctx || this.muted() || !save.sfxOn || !this.buf[n] || this.ctx.state !== 'running') return;
+    const now = this.ctx.currentTime, gap = { gem: .06, kill: .07, hurt: .25, coin: .08, place: .03, w_bolt: .12, w_arrow: .2, w_axe: .3, w_aura: 1.4, w_lightning: .3, drop: .05, merge: .04 }[n] || 0;
+    if (gap && this.last[n] && now - this.last[n] < gap) return;
+    this.last[n] = now;
+    const src = this.ctx.createBufferSource(), g = this.ctx.createGain();
+    src.buffer = this.buf[n]; if (rate) src.playbackRate.value = rate;
+    g.gain.value = SFX_VOL[n] || .5; src.connect(g); g.connect(this.sfx); src.start();
+  },
+  playMusic(n, force) {
+    this.want = n;
+    if (!this.ctx || (!force && this.curName === n)) return;
+    const c = this.ctx, b = this.mbuf[n];
+    if (this.cur) { const old = this.cur; try { old.g.gain.setTargetAtTime(0, c.currentTime, 0.25); old.src.stop(c.currentTime + 1.2); } catch (e) {} this.cur = null; this.curName = null; }
+    if (!b) return;
+    const src = c.createBufferSource(), g = c.createGain(); src.buffer = b; src.loop = true;
+    g.gain.value = 0; g.gain.setTargetAtTime(1, c.currentTime, 0.4); src.connect(g); g.connect(this.music); src.start();
+    this.cur = { src, g }; this.curName = n;
+  },
+  toggle() {                                      // 스피커 버튼: 전체 켜기/끄기
+    if (this.allOff()) { save.muted = false; if (!save.musicOn && !save.sfxOn) { save.musicOn = true; save.sfxOn = true; } }
+    else save.muted = true;
+    this.applyMute(); persist();
+  },
+  // 전체 음소거 상태에서 하나만 켜면, 다른 하나는 꺼진 상태로 유지
+  setMusic(on) { if (on && save.muted) { save.muted = false; save.sfxOn = false; } save.musicOn = on; this.applyMute(); persist(); },
+  setSfx(on) { if (on && save.muted) { save.muted = false; save.musicOn = false; } save.sfxOn = on; this.applyMute(); persist(); }
+};
+let memStore = null;
+function readLocal() { let raw = null; try { raw = localStorage.getItem(SAVE_KEY); } catch (e) { raw = memStore; } if (!raw) return null; try { return JSON.parse(raw); } catch (e) { return null; } }
+async function loadSaveAsync() {
+  let data = null;
+  if (Platform.b) {
+    try { data = await Platform.b.storage.get(SAVE_KEY); } catch (e) { data = null; }
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch (e) { data = null; } }
+    if (!data && Platform.mode === 'mock') data = readLocal();   // 이전 버전(브라우저 저장) 기록 이어받기
+  } else data = readLocal();
+  let s = defaults();
+  if (data && typeof data === 'object') s = merge(s, data);
+  if (!s.lang) { const pl = Platform.b ? Platform.b.platform.language : 'en'; s.lang = /^ko/i.test(pl || '') ? 'ko' : 'en'; }
+  if (!Array.isArray(s.inv)) s.inv = [];
+  if (!s.pid) s.pid = Math.random().toString(36).slice(2, 8).toUpperCase();   // 문의할 때 알려 줄 기록 ID
+  s.v = 3;
+  return s;
+}
+let saveTimer = null;
+function writeSave() {
+  saveTimer = null;
+  const str = JSON.stringify(save);
+  if (Platform.b) { try { Platform.b.storage.set(SAVE_KEY, str).catch(() => {}); } catch (e) {} }
+  else { try { localStorage.setItem(SAVE_KEY, str); } catch (e) { memStore = str; } }
+}
+function persist(now = false) {                    // 여러 변경을 모아 한 번에 저장
+  save.lastSeen = Date.now();
+  if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  if (now) writeSave(); else saveTimer = setTimeout(writeSave, 400);
+}
+let save = defaults();
+
+/* =========================================================
+   장비 아이템
+   ========================================================= */
+const RAR_COL = ['#adb5bd', '#4dabf7', '#b197fc', '#ffa94d'];
+const RAR_INK = ['#6c757d', '#1c7ed6', '#7048e8', '#e8590c'];
+const RAR_MULT = [1, 1.6, 2.4, 3.5];
+const SLOTS = ['weapon', 'armor', 'trinket'];
+const BASES = { weapon: ['sword', 'staff', 'bow'], armor: ['mail', 'shieldI', 'cloak'], trinket: ['ring', 'amulet', 'charm'] };
+const STAT_KEY = { atk: 'sAtk', cdr: 'sCdr', hp: 'sHp', dr: 'sDr', spd: 'sSpd', mag: 'sMag', gold: 'sGold', xp: 'sXp' };
+const INV_MAX = 30;
+function genItem(day, minR = 0) {
+  const w = {}; [60, 28, 10, 2].forEach((v, i) => { if (i >= minR) w[i] = v; });
+  const rar = +pick(w), slot = SLOTS[randi(0, 2)], base = BASES[slot][randi(0, 2)];
+  const m = RAR_MULT[rar] * (1 + (day - 1) * 0.06), st = {};
+  if (slot === 'weapon') { st.atk = Math.round(5 * m); if (rar >= 1) st.cdr = Math.round(3 * m); }
+  else if (slot === 'armor') { st.hp = Math.round(15 * m); if (rar >= 1) st.dr = Math.round(2 * m); }
+  else { const pool = shuffle([['spd', 4], ['mag', 15], ['gold', 8], ['xp', 6]]); for (let i = 0; i < (rar >= 1 ? 2 : 1); i++) st[pool[i][0]] = Math.round(pool[i][1] * m); }
+  return { id: save.nextId++, slot, base, rar, st, day };
+}
+const itemName = it => t('itemName', { r: t('rar' + it.rar), b: t(it.base) });
+const itemStats = it => Object.keys(it.st).map(k => t(STAT_KEY[k], { v: it.st[k] }));
+const salvageValue = it => Math.round([6, 15, 35, 80][it.rar] * (1 + (it.day - 1) * 0.1));
+function addItem(it) {
+  if (save.inv.length >= INV_MAX) { const g = salvageValue(it); save.gold += g; persist(); return g; }
+  save.inv.push(it); persist(); return 0;
+}
+function gearStats() {
+  const g = { atk: 0, cdr: 0, hp: 0, dr: 0, spd: 0, mag: 0, gold: 0, xp: 0 };
+  for (const s of SLOTS) { const it = save.eq[s]; if (it) for (const k in it.st) g[k] += it.st[k]; }
+  return g;
+}
+
+/* ---------- 광고 (Playgama Bridge) ----------
+   live: 실제 포털 → 진짜 광고, 'rewarded' 상태에서만 보상 지급
+   mock/none: 포털 밖(itch.io·미리보기) → 테스트 모드, 광고 없이 보상 지급 */
+let toast = null;
+function showToast(text) { toast = { text, t: 0 }; }
+const AdBridge = {
+  active: false, rwCb: null, granted: false, itCb: null, itOpened: false,
+  live() { return Platform.mode === 'live'; },
+  canReward() { return this.live() ? !!Platform.b.advertisement.isRewardedSupported : true; },
+  gameplayStart() {},
+  gameplayStop() {},
+  rewarded(cb, placement) {
+    if (this.active) return;
+    if (!this.live()) { showToast(t('testAd')); cb(true); return; }
+    if (!Platform.b.advertisement.isRewardedSupported) return;
+    this.active = true; this.granted = false; this.rwCb = cb;
+    try { Platform.b.advertisement.showRewarded(placement || null); } catch (e) { this.onRewarded('failed'); }
+  },
+  onRewarded(st) {
+    if (st === 'loading' || st === 'opened') { this.active = true; }
+    else if (st === 'rewarded') { if (this.rwCb && !this.granted) { this.granted = true; const c = this.rwCb; this.rwCb = null; c(true); } }
+    else if (st === 'closed' || st === 'failed') { this.active = false; if (st === 'failed' && !this.granted) showToast(t('adFail')); this.rwCb = null; }
+  },
+  interstitial(cb) {
+    if (save.noAds) { cb(); return; }
+    if (!this.live() || !Platform.b.advertisement.isInterstitialSupported) { cb(); return; }
+    this.itCb = cb; this.itOpened = false;
+    try { Platform.b.advertisement.showInterstitial(); } catch (e) {}
+    setTimeout(() => { if (!this.itOpened && this.itCb) { const c = this.itCb; this.itCb = null; this.active = false; c(); } }, 1500);
+  },
+  onInterstitial(st) {
+    if (st === 'opened') { this.itOpened = true; this.active = true; }
+    else if (st === 'loading') { this.active = true; }
+    else if (st === 'closed' || st === 'failed') { this.active = false; if (this.itCb) { const c = this.itCb; this.itCb = null; c(); } }
+  }
+};
+// 광고 버튼: 지원 안 되는 플랫폼에서는 숨김
+const adBtn = b => AdBridge.canReward() ? [b] : [];
+
+/* ---------- 공통 그리기 ---------- */
+function rr(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2); ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function txt(s, x, y, size, color = '#fff', align = 'center', weight = '700', stroke = false, maxW = 0) {
+  ctx.font = `${weight} ${size}px ${FONT}`;
+  if (maxW) { const w = ctx.measureText(s).width; if (w > maxW) { size = Math.max(10, Math.floor(size * maxW / w)); ctx.font = `${weight} ${size}px ${FONT}`; } }
+  ctx.textAlign = align; ctx.textBaseline = 'middle';
+  if (stroke) { ctx.lineWidth = Math.max(4, size / 6); ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); }
+  ctx.fillStyle = color; ctx.fillText(s, x, y);
+}
+function button(b) {
+  const r = b.r || 24;
+  rr(b.x, b.y + 7, b.w, b.h, r); ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fill();
+  rr(b.x, b.y, b.w, b.h, r); ctx.fillStyle = b.disabled ? '#8a91a3' : (b.color || '#ff8a3d'); ctx.fill();
+  rr(b.x + 6, b.y + 5, b.w - 12, b.h * 0.38, r * 0.7); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill();
+  const sz = b.size || 34, pad = b.ad ? 120 : 24, ly = b.y + b.h / 2 + (b.sub ? -13 : 0);
+  if (b.icon) {
+    ctx.font = `800 ${sz}px ${FONT}`;
+    const is = sz * 1.05, tw = Math.min(ctx.measureText(b.label).width, b.w - is - 40), x0 = b.x + b.w / 2 - (is + 8 + tw) / 2;
+    drawIcon(b.icon, x0 + is / 2, ly - 1, is, '#fff');
+    txt(b.label, x0 + is + 8 + tw / 2, ly, sz, '#fff', 'center', '800', false, b.w - is - 40);
+  } else txt(b.label, b.x + b.w / 2, ly, sz, '#fff', 'center', '800', false, b.w - (b.ad && b.w < 380 ? 30 : pad));
+  if (b.sub) txt(b.sub, b.x + b.w / 2, b.y + b.h / 2 + 22, 22, 'rgba(255,255,255,.9)', 'center', '600', false, b.w - 24);
+  if (b.ad && AdBridge.live()) {
+    const cw = 86, cx = b.w < 380 ? b.x + b.w / 2 - cw / 2 : b.x + b.w - cw - 14, cy = b.w < 380 ? b.y - 16 : b.y + 10;
+    rr(cx, cy, cw, 30, 15); ctx.fillStyle = b.w < 380 ? '#212529' : 'rgba(0,0,0,.3)'; ctx.fill();
+    txt(t('adChip'), cx + cw / 2, cy + 16, 17, '#fff', 'center', '700');
+  }
+}
+function drawIcon(kind, cx, cy, s, col) {
+  ctx.save(); ctx.translate(cx, cy); const k = s / 40; ctx.scale(k, k);
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (kind === 'globe') {
+    ctx.beginPath(); ctx.arc(0, 0, 15, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(0, 0, 6.5, 15, 0, 0, 7); ctx.stroke();
+    line(-15, 0, 15, 0); line(-12, -8, 12, -8); line(-12, 8, 12, 8);
+  } else if (kind === 'flag') {
+    ctx.fillRect(-11, -16, 4, 32); ctx.beginPath(); ctx.moveTo(-7, -16); ctx.lineTo(14, -10); ctx.lineTo(-7, -2); ctx.closePath(); ctx.fill();
+  } else if (kind === 'home') {
+    ctx.beginPath(); ctx.moveTo(-15, -1); ctx.lineTo(0, -15); ctx.lineTo(15, -1); ctx.stroke(); rr(-10, -3, 20, 17, 2); ctx.fill();
+  } else if (kind === 'cart') {
+    ctx.beginPath(); ctx.moveTo(-16, -12); ctx.lineTo(-10, -12); ctx.lineTo(-6, 6); ctx.lineTo(12, 6); ctx.lineTo(15, -6); ctx.lineTo(-8, -6); ctx.stroke();
+    ctx.beginPath(); ctx.arc(-4, 12, 3, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(10, 12, 3, 0, 7); ctx.fill();
+  } else if (kind === 'trophy') {
+    ctx.beginPath(); ctx.moveTo(-12, -15); ctx.lineTo(12, -15); ctx.lineTo(10, 0); ctx.quadraticCurveTo(0, 9, -10, 0); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.arc(-13, -8, 6, Math.PI * 0.5, Math.PI * 1.5); ctx.stroke(); ctx.beginPath(); ctx.arc(13, -8, 6, -Math.PI * 0.5, Math.PI * 0.5); ctx.stroke();
+    ctx.fillRect(-3, 4, 6, 7); rr(-10, 11, 20, 5, 2); ctx.fill();
+  } else if (kind === 'gear') {
+    ctx.beginPath();
+    for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, r = i % 2 ? 11 : 16; ctx.lineTo(Math.cos(a - .12) * r, Math.sin(a - .12) * r); ctx.lineTo(Math.cos(a + .12) * r, Math.sin(a + .12) * r); }
+    ctx.closePath(); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = 'rgba(20,30,60,.9)'; ctx.beginPath(); ctx.arc(0, 0, 5.5, 0, 7); ctx.fill();
+  } else if (kind === 'hammer') {
+    ctx.rotate(-0.6); rr(-3, -6, 6, 24, 2); ctx.fill(); rr(-13, -15, 26, 11, 3); ctx.fill();
+  } else if (kind === 'bag') {
+    rr(-14, -7, 28, 22, 6); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -8, 7, Math.PI, 0); ctx.stroke();
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-7, 1, 14, 3);
+  } else if (kind === 'chest') {
+    rr(-13, -4, 26, 16, 3); ctx.fill(); rr(-14, -12, 28, 8, 3); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(-2, -6, 4, 8);
+  }
+  ctx.restore();
+}
+const hit = (b, x, y) => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+function tapButtons(list, x, y) { for (const b of list) if (!b.disabled && hit(b, x, y)) { Sound.play('click'); b.cb(); return true; } return false; }
+function line(x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+
+const RES = {
+  wood: { color: '#8bc34a', dark: '#558b2f', ink: '#3d7a17' },
+  stone: { color: '#a7b4c6', dark: '#6b7a90', ink: '#4c5a70' },
+  gold: { color: '#ffc93c', dark: '#c99400', ink: '#b07a00' },
+};
+function drawCell(x, y, s, type, alpha = 1) {
+  const r = RES[type]; ctx.globalAlpha = alpha;
+  rr(x + 2, y + 2, s - 4, s - 4, s * 0.18); ctx.fillStyle = r.dark; ctx.fill();
+  rr(x + 2, y + 2, s - 4, s - 4 - s * 0.1, s * 0.18); ctx.fillStyle = r.color; ctx.fill();
+  rr(x + s * 0.18, y + s * 0.14, s * 0.4, s * 0.13, s * 0.07); ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fill();
+  ctx.globalAlpha = 1;
+}
+function drawResBar() {
+  rr(20, 24, 590, 76, 38); ctx.fillStyle = 'rgba(20,30,50,.6)'; ctx.fill();
+  ['wood', 'stone', 'gold'].forEach((k, i) => {
+    const x = 56 + i * 192;
+    drawCell(x - 20, 42, 40, k);
+    txt(String(save[k]), x + 34, 63, 32, '#fff', 'left', '800', false, 140);
+  });
+}
+function skyBg(top, bottom) {
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, top); g.addColorStop(1, bottom);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+}
+// 장비 아이콘
+function itemIcon(it, cx, cy, s, frame = true) {
+  if (frame) {
+    rr(cx - s / 2, cy - s / 2, s, s, s * 0.18); ctx.fillStyle = '#2b3a55'; ctx.fill();
+    ctx.lineWidth = Math.max(3, s * 0.05); ctx.strokeStyle = RAR_COL[it.rar]; ctx.stroke();
+    if (it.rar >= 2) { rr(cx - s / 2 + 4, cy - s / 2 + 4, s - 8, s - 8, s * 0.15); ctx.fillStyle = it.rar === 3 ? 'rgba(255,169,77,.15)' : 'rgba(177,151,252,.13)'; ctx.fill(); }
+  }
+  const k = s / 110; ctx.save(); ctx.translate(cx, cy); ctx.scale(k, k); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  switch (it.base) {
+    case 'sword': ctx.strokeStyle = '#e9ecef'; ctx.lineWidth = 10; line(-20, 20, 24, -24); ctx.strokeStyle = '#8d6e63'; ctx.lineWidth = 8; line(-30, 10, -10, 30); line(-24, 24, -34, 34); break;
+    case 'staff': ctx.strokeStyle = '#a0522d'; ctx.lineWidth = 8; line(-24, 32, 14, -14); ctx.fillStyle = '#74c0fc'; ctx.beginPath(); ctx.arc(18, -20, 13, 0, 7); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(14, -24, 4, 0, 7); ctx.fill(); break;
+    case 'bow': ctx.strokeStyle = '#a0522d'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(-14, 0, 32, -1.2, 1.2); ctx.stroke();
+      ctx.strokeStyle = '#dee2e6'; ctx.lineWidth = 2; line(-14 + 32 * Math.cos(-1.2), 32 * Math.sin(-1.2), -14 + 32 * Math.cos(1.2), 32 * Math.sin(1.2));
+      ctx.strokeStyle = '#ffe8a3'; ctx.lineWidth = 4; line(-4, 0, 30, 0); break;
+    case 'mail': ctx.fillStyle = '#ced4da'; ctx.beginPath(); ctx.moveTo(-26, -24); ctx.lineTo(-10, -30); ctx.lineTo(0, -22); ctx.lineTo(10, -30); ctx.lineTo(26, -24); ctx.lineTo(22, 28); ctx.lineTo(-22, 28); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#868e96'; ctx.lineWidth = 3; line(0, -18, 0, 26); break;
+    case 'shieldI': ctx.fillStyle = '#4dabf7'; ctx.beginPath(); ctx.moveTo(0, -32); ctx.lineTo(28, -22); ctx.quadraticCurveTo(26, 18, 0, 34); ctx.quadraticCurveTo(-26, 18, -28, -22); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#ffd43b'; ctx.fillRect(-4, -20, 8, 40); ctx.fillRect(-16, -6, 32, 8); break;
+    case 'cloak': ctx.fillStyle = '#e64980'; ctx.beginPath(); ctx.moveTo(-12, -30); ctx.lineTo(12, -30); ctx.lineTo(28, 30); ctx.lineTo(-28, 30); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#ffd43b'; ctx.beginPath(); ctx.arc(0, -26, 6, 0, 7); ctx.fill(); break;
+    case 'ring': ctx.strokeStyle = '#fcc419'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(0, 8, 20, 0, 7); ctx.stroke(); ctx.fillStyle = '#ff6b6b'; ctx.beginPath(); ctx.moveTo(0, -26); ctx.lineTo(10, -14); ctx.lineTo(0, -4); ctx.lineTo(-10, -14); ctx.closePath(); ctx.fill(); break;
+    case 'amulet': ctx.strokeStyle = '#ced4da'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -6, 26, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+      ctx.fillStyle = '#63e6be'; ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(14, 14); ctx.lineTo(0, 32); ctx.lineTo(-14, 14); ctx.closePath(); ctx.fill(); break;
+    default: ctx.fillStyle = '#ffe066'; rr(-18, -28, 36, 56, 4); ctx.fill(); ctx.strokeStyle = '#e03131'; ctx.lineWidth = 4; line(0, -18, 0, 18); line(-10, -6, 10, -6); line(-8, 8, 8, 8);
+  }
+  ctx.restore();
+}
+
+/* ---------- 떠오르는 글자 ---------- */
+let floats = [];
+function floatText(x, y, text, color, size = 34) { floats.push({ x, y, text, color, size, t: 0 }); }
+function updFloats(dt) { for (const f of floats) { f.t += dt; f.y -= 55 * dt; } floats = floats.filter(f => f.t < 1.2); }
+function drawFloats(ox = 0, oy = 0) {
+  for (const f of floats) { ctx.globalAlpha = clamp(1.2 - f.t, 0, 1); txt(f.text, f.x - ox, f.y - oy, f.size, f.color, 'center', '900', true); }
+  ctx.globalAlpha = 1;
+}
+
+/* ---------- 팝업 ---------- */
+let popup = null; const popupQueue = [];
+function showPopup(p) { if (popup) popupQueue.push(p); else popup = p; }
+function closePopup() { popup = popupQueue.shift() || null; }
+function popupGeom(p) {
+  const n = (p.lines || []).length, bh = p.buttons.some(b => b.sub) ? 112 : 96, top = p.icon ? 250 : 140;
+  const h = top + 10 + n * 54 + (p.customH || 0) + p.buttons.length * (bh + 18) + 16, w = 620;
+  return { x: (W - w) / 2, y: (H - h) / 2, w, h, bh, top };
+}
+function popupButtons(p) {
+  const g = popupGeom(p); const y0 = g.y + g.top + (p.lines || []).length * 54 + (p.customH || 0);
+  return p.buttons.map((b, i) => Object.assign({}, b, { x: g.x + 40, y: y0 + i * (g.bh + 18), w: g.w - 80, h: g.bh, size: 32 }));
+}
+function popupX(p) { const g = popupGeom(p); return { x: g.x + g.w - 66, y: g.y + 14, w: 52, h: 52 }; }
+function drawPopup() {
+  const p = popup, g = popupGeom(p);
+  rr(g.x, g.y + 10, g.w, g.h, 32); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
+  rr(g.x, g.y, g.w, g.h, 32); ctx.fillStyle = '#fff8ec'; ctx.fill();
+  ctx.lineWidth = 6; ctx.strokeStyle = p.border || '#ffc982'; ctx.stroke();
+  txt(p.title, W / 2, g.y + 72, 44, p.titleColor || '#3b2a1a', 'center', '900', false, g.w - 60);
+  if (p.icon) itemIcon(p.icon, W / 2, g.y + 180, 110);
+  let y = g.y + g.top;
+  for (const l of p.lines || []) { const o = typeof l === 'string' ? { text: l } : l; txt(o.text, W / 2, y + 8, o.size || 28, o.color || '#5a4632', 'center', '700', false, g.w - 60); y += 54; }
+  if (p.custom) p.custom(g.x, y - 10, g.w);
+  for (const b of popupButtons(p)) button(b);
+  if (!p.noClose) {
+    const x = popupX(p); ctx.fillStyle = 'rgba(0,0,0,.08)'; ctx.beginPath(); ctx.arc(x.x + 26, x.y + 26, 24, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#7a6a58'; ctx.lineWidth = 5; ctx.lineCap = 'round'; line(x.x + 16, x.y + 16, x.x + 36, x.y + 36); line(x.x + 36, x.y + 16, x.x + 16, x.y + 36);
+  }
+}
+function handlePopup(pt) {
+  if (!popup.noClose && hit(popupX(popup), pt.x, pt.y)) { const bs = popup.buttons; (popup.onClose || bs[bs.length - 1].cb)(); return; }
+  for (const b of popupButtons(popup)) if (!b.disabled && hit(b, pt.x, pt.y)) { Sound.play('click'); b.cb(); return; }
+}
+function showSettings() {
+  const reopen = () => { popup = null; showSettings(); };
+  const musicOn = save.musicOn && !save.muted, sfxOn = save.sfxOn && !save.muted;
+  const sw = (name, on, cb) => ({ label: `${t(name)}: ${on ? t('on') : t('off')}`, color: on ? '#2f9e44' : '#868e96', cb });
+  showPopup({ title: t('settings'), lines: [t('language')],
+    buttons: [
+      ...Object.keys(LANGS).map(k => ({ label: (save.lang === k ? '✓ ' : '') + LANGS[k], color: save.lang === k ? '#1d3557' : '#74819a', cb: () => { save.lang = k; document.documentElement.lang = k; persist(); reopen(); } })),
+      sw('music', musicOn, () => { Sound.setMusic(!musicOn); reopen(); }),
+      sw('sfx', sfxOn, () => { Sound.setSfx(!sfxOn); if (!sfxOn) Sound.play('click'); reopen(); }),
+      { label: t('contact'), color: '#5c7cfa', cb: () => { popup = null; showContact(); } },
+      { label: t('close'), color: '#ff8a3d', cb: closePopup }] });
+}
+
+/* ---------- 장면 관리 ---------- */
+const scenes = {}; let scene = null;
+function go(name, arg) { floats = []; scene = scenes[name]; if (scene.enter) scene.enter(arg); Sound.playMusic(name === 'night' ? 'night' : 'day'); }
+function openBag() { const b = scenes.bag; b.prev = scene; floats = []; scene = b; b.enter(); }
+
+/* =========================================================
+   타이틀
+   ========================================================= */
+scenes.title = {
+  outer: ['#1b2350', '#ff9e6b'],
+  enter() {
+    this.t = 0; this.bl = [];
+    for (let i = 0; i < 16; i++) this.bl.push({ x: rand(0, W), y: rand(-H, H), s: rand(34, 70), type: pick({ wood: 4, stone: 4, gold: 2 }), v: rand(30, 80) });
+  },
+  update(dt) { this.t += dt; for (const b of this.bl) { b.y += b.v * dt; if (b.y > H + 80) { b.y = -80; b.x = rand(0, W); } } },
+  buttons() {
+    const started = save.day > 1 || save.phase !== 'puzzle' || save.wood + save.stone + save.gold > 0;
+    return [
+      { x: 150, y: 860, w: 420, h: 124, label: started ? t('cont') : t('start'), sub: started ? t('dayN', { n: save.day }) : t('jumpIn'), color: '#ff8a3d', cb: () => startFromSave() },
+      { x: 400, y: 30, w: 210, h: 64, label: t('settings'), icon: 'gear', color: 'rgba(20,30,60,.65)', size: 26, r: 32, cb: showSettings },
+    ].concat(this.row(), this.extra());
+  },
+  row() {                                           // 기록 · 오늘의 도전 · (상점)
+    const r = [{ label: t('records'), icon: 'trophy', color: '#7048e8', cb: () => openRecords() },
+      { label: t('qBtn', { a: Daily.doneN(), b: 3 }), icon: 'flag', color: '#2f9e44', cb: showQuests, badge: Daily.ready() }];
+    if (Shop.ok) r.push({ label: t('shopBtn'), icon: 'cart', color: '#e8590c', cb: showShop });
+    const w = r.length === 3 ? 200 : 270, gap = r.length === 3 ? 15 : 20, x0 = (W - (r.length * w + (r.length - 1) * gap)) / 2;
+    return r.map((b, i) => Object.assign(b, { x: x0 + i * (w + gap), y: 1010, w, h: 80, size: 26, r: 26 }));
+  },
+  extra() {
+    const c = Install.can(); if (!c) return [];
+    return [{ x: 20, y: 30, w: 250, h: 64, label: t(c === 'fav' ? 'favAdd' : 'addHome'), icon: 'home', color: 'rgba(20,30,60,.65)', size: 22, r: 32, cb: () => Install.run() }];
+  },
+  draw() {
+    skyBg('#1b2350', '#ff9e6b');
+    for (const b of this.bl) drawCell(b.x, b.y, b.s, b.type, 0.55);
+    ctx.beginPath(); ctx.arc(560, 230, 70, 0, Math.PI * 2); ctx.fillStyle = '#fff2c2'; ctx.fill();
+    ctx.beginPath(); ctx.arc(590, 210, 62, 0, Math.PI * 2); ctx.fillStyle = '#2a3363'; ctx.globalAlpha = 0.85; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.fillStyle = '#20213d'; ctx.fillRect(0, 700, W, 120);
+    for (let i = 0; i < 6; i++) {
+      const x = 40 + i * 115, hh = 80 + (i % 3) * 30;
+      ctx.fillRect(x, 700 - hh, 80, hh);
+      ctx.beginPath(); ctx.moveTo(x - 12, 700 - hh); ctx.lineTo(x + 40, 650 - hh); ctx.lineTo(x + 92, 700 - hh); ctx.fill();
+      ctx.fillStyle = '#ffd86b'; ctx.fillRect(x + 28, 720 - hh, 22, 22); ctx.fillStyle = '#20213d';
+    }
+    const bob = Math.sin(this.t * 2) * 8;
+    txt(t('title'), W / 2, 380 + bob, 96, '#ffffff', 'center', '900', true, 660);
+    txt(t('subtitle'), W / 2, 480 + bob, 60, '#ffcf4a', 'center', '900', true, 660);
+    txt(t('tagline'), W / 2, 560, 28, '#fff', 'center', '700', true, 680);
+    for (const b of this.buttons()) button(b);
+    for (const b of this.row()) if (b.badge) { ctx.fillStyle = '#e03131'; ctx.beginPath(); ctx.arc(b.x + b.w - 8, b.y + 6, 16, 0, 7); ctx.fill(); txt(String(b.badge), b.x + b.w - 8, b.y + 7, 20, '#fff', 'center', '900'); }
+    if (save.bestDay > 1) txt(t('best', { d: save.bestDay, k: save.totalKills }), W / 2, 1140, 26, '#fff', 'center', '700', true, 680);
+    txt(`Prototype v${GAME_VER}`, W / 2, 1230, 22, 'rgba(255,255,255,.7)');
+  },
+  down(x, y) { tapButtons(this.buttons(), x, y); }
+};
+function startFromSave() {
+  if (save.phase === 'build' && save.day >= 2) go('build');
+  else if (save.phase === 'night') go('night');
+  else go('puzzle');
+}
+function bootRewards() {
+  const now = Date.now();
+  const mins = Math.min(480, Math.floor((now - (save.lastSeen || now)) / 60000));
+  const rate = save.b.shop * 2;
+  if (rate > 0 && mins >= 1) {
+    const g = mins * rate;
+    showPopup({ title: t('offTitle'), lines: [t('offBody', { m: mins }), { text: t('goldN', { g }), color: RES.gold.ink, size: 46 }],
+      buttons: [
+        ...adBtn({ label: t('x2'), sub: t('goldN', { g: g * 2 }), ad: true, color: '#7c4dff', cb: () => AdBridge.rewarded(() => { save.gold += g * 2; persist(); closePopup(); }, 'offline_x2') }),
+        { label: t('claim'), color: '#4caf50', cb: () => { save.gold += g; persist(); closePopup(); } }] });
+  }
+  const today = localDate();
+  if (save.seenVer !== GAME_VER) { if (save.day > 1 || save.totalKills > 0) showNews(); else save.seenVer = GAME_VER; }
+  if (save.lastLogin !== today) {
+    const first = !save.lastLogin;
+    save.streakN = save.lastLogin === localDate(-1) ? (save.streakN || 0) + 1 : 1;   // 어제도 왔으면 연속, 아니면 1일부터
+    save.lastLogin = today;
+    if (first) grantStreak(0, 1); else showStreak();
+  }
+  Daily.ensure();
+  persist();
+}
+
+/* =========================================================
+   아침: 재료 합치기 (수박게임식 자원 채집)
+   같은 재료끼리 닿으면 합쳐져 다음 재료가 되고, 그때 자원을 얻음
+   ========================================================= */
+const TIERS = [
+  { r: 26, res: 'wood', v: 1 },   // 0 도토리
+  { r: 34, res: 'wood', v: 2 },   // 1 솔방울
+  { r: 44, res: 'wood', v: 5 },   // 2 통나무
+  { r: 54, res: 'stone', v: 4 },  // 3 조약돌
+  { r: 66, res: 'stone', v: 6 },  // 4 바위
+  { r: 78, res: 'stone', v: 10 }, // 5 철광석
+  { r: 92, res: 'gold', v: 5 },   // 6 금화
+  { r: 106, res: 'gold', v: 8 }, // 7 금덩이
+  { r: 122, res: 'gold', v: 13 }, // 8 보석
+  { r: 140, res: 'gold', v: 22 }, // 9 보물상자
+];
+const TIER_COL = ['#d9a066', '#a0662f', '#e3b778', '#c3cad3', '#8e98a6', '#5f6672', '#ffc93c', '#ffd43b', '#845ef7', '#c92a2a'];
+const BOX = { l: 50, r: 670, t: 330, b: 1112 }, DANGER_Y = 410, DROP_Y = 280, DROPS = 30, BONUS_MAX = 40;
+const rollTier = () => +pick({ 0: 34, 1: 30, 2: 24, 3: 12 });
+function drawMat(k, x, y, r, a = 0, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha; ctx.translate(x, y); ctx.rotate(a); ctx.scale(r / 50, r / 50);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const dot = (cx, cy, rad, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(cx, cy, rad, 0, 7); ctx.fill(); };
+  dot(0, 0, 50, TIER_COL[k]);
+  ctx.save(); ctx.beginPath(); ctx.arc(0, 0, 50, 0, 7); ctx.clip();
+  ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.beginPath(); ctx.arc(8, 14, 52, 0, 7); ctx.arc(0, 0, 50, 0, 7, true); ctx.fill();
+  switch (k) {
+    case 0: // 도토리: 모자
+      ctx.fillStyle = '#7a4a24'; ctx.fillRect(-50, -50, 100, 38);
+      ctx.strokeStyle = '#5c3317'; ctx.lineWidth = 3;
+      for (let i = -60; i < 60; i += 14) { line(i, -50, i + 30, -12); line(i + 30, -50, i, -12); }
+      ctx.fillStyle = '#5c3317'; ctx.fillRect(-4, -50, 8, 12); break;
+    case 1: // 솔방울: 비늘
+      ctx.strokeStyle = '#6e4420'; ctx.lineWidth = 5;
+      for (let r = -2; r <= 2; r++) for (let c = -3; c <= 3; c++) { const cx = c * 22 + (r % 2 ? 11 : 0), cy = r * 20; ctx.beginPath(); ctx.arc(cx, cy - 6, 11, 0.3, Math.PI - 0.3); ctx.stroke(); }
+      break;
+    case 2: // 통나무 단면: 나이테
+      ctx.strokeStyle = '#7a4a24'; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(0, 0, 47, 0, 7); ctx.stroke();
+      ctx.strokeStyle = '#b8864c'; ctx.lineWidth = 4;
+      for (const rr_ of [32, 20, 9]) { ctx.beginPath(); ctx.arc(2, 1, rr_, 0, 7); ctx.stroke(); }
+      break;
+    case 3: // 조약돌
+      for (const [sx, sy, sr] of [[-24, -18, 5], [20, -26, 4], [28, 18, 6], [-10, 26, 4], [-32, 10, 3]]) dot(sx, sy, sr, '#9aa3ae');
+      break;
+    case 4: // 바위: 금
+      ctx.strokeStyle = '#5d6673'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(-36, -20); ctx.lineTo(-14, -8); ctx.lineTo(-20, 12); ctx.lineTo(4, 26); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(22, -36); ctx.lineTo(14, -14); ctx.lineTo(34, 0); ctx.stroke(); break;
+    case 5: // 철광석: 광맥
+      for (const [sx, sy, sr, c] of [[-22, -18, 9, '#e8590c'], [18, -24, 7, '#ced4da'], [26, 14, 10, '#e8590c'], [-16, 22, 7, '#ced4da'], [0, 0, 5, '#ffa94d'], [-36, 4, 5, '#ced4da']]) dot(sx, sy, sr, c);
+      break;
+    case 6: // 금화
+      ctx.strokeStyle = '#c99400'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, 38, 0, 7); ctx.stroke();
+      ctx.fillStyle = '#e0a800'; ctx.beginPath();
+      for (let i = 0; i < 10; i++) { const an = -Math.PI / 2 + i * Math.PI / 5, rd = i % 2 ? 11 : 24; ctx.lineTo(Math.cos(an) * rd, Math.sin(an) * rd - 4); }
+      ctx.closePath(); ctx.fill(); break;
+    case 7: // 금덩이
+      for (const [sx, sy, sr] of [[-20, -10, 18], [16, -18, 15], [20, 16, 17], [-14, 22, 14]]) dot(sx, sy, sr, '#fab005');
+      for (const [sx, sy] of [[-26, -16], [10, -24], [14, 10]]) dot(sx, sy, 5, 'rgba(255,255,255,.7)');
+      break;
+    case 8: // 보석: 다면체
+      ctx.fillStyle = '#b197fc'; ctx.beginPath(); for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4 + Math.PI / 8; ctx.lineTo(Math.cos(an) * 30, Math.sin(an) * 30); } ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#d0bfff'; ctx.lineWidth = 3; for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4 + Math.PI / 8; line(Math.cos(an) * 30, Math.sin(an) * 30, Math.cos(an) * 50, Math.sin(an) * 50); }
+      break;
+    default: // 보물상자
+      rr(-30, -8, 60, 34, 6); ctx.fillStyle = '#8d5524'; ctx.fill();
+      rr(-32, -28, 64, 22, 8); ctx.fillStyle = '#a0612e'; ctx.fill();
+      ctx.fillStyle = '#ffd43b'; ctx.fillRect(-5, -28, 10, 54); ctx.fillRect(-32, -9, 64, 6);
+      dot(0, 6, 6, '#ffd43b');
+  }
+  ctx.restore();
+  // 얼굴 (귀여운 눈·볼)
+  const ey = k === 0 ? 10 : k === 9 ? 36 : 6, ex = k === 9 ? 22 : 15;
+  if (k !== 9) {
+    dot(-ex, ey, 5.5, '#2b2118'); dot(ex, ey, 5.5, '#2b2118'); dot(-ex + 2, ey - 2, 1.8, '#fff'); dot(ex + 2, ey - 2, 1.8, '#fff');
+    ctx.strokeStyle = '#2b2118'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, ey + 6, 6, 0.4, Math.PI - 0.4); ctx.stroke();
+    dot(-ex - 9, ey + 9, 5, 'rgba(255,120,120,.45)'); dot(ex + 9, ey + 9, 5, 'rgba(255,120,120,.45)');
+  }
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.ellipse(-18, -26, 14, 8, -0.6, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, 49, 0, 7); ctx.stroke();
+  ctx.restore();
+}
+scenes.puzzle = {
+  outer: ['#7cc8f2', '#d8f1ff'],
+  enter() {
+    save.phase = 'puzzle'; persist();
+    this.bodies = []; this.fx = []; this.left = DROPS; this.gain = { wood: 0, stone: 0, gold: 0 };
+    this.cur = rollTier(); this.next = rollTier(); this.cdT = 0; this.aim = false; this.aimX = W / 2;
+    this.ended = false; this.paused = false; this.tidyUsed = false; this.hamMode = false; this.t = 0;
+    this.overT = 0; this.endT = 0; this.chain = 0; this.chainT = 0; this.merges = 0; this.dropped = 0; this.loot = []; this.bonusDrops = 0; this.leftFx = 0;
+    AdBridge.gameplayStart();
+    if (!save.tut.merge2) {                          // 기회 보너스 규칙이 추가되어 안내를 한 번 더 보여 줌
+      save.tut.merge = save.tut.merge2 = true; persist();
+      showPopup({ title: t('pHead', { d: save.day }).split('·')[0].trim(), lines: [t('pT1'), t('pT2'), t('pT3'), { text: t('pT4', { n: DROPS }), color: '#d9480f' }, { text: t('pT5'), color: '#2f9e44' }],
+        buttons: [{ label: t('pStart'), color: '#4caf50', cb: closePopup }] });
+    }
+  },
+  buttons() {
+    if (this.ended || this.paused) return [];
+    const b = [];
+    if (this.hamMode) b.push({ x: 190, y: 1192, w: 340, h: 70, label: t('cancel'), color: '#868e96', size: 28, r: 20, cb: () => { this.hamMode = false; } });
+    else {
+      b.push({ x: 30, y: 1192, w: 220, h: 70, label: t('hammer', { n: save.hammer }), icon: 'hammer', color: '#495057', size: 24, r: 20, disabled: save.hammer <= 0, cb: () => { this.hamMode = true; this.aim = false; } });
+      b.push({ x: 470, y: 1192, w: 220, h: 70, label: t('endG'), color: 'rgba(60,70,95,.85)', size: 24, r: 20, cb: () => this.finish() });
+    }
+    return b;
+  },
+  dropX() { const r = this.cur === null ? 30 : TIERS[this.cur].r; return clamp(this.aimX, BOX.l + r + 2, BOX.r - r - 2); },
+  drop() {
+    if (this.cur === null || this.left <= 0 || this.ended || this.paused) return;
+    const k = this.cur;
+    this.bodies.push({ k, x: this.dropX(), y: DROP_Y, vx: rand(-8, 8), vy: 60, r: TIERS[k].r, a: 0, age: 0, pop: 1 });
+    this.left--; this.dropped++; this.cur = null; this.chain = 0; this.chainT = 0; this.cdT = 0.45; Sound.play('drop', rand(0.95, 1.1));
+  },
+  merge(p, q) {
+    p.gone = q.gone = true;
+    const k = p.k + 1, x = (p.x + q.x) / 2, y = (p.y + q.y) / 2;
+    this.chain = this.chainT > 0 ? this.chain + 1 : 1; this.chainT = 0.9; this.merges++;
+    Daily.add('merge'); if (p.k + 1 >= 6) Daily.add('tier6'); if (this.chain === 3) Daily.add('chain3');
+    const bonus = 1 + 0.25 * (this.chain - 1);
+    if (k >= TIERS.length) {                       // 보물상자 + 보물상자 → 대박 보너스 후 사라짐
+      const g = Math.round(60 * bonus); this.gain.gold += g;
+      const it = genItem(save.day, 2), salv = addItem(it); this.loot.push(it);
+      floatText(x, y - 40, `+${g} ${t('gold')}`, RES.gold.color, 48); floatText(x, y - 100, itemName(it), RAR_COL[it.rar], 36);
+      if (salv) floatText(x, y - 150, t('autoSalv', { g: salv }), '#fff', 26);
+      this.fx.push({ x, y, r: 160, t: 0, c: '#ffd43b' }); Sound.play('chest'); Sound.play('combo');
+      return;
+    }
+    const T = TIERS[k];
+    // 잘 합칠수록 오래 하기: 조약돌 이상 +1, 금화 이상 +1, 보물상자 +1, 3연속 합체 +1 (하루 최대 BONUS_MAX)
+    let plus = (k >= 3 ? 1 : 0) + (k >= 6 ? 1 : 0) + (k >= 9 ? 1 : 0) + (this.chain >= 3 ? 1 : 0);
+    plus = Math.min(plus, BONUS_MAX - this.bonusDrops);
+    if (plus) { this.left += plus; this.bonusDrops += plus; this.leftFx = 1; this.leftAdd = plus; this.endT = 0; Sound.play('gem', 1.3); }
+    this.bodies.push({ k, x: clamp(x, BOX.l + T.r, BOX.r - T.r), y: Math.min(y, BOX.b - T.r), vx: (p.vx + q.vx) / 2, vy: Math.min(0, (p.vy + q.vy) / 2) - 140, r: T.r, a: (p.a + q.a) / 2, age: 0.5, pop: 0.6 });
+    const v = Math.round(T.v * bonus); this.gain[T.res] += v;
+    floatText(x, y - T.r * 0.3, `+${v} ${t(T.res)}`, RES[T.res].ink, 30 + k * 1.6);
+    if (this.chain >= 2) floatText(x, y - T.r * 0.3 - 44, t('combo', { n: this.chain }), '#fff', 34);
+    if (k > (save.bestTier || 0)) { save.bestTier = k; floatText(W / 2, BOX.t + 120, t('newMat', { n: t('mat' + k) }), '#d9480f', 40); }
+    if (k === 9) {                                  // 보물상자를 만들면 장비 1개
+      const it = genItem(save.day, 1), salv = addItem(it); this.loot.push(it);
+      floatText(x, y - 90, itemName(it), RAR_COL[it.rar], 34); if (salv) floatText(x, y - 136, t('autoSalv', { g: salv }), '#fff', 26);
+    }
+    this.fx.push({ x, y, r: T.r, t: 0, c: TIER_COL[k] });
+    Sound.play('merge', clamp(1.4 - k * 0.08, 0.6, 1.4));
+    if (k === 9) Sound.play('chest'); else if (k >= 6) Sound.play('coin'); else if (this.chain >= 3) Sound.play('combo');
+  },
+  step(dt) {
+    const B = this.bodies, g = 2400;
+    for (const o of B) {
+      o.vy += g * dt; o.vx *= 0.997;
+      const sp = Math.hypot(o.vx, o.vy); if (sp > 2600) { o.vx *= 2600 / sp; o.vy *= 2600 / sp; }
+      o.x += o.vx * dt; o.y += o.vy * dt; o.a += o.vx * dt / o.r * 0.6;
+    }
+    for (let it = 0; it < 3; it++) {
+      for (let i = 0; i < B.length; i++) {
+        const p = B[i]; if (p.gone) continue;
+        for (let j = i + 1; j < B.length; j++) {
+          const q = B[j]; if (q.gone) continue;
+          const dx = q.x - p.x, dy = q.y - p.y, rs = p.r + q.r, d2 = dx * dx + dy * dy;
+          if (d2 >= rs * rs) continue;
+          if (p.k === q.k && !this.ended) { this.merge(p, q); break; }
+          const d = Math.sqrt(d2) || 0.01, nx = dx / d, ny = dy / d, ov = rs - d;
+          const mp = p.r * p.r, mq = q.r * q.r, tot = mp + mq;
+          p.x -= nx * ov * mq / tot; p.y -= ny * ov * mq / tot; q.x += nx * ov * mp / tot; q.y += ny * ov * mp / tot;
+          const rv = (q.vx - p.vx) * nx + (q.vy - p.vy) * ny;
+          if (rv < 0) {
+            const jm = -1.12 * rv / (1 / mp + 1 / mq);
+            p.vx -= jm * nx / mp; p.vy -= jm * ny / mp; q.vx += jm * nx / mq; q.vy += jm * ny / mq;
+            const tx = -ny, ty = nx, tv = (q.vx - p.vx) * tx + (q.vy - p.vy) * ty, f = tv * 0.1;
+            p.vx += f * tx * mq / tot; p.vy += f * ty * mq / tot; q.vx -= f * tx * mp / tot; q.vy -= f * ty * mp / tot;
+          }
+        }
+      }
+      for (const o of B) {
+        if (o.gone) continue;
+        if (o.x - o.r < BOX.l) { o.x = BOX.l + o.r; if (o.vx < 0) o.vx *= -0.2; }
+        if (o.x + o.r > BOX.r) { o.x = BOX.r - o.r; if (o.vx > 0) o.vx *= -0.2; }
+        if (o.y + o.r > BOX.b) { o.y = BOX.b - o.r; if (o.vy > 0) o.vy *= -0.1; o.vx *= 0.97; }
+      }
+    }
+    this.bodies = B.filter(o => !o.gone);
+  },
+  bodyAt(x, y) { for (let i = this.bodies.length - 1; i >= 0; i--) { const o = this.bodies[i]; if ((o.x - x) ** 2 + (o.y - y) ** 2 < o.r * o.r) return o; } return null; },
+  smash(o) {
+    o.gone = true; this.bodies = this.bodies.filter(b => !b.gone);
+    save.hammer--; this.hamMode = false; persist(); Sound.play('hammer');
+    this.fx.push({ x: o.x, y: o.y, r: o.r, t: 0, c: '#ffffff' }); floatText(o.x, o.y - 20, t('smash'), '#ffd43b', 44);
+  },
+  tidy() {                                         // 광고 보상: 작은 재료(도토리~통나무)와 선 위 재료 치우기
+    for (const o of this.bodies) if (o.k <= 2 || o.y - o.r < DANGER_Y + 10) { o.gone = true; this.fx.push({ x: o.x, y: o.y, r: o.r, t: 0, c: '#ffffff' }); }
+    this.bodies = this.bodies.filter(o => !o.gone); this.overT = 0; Sound.play('hammer');
+  },
+  overflow() {
+    this.paused = true; this.aim = false; this.overT = 0; Sound.play('hurt');
+    showPopup({ title: t('full'), noClose: true, lines: [t('fullBody')],
+      buttons: [
+        ...(this.tidyUsed ? [] : adBtn({ label: t('tidy'), sub: t('tidyS'), ad: true, color: '#7c4dff', cb: () => AdBridge.rewarded(() => { this.tidyUsed = true; this.tidy(); this.paused = false; closePopup(); }, 'tidy_board') })),
+        { label: t('endG'), color: '#ff8a3d', cb: () => { closePopup(); this.finish(); } }] });
+  },
+  down(x, y) {
+    if (tapButtons(this.buttons(), x, y)) return;
+    if (this.ended || this.paused) return;
+    if (this.hamMode) { const o = this.bodyAt(x, y); if (o && save.hammer > 0) this.smash(o); return; }
+    if (y < 150 || y > 1185) return;
+    this.aim = true; this.aimX = x;
+  },
+  move(x) { if (this.aim) this.aimX = x; },
+  up() { if (this.aim) { this.aim = false; this.drop(); } },
+  finish() {
+    if (this.ended) return;
+    this.ended = true; this.aim = false; this.hamMode = false; this.paused = false;
+    let harvest = 0;                                // 판에 남은 재료도 절반 수확
+    for (const o of this.bodies) { const T = TIERS[o.k], v = Math.max(o.k === 0 ? 1 : 0, Math.floor(T.v / 2)); this.gain[T.res] += v; harvest += v; }
+    for (const k in this.gain) save[k] += this.gain[k];
+    const toBuild = save.day >= 2;
+    save.phase = toBuild ? 'build' : 'night'; persist();
+    AdBridge.gameplayStop();
+    const lines = [t('today')];
+    let any = false;
+    for (const k in this.gain) if (this.gain[k]) { any = true; lines.push({ text: `${t(k)}  +${this.gain[k]}`, color: RES[k].ink, size: 36 }); }
+    if (!any) lines.push({ text: t('noLines'), color: '#888' });
+    if (harvest) lines.push({ text: t('harvest'), color: '#5a4632', size: 24 });
+    if (this.bonusDrops) lines.push({ text: t('bonusDrops', { n: this.bonusDrops }), color: '#2f9e44', size: 24 });
+    const total = this.gain.wood + this.gain.stone + this.gain.gold;
+    if (Ranking.best('bestGather', total, 'gather_best')) { lines.push({ text: t('newBest', { n: t('unitRes', { n: total }) }), color: '#e8590c', size: 28 }); persist(); }
+    if (this.loot.length) lines.push({ text: t('loot', { n: this.loot.length }), color: '#7048e8', size: 26 });
+    if (!toBuild) lines.push({ text: t('bLocked'), color: '#d9480f', size: 26 });
+    Daily.add('gather', total);
+    const next = () => go(toBuild ? 'build' : 'night');
+    let dbl = false;
+    showPopup({ title: t('gDone'), lines, buttons: [
+      ...(total > 0 ? adBtn({ label: t('gx2'), sub: t('unitRes', { n: total }), ad: true, color: '#7c4dff', cb: () => AdBridge.rewarded(() => { if (dbl) return; dbl = true; for (const k in this.gain) save[k] += this.gain[k]; persist(); closePopup(); next(); }, 'gather_x2') }) : []),
+      { label: toBuild ? t('goBuild') : t('goNight'), color: toBuild ? '#4caf50' : '#5e35b1', cb: () => { closePopup(); AdBridge.interstitial(next); } }] });
+  },
+  update(dt) {
+    this.t += dt;
+    for (const f of this.fx) f.t += dt; this.fx = this.fx.filter(f => f.t < 0.5);
+    for (const o of this.bodies) if (o.pop < 1) o.pop = Math.min(1, o.pop + dt * 3);
+    if (this.ended || this.paused || popup) return;
+    const n = 4; for (let i = 0; i < n; i++) this.step(Math.min(dt, 1 / 30) / n);
+    for (const o of this.bodies) o.age += dt;
+    if (this.chainT > 0) this.chainT -= dt;
+    if (this.cur === null && this.left > 0) { this.cdT -= dt; if (this.cdT <= 0) { this.cur = this.next; this.next = rollTier(); } }
+    let over = false;
+    for (const o of this.bodies) if (o.age > 1 && o.y - o.r < DANGER_Y && Math.abs(o.vy) < 250) { over = true; break; }
+    this.overT = over ? this.overT + dt : 0;
+    if (this.overT > 2) { this.overflow(); return; }
+    if (this.leftFx > 0) this.leftFx -= dt * 1.5;
+    if (this.left > 0) this.endT = 0;
+    if (this.left <= 0 && this.cur === null) {
+      const calm = this.bodies.every(o => Math.abs(o.vy) < 120 && Math.abs(o.vx) < 120);
+      this.endT += dt; if ((calm && this.endT > 1.2) || this.endT > 3.5) this.finish();
+    }
+  },
+  draw() {
+    skyBg('#7cc8f2', '#d8f1ff');
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    for (let i = 0; i < 3; i++) { const x = ((this.t * 12 + i * 260) % (W + 200)) - 100, y = 150 + i * 40; ctx.beginPath(); ctx.arc(x, y, 30, 0, 7); ctx.arc(x + 35, y - 12, 38, 0, 7); ctx.arc(x + 72, y, 28, 0, 7); ctx.fill(); }
+    drawResBar();
+    txt(t('pHead', { d: save.day }), W / 2, 146, 36, '#1d3557', 'center', '900', false, 680);
+    { const g = Math.max(0, this.leftFx), sc = 1 + g * 0.12, pw = 260 * sc, ph = 48 * sc;
+      rr(W / 2 - pw / 2, 200 - ph / 2, pw, ph, ph / 2); ctx.fillStyle = g > 0 ? '#2f9e44' : this.left <= 5 ? '#e8590c' : '#1d3557'; ctx.fill();
+      txt(t('left', { n: this.left }), W / 2, 201, 26 * sc, '#fff', 'center', '800', false, 240 * sc);
+      if (g > 0) txt(`+${this.leftAdd}`, W / 2 + pw / 2 + 12, 201 - (1 - g) * 8, 34, '#69db7c', 'left', '900', true); }
+    if (this.next !== null && this.left > 1) { txt(t('nextMat'), 620, 201, 22, '#1d3557', 'right', '800'); drawMat(this.next, 652, 200, 22); }
+    // 항아리
+    rr(BOX.l - 16, BOX.t - 6, BOX.r - BOX.l + 32, BOX.b - BOX.t + 22, 30); ctx.fillStyle = this.hamMode ? 'rgba(120,40,40,.35)' : 'rgba(255,255,255,.38)'; ctx.fill();
+    ctx.lineWidth = 8; ctx.strokeStyle = '#8d6e63'; ctx.stroke();
+    rr(BOX.l, BOX.b - 6, BOX.r - BOX.l, 12, 6); ctx.fillStyle = '#8d6e63'; ctx.fill();
+    const warn = this.overT > 0 && Math.floor(this.t * 8) % 2;
+    ctx.save(); ctx.setLineDash([18, 12]); ctx.lineWidth = 5; ctx.strokeStyle = warn ? '#e03131' : 'rgba(224,49,49,.45)'; line(BOX.l, DANGER_Y, BOX.r, DANGER_Y); ctx.restore();
+    if (this.cur !== null && !this.ended && !this.hamMode) {
+      const ax = this.dropX(), r = TIERS[this.cur].r;
+      ctx.save(); ctx.setLineDash([8, 12]); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(29,53,87,.28)'; line(ax, DROP_Y + r, ax, BOX.b); ctx.restore();
+      drawMat(this.cur, ax, DROP_Y, r);
+      if (this.dropped === 0 && !popup) {          // 처음 한 번: 손가락 안내 애니메이션
+        const b = Math.sin(this.t * 6) * 10, hx = ax + 46, hy = DROP_Y + r + 30 + b;
+        ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.arc(hx, hy + 24, 18, 0, 7); ctx.fill(); rr(hx - 8, hy - 14, 16, 34, 8); ctx.fill();
+        ctx.strokeStyle = '#1d3557'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(hx, hy + 24, 18, 0, 7); ctx.stroke(); rr(hx - 8, hy - 14, 16, 34, 8); ctx.stroke();
+        txt(t('tapDrop'), W / 2, DANGER_Y + 60, 30, '#1d3557', 'center', '900', true, 600);
+      }
+    }
+    for (const o of this.bodies) drawMat(o.k, o.x, o.y, o.r * (0.6 + 0.4 * Math.min(1, o.pop) + (o.pop < 1 ? Math.sin(o.pop * Math.PI) * 0.12 : 0)), o.a);
+    for (const f of this.fx) { const k = f.t / 0.5; ctx.globalAlpha = 1 - k; ctx.strokeStyle = f.c; ctx.lineWidth = 10 * (1 - k) + 2; ctx.beginPath(); ctx.arc(f.x, f.y, f.r * (1 + k * 0.6), 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
+    // 진화 순서 안내
+    rr(26, 1128, 668, 52, 26); ctx.fillStyle = 'rgba(29,53,87,.2)'; ctx.fill();
+    for (let i = 0; i < TIERS.length; i++) {
+      const cx = 60 + i * 66.7;
+      if (i) { ctx.fillStyle = 'rgba(29,53,87,.45)'; ctx.beginPath(); ctx.moveTo(cx - 37, 1149); ctx.lineTo(cx - 30, 1154); ctx.lineTo(cx - 37, 1159); ctx.fill(); }
+      drawMat(i, cx, 1154, 19, 0, i <= Math.max(3, save.bestTier || 0) ? 1 : 0.35);
+    }
+    if (this.hamMode) txt(t('hamHint'), W / 2, DANGER_Y + 60, 30, '#c92a2a', 'center', '900', true, 640);
+    for (const b of this.buttons()) button(b);
+    drawFloats();
+  }
+};
+
+/* =========================================================
+   낮: 마을 건설 (경영)
+   ========================================================= */
+const BUILD = {
+  smith: { color: '#ef6c00', roof: '#8d3b00', eff: l => t('eSmith', { x: l * 15 }), base: { wood: 10, stone: 6, gold: 0 } },
+  farm: { color: '#7cb342', roof: '#9c5a1a', eff: l => t('eFarm', { x: l * 20 }), base: { wood: 12, stone: 0, gold: 6 } },
+  wall: { color: '#90a4ae', roof: '#455a64', eff: l => t('eWall', { x: Math.min(60, l * 6) }), base: { wood: 0, stone: 14, gold: 6 } },
+  shop: { color: '#f9a825', roof: '#b23c17', eff: l => l ? t('eShop', { a: l * 2, b: l * 10 }) : t('eShop0'), base: { wood: 8, stone: 8, gold: 12 } },
+};
+const BMAX = 10;
+function bcost(k, l) { const b = BUILD[k].base, m = Math.pow(1 + l, 1.35); return { wood: Math.round(b.wood * m), stone: Math.round(b.stone * m), gold: Math.round(b.gold * m) }; }
+const affordable = c => save.wood >= c.wood && save.stone >= c.stone && save.gold >= c.gold;
+function house(cx, by, s, B, lvl) {
+  ctx.globalAlpha = lvl ? 1 : 0.4;
+  rr(cx - s * 0.4, by - s * 0.55, s * 0.8, s * 0.55, 8); ctx.fillStyle = B.color; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx - s * 0.54, by - s * 0.5); ctx.lineTo(cx, by - s * 0.98); ctx.lineTo(cx + s * 0.54, by - s * 0.5); ctx.closePath(); ctx.fillStyle = B.roof; ctx.fill();
+  rr(cx - s * 0.1, by - s * 0.28, s * 0.2, s * 0.28, 4); ctx.fillStyle = '#4e342e'; ctx.fill();
+  ctx.globalAlpha = 1;
+}
+scenes.build = {
+  outer: ['#9ad7ff', '#e8f7d8'],
+  enter() {
+    save.phase = 'build'; persist(); this.t = 0;
+    if (!save.tut.build) {
+      save.tut.build = true; persist();
+      showPopup({ title: t('bOpenT'), lines: [t('bOpen1'), t('bOpen2'), { text: t('bOpen3'), color: RES.gold.ink }], buttons: [{ label: t('good'), color: '#4caf50', cb: closePopup }] });
+    }
+  },
+  update(dt) { this.t += dt; },
+  cardY(i) { return 230 + i * 205; },
+  buttons() {
+    const list = Object.keys(BUILD).map((k, i) => {
+      const l = save.b[k], max = l >= BMAX, c = bcost(k, l);
+      const up = () => {
+        save.wood -= c.wood; save.stone -= c.stone; save.gold -= c.gold; save.b[k]++; persist(); Sound.play('build'); Ranking.submit('village_level'); Daily.add('build');
+        floatText(420, this.cardY(i) + 110, `${t(k)} Lv.${save.b[k]}!`, '#fff', 40);
+      };
+      const D = Daily.ensure(), near = ['wood', 'stone', 'gold'].every(r => save[r] >= c[r] * 0.6);
+      if (!max && !affordable(c) && near && D.fill < 3 && AdBridge.canReward())    // 조금 모자랄 때: 광고 보고 부족분 채우고 바로 강화 (하루 3번)
+        return { x: 500, y: this.cardY(i) + 48, w: 170, h: 92, label: t('fillAd'), sub: t('fillLeft', { n: 3 - D.fill }), ad: true, color: '#7c4dff', size: 24,
+          cb: () => AdBridge.rewarded(() => { if (affordable(c)) return; for (const r of ['wood', 'stone', 'gold']) save[r] = Math.max(save[r], c[r]); D.fill++; up(); }, 'fill_build') };
+      return { x: 500, y: this.cardY(i) + 48, w: 170, h: 92, label: max ? t('max') : (l ? t('upg') : t('build')), color: '#4caf50', size: 30, disabled: max || !affordable(c), cb: up };
+    });
+    list.push({ x: 30, y: 1075, w: 200, h: 124, label: t('bag'), icon: 'bag', sub: `${save.inv.length}/${INV_MAX}`, color: '#1971c2', size: 30, cb: () => openBag() });
+    list.push({ x: 250, y: 1075, w: 440, h: 124, label: t('goNight'), sub: t('nightSub'), color: '#5e35b1', cb: () => go('night') });
+    return list;
+  },
+  draw() {
+    skyBg('#9ad7ff', '#e8f7d8');
+    ctx.fillStyle = '#9ccc65'; ctx.fillRect(0, 1010, W, 270);
+    drawResBar();
+    txt(t('bHead', { d: save.day }), W / 2, 170, 40, '#1d3557', 'center', '900', false, 680);
+    Object.keys(BUILD).forEach((k, i) => {
+      const B = BUILD[k], l = save.b[k], y = this.cardY(i), c = bcost(k, l);
+      rr(30, y, 660, 185, 26); ctx.fillStyle = 'rgba(255,255,255,.88)'; ctx.fill();
+      house(100, y + 150, 120, B, l);
+      txt(t(k), 175, y + 40, 36, '#1d3557', 'left', '900');
+      const nw = ctx.measureText(t(k)).width;
+      rr(175 + nw + 14, y + 22, 82, 36, 18); ctx.fillStyle = l ? '#1d3557' : '#adb5bd'; ctx.fill();
+      txt(`Lv.${l}`, 175 + nw + 55, y + 40, 22, '#fff', 'center', '800');
+      txt(l ? B.eff(l) : t('notBuilt'), 175, y + 84, 24, '#495057', 'left', '700', false, 315);
+      if (l < BMAX) {
+        txt(t('next', { e: B.eff(l + 1) }), 175, y + 116, 21, '#2f9e44', 'left', '700', false, 315);
+        let x = 175;
+        for (const r of ['wood', 'stone', 'gold']) {
+          if (!c[r]) continue;
+          drawCell(x, y + 135, 30, r);
+          txt(String(c[r]), x + 36, y + 151, 24, save[r] >= c[r] ? '#343a40' : '#e03131', 'left', '800');
+          x += 36 + String(c[r]).length * 15 + 24;
+        }
+      }
+    });
+    for (const b of this.buttons()) button(b);
+    drawFloats();
+  },
+  down(x, y) { tapButtons(this.buttons(), x, y); }
+};
+
+/* =========================================================
+   가방 (장비 장착·분해)
+   ========================================================= */
+const BAG_COLS = 6, BAG_CELL = 104, BAG_GAP = 8, BAG_X = 28, BAG_Y = 560;
+scenes.bag = {
+  muteAt: [656, 65],
+  outer: ['#243b55', '#141e30'],
+  prev: null,
+  enter() { this.t = 0; },
+  update(dt) { this.t += dt; },
+  slotRect(i) { return { x: 30 + i * 230, y: 150, w: 200, h: 230 }; },
+  cellRect(i) { const c = i % BAG_COLS, r = Math.floor(i / BAG_COLS); return { x: BAG_X + c * (BAG_CELL + BAG_GAP), y: BAG_Y + r * (BAG_CELL + BAG_GAP), w: BAG_CELL, h: BAG_CELL }; },
+  buttons() {
+    return [
+      { x: 30, y: 30, w: 170, h: 70, label: '← ' + t('back'), color: '#495057', size: 26, r: 22, cb: () => { floats = []; scene = this.prev || scenes.title; } },
+      { x: 430, y: 30, w: 180, h: 70, label: t('settings'), icon: 'gear', color: 'rgba(20,30,60,.65)', size: 22, r: 22, cb: showSettings },
+    ];
+  },
+  showItem(it, equippedSlot) {
+    const cur = save.eq[it.slot];
+    const lines = [{ text: `${t('rar' + it.rar)} · ${t(it.slot)}`, color: RAR_INK[it.rar] }, ...itemStats(it).map(s => ({ text: s, color: '#2b8a3e', size: 30 }))];
+    if (!equippedSlot && cur) lines.push({ text: t('vs', { n: itemName(cur) }) + ' — ' + itemStats(cur).join(', '), color: '#868e96', size: 22 });
+    const btns = [];
+    if (equippedSlot) btns.push({ label: t('unequip'), color: '#868e96', cb: () => { if (save.inv.length < INV_MAX) { save.inv.push(it); save.eq[it.slot] = null; persist(); } closePopup(); } });
+    else {
+      btns.push({ label: t('equip'), color: '#1971c2', cb: () => {
+        save.inv = save.inv.filter(x => x.id !== it.id);
+        if (cur) save.inv.push(cur);
+        save.eq[it.slot] = it; persist(); closePopup();
+        floatText(360, 400, t('equip') + '!', '#ffd43b', 44);
+      } });
+      btns.push({ label: t('salvage', { g: salvageValue(it) }), color: '#e8590c', cb: () => {
+        save.inv = save.inv.filter(x => x.id !== it.id); save.gold += salvageValue(it); persist(); closePopup();
+      } });
+    }
+    btns.push({ label: t('close'), color: '#adb5bd', cb: closePopup });
+    showPopup({ title: itemName(it), titleColor: RAR_INK[it.rar], border: RAR_COL[it.rar], icon: it, lines, buttons: btns });
+  },
+  down(x, y) {
+    if (tapButtons(this.buttons(), x, y)) return;
+    SLOTS.forEach((s, i) => { const r = this.slotRect(i); if (hit(r, x, y) && save.eq[s]) this.showItem(save.eq[s], true); });
+    save.inv.forEach((it, i) => { if (hit(this.cellRect(i), x, y)) this.showItem(it, false); });
+  },
+  draw() {
+    skyBg('#243b55', '#141e30');
+    for (const b of this.buttons()) button(b);
+    ctx.font = `900 40px ${FONT}`; { const bw = ctx.measureText(t('bag')).width; drawIcon('bag', W / 2 - bw / 2 - 26, 64, 38, '#fff'); txt(t('bag'), W / 2 + 22, 66, 40, '#fff', 'center', '900'); }
+    txt(t('equipped'), 40, 130, 24, '#adb5bd', 'left', '800');
+    SLOTS.forEach((s, i) => {
+      const r = this.slotRect(i), it = save.eq[s];
+      rr(r.x, r.y, r.w, r.h, 22); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill();
+      txt(t(s), r.x + r.w / 2, r.y + 26, 22, '#ced4da', 'center', '800');
+      if (it) {
+        itemIcon(it, r.x + r.w / 2, r.y + 110, 120);
+        txt(itemName(it), r.x + r.w / 2, r.y + 200, 22, RAR_COL[it.rar], 'center', '800', false, r.w - 16);
+      } else {
+        rr(r.x + 40, r.y + 50, 120, 120, 20); ctx.setLineDash([8, 8]); ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 3; ctx.stroke(); ctx.setLineDash([]);
+        txt(t('empty'), r.x + r.w / 2, r.y + 200, 22, '#868e96', 'center', '700');
+      }
+    });
+    const g = gearStats(), parts = Object.keys(g).filter(k => g[k]).map(k => t(STAT_KEY[k], { v: g[k] }));
+    rr(30, 400, 660, 110, 20); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill();
+    txt(t('gearTotal'), 50, 428, 22, '#adb5bd', 'left', '800');
+    if (parts.length) {
+      const half = Math.ceil(parts.length / 2);
+      txt(parts.slice(0, half).join(' · '), W / 2, 460, 22, '#8ce99a', 'center', '700', false, 630);
+      if (parts.length > half) txt(parts.slice(half).join(' · '), W / 2, 490, 22, '#8ce99a', 'center', '700', false, 630);
+    } else txt('-', W / 2, 470, 22, '#868e96');
+    txt(t('storage', { a: save.inv.length, b: INV_MAX }), 40, 540, 24, '#adb5bd', 'left', '800');
+    if (!save.inv.length && !SLOTS.some(s => save.eq[s])) txt(t('noGear'), W / 2, 760, 26, '#ced4da', 'center', '700', false, 640);
+    for (let i = 0; i < INV_MAX; i++) {
+      const r = this.cellRect(i), it = save.inv[i];
+      if (it) itemIcon(it, r.x + r.w / 2, r.y + r.h / 2, r.w);
+      else { rr(r.x, r.y, r.w, r.h, 18); ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fill(); }
+    }
+    drawFloats();
+  }
+};
+
+/* =========================================================
+   재방문 장치: 7일 연속 출석 · 오늘의 도전 · 업데이트 소식
+   ========================================================= */
+const STREAK = [{ g: 30 }, { g: 50, h: 1 }, { g: 80 }, { g: 60, gear: 0 }, { g: 120, h: 2 }, { g: 150 }, { g: 200, gear: 2 }];
+const streakMul = () => 1 + Math.floor((save.day - 1) / 5) * 0.5;
+function streakText(i) {
+  const r = STREAK[i], p = [t('goldN', { g: Math.round(r.g * streakMul()) })];
+  if (r.h) p.push(t('hammer', { n: r.h })); if (r.gear != null) p.push(t(r.gear >= 2 ? 'rGearR' : 'rGear'));
+  return p.join(' + ');
+}
+function grantStreak(i, times) {
+  const r = STREAK[i];
+  for (let k = 0; k < times; k++) { save.gold += Math.round(r.g * streakMul()); if (r.h) save.hammer += r.h; if (r.gear != null) addItem(genItem(save.day, r.gear)); }
+  persist();
+}
+function drawStreakRow(x, y, w, cur) {
+  const n = 7, gap = 8, bw = (w - 60 - gap * (n - 1)) / n;
+  for (let j = 0; j < n; j++) {
+    const bx = x + 30 + j * (bw + gap), past = j < cur, now = j === cur, R = STREAK[j];
+    rr(bx, y, bw, 120, 14); ctx.fillStyle = now ? '#fff3bf' : past ? '#d3f9d8' : '#f1f3f5'; ctx.fill();
+    ctx.lineWidth = now ? 5 : 2; ctx.strokeStyle = now ? '#f59f00' : past ? '#40c057' : '#dee2e6'; ctx.stroke();
+    txt(t('streakDay', { n: j + 1 }), bx + bw / 2, y + 22, 18, '#495057', 'center', '800', false, bw - 6);
+    const col = past ? '#2f9e44' : now ? '#e67700' : '#adb5bd';
+    if (R.gear != null) drawIcon('chest', bx + bw / 2, y + 66, 38, col);
+    else if (R.h) drawIcon('hammer', bx + bw / 2, y + 66, 34, col);
+    else { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(bx + bw / 2, y + 66, 14, 0, 7); ctx.fill(); }
+    if (past) txt('✓', bx + bw / 2, y + 102, 24, '#2f9e44', 'center', '900');
+    else txt(String(Math.round(R.g * streakMul())), bx + bw / 2, y + 102, 17, '#868e96', 'center', '800', false, bw - 6);
+  }
+}
+function showStreak() {
+  const i = (save.streakN - 1) % 7; let done = false;
+  const claim = n => { if (done) return; done = true; grantStreak(i, n); closePopup(); Sound.play(n > 1 ? 'chest' : 'coin'); };
+  showPopup({ title: t('streakT', { n: save.streakN }), onClose: () => claim(1),
+    lines: [{ text: streakText(i), color: RES.gold.ink, size: 34 }, { text: t('streakTmr', { r: streakText((i + 1) % 7) }), color: '#2f9e44', size: 24 }, { text: t('streakMiss'), color: '#868e96', size: 21 }],
+    customH: 140, custom: (x, y, w) => drawStreakRow(x, y, w, i),
+    buttons: [...adBtn({ label: t('gx2'), ad: true, color: '#7c4dff', cb: () => AdBridge.rewarded(() => claim(2), 'daily_x2') }),
+      { label: t('claim'), color: '#4caf50', cb: () => claim(1) }] });
+}
+const QUESTS = { merge: { n: 30, g: 60 }, tier6: { n: 1, g: 80 }, gather: { n: 150, g: 60 }, kills: { n: 120, g: 60 }, boss: { n: 1, g: 80 }, build: { n: 2, g: 50 }, survive: { n: 1, g: 70 }, chain3: { n: 3, g: 60 } };
+const qName = k => t('q_' + k, { n: QUESTS[k].n });
+const Daily = {
+  ensure() {
+    const d = localDate();
+    if (!save.daily || save.daily.date !== d) {
+      const keys = Object.keys(QUESTS).filter(k => !(k === 'build' && save.day < 2));
+      let seed = 7; for (const ch of d) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+      const q = [];
+      while (q.length < 3) { seed = (seed * 1103515245 + 12345) >>> 0; const k = keys[(seed >>> 8) % keys.length]; if (!q.includes(k)) q.push(k); }
+      save.daily = { date: d, q, p: {}, c: {}, all: false, fill: 0 };
+    }
+    return save.daily;
+  },
+  add(k, v = 1) {
+    const D = this.ensure(); if (!D.q.includes(k) || D.c[k]) return;
+    const Q = QUESTS[k], before = D.p[k] || 0; D.p[k] = Math.min(Q.n, before + v);
+    if (before < Q.n && D.p[k] >= Q.n) { showToast(t('qToast', { n: qName(k) })); Sound.play('levelup'); }
+  },
+  ready() { const D = this.ensure(); return D.q.filter(k => !D.c[k] && (D.p[k] || 0) >= QUESTS[k].n).length + (!D.all && D.q.every(k => D.c[k]) ? 1 : 0); },
+  doneN() { const D = this.ensure(); return D.q.filter(k => D.c[k]).length; }
+};
+function showQuests() {
+  const D = Daily.ensure();
+  const btns = D.q.map(k => {
+    const Q = QUESTS[k], p = D.p[k] || 0, done = D.c[k], ready = !done && p >= Q.n;
+    return { label: (done ? '✓ ' : '') + qName(k), sub: done ? t('qDoneLbl') : ready ? t('qClaim', { g: Q.g }) : `${p} / ${Q.n} · ${t('qReward', { g: Q.g })}`,
+      color: ready ? '#2f9e44' : '#74819a', disabled: !ready,
+      cb: () => { D.c[k] = true; save.gold += Q.g; persist(); Sound.play('coin'); popup = null; showQuests(); } };
+  });
+  if (D.q.every(k => D.c[k]) && !D.all) btns.push({ label: t('qAllBtn'), sub: t('qAll'), color: '#e8590c',
+    cb: () => { D.all = true; save.hammer++; const it = genItem(save.day, 1), s = addItem(it); persist(); Sound.play('chest'); popup = null; showToast(s ? t('autoSalv', { g: s }) : itemName(it)); showQuests(); } });
+  btns.push({ label: t('close'), color: '#ff8a3d', cb: closePopup });
+  showPopup({ title: t('qT'), lines: [{ text: t('qReset'), color: '#868e96', size: 24 }], buttons: btns });
+}
+const NEWS = {
+  ko: ['7일 연속 출석 보상: 날마다 보상이 커져요', '오늘의 도전 3개가 매일 새로 열려요', '크게 합칠수록 재료 모으기 기회가 늘어요', '홈 화면에 추가해 바로 실행할 수 있어요'],
+  en: ['7-day login streak: rewards grow every day', '3 new daily challenges every day', 'Bigger merges give you more drops', 'Add the game to your home screen'],
+};
+function showNews() {
+  save.seenVer = GAME_VER; persist();
+  showPopup({ title: t('newsT', { v: GAME_VER }), lines: NEWS[save.lang].map(s => ({ text: '· ' + s, size: 24, color: '#5a4632' })), buttons: [{ label: t('ok'), color: '#4caf50', cb: closePopup }] });
+}
+
+/* =========================================================
+   다시 찾아오기: 홈 화면 추가 · 즐겨찾기 · 앱처럼 설치(내 사이트에서)
+   ========================================================= */
+const Install = {
+  prompt: null,
+  init() {
+    addEventListener('beforeinstallprompt', e => { e.preventDefault(); this.prompt = e; });
+    addEventListener('appinstalled', () => { this.prompt = null; showToast(t('installed')); });
+    if (this.ownSite()) {
+      const l = document.createElement('link'); l.rel = 'manifest'; l.href = 'manifest.webmanifest'; document.head.appendChild(l);
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  },
+  ownSite() { try { return window.top === window && Platform.mode !== 'live' && location.protocol === 'https:'; } catch (e) { return false; } },
+  isApp() { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } },
+  social(k) { try { return !!(Platform.b && Platform.b.social && Platform.b.social[k]); } catch (e) { return false; } },
+  can() {
+    if (this.social('isAddToHomeScreenSupported')) return 'bridge';
+    if (this.social('isAddToFavoritesSupported')) return 'fav';
+    if (!this.ownSite() || this.isApp()) return null;
+    if (this.prompt) return 'pwa';
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) return 'ios';
+    return null;
+  },
+  run() {
+    const c = this.can();
+    try {
+      if (c === 'bridge') Platform.b.social.addToHomeScreen().catch(() => {});
+      else if (c === 'fav') Platform.b.social.addToFavorites().catch(() => {});
+      else if (c === 'pwa') { const p = this.prompt; this.prompt = null; p.prompt(); }
+      else if (c === 'ios') showPopup({ title: t('iosHowT'), lines: [t('iosHow1'), t('iosHow2')], buttons: [{ label: t('ok'), color: '#4caf50', cb: closePopup }] });
+    } catch (e) {}
+  }
+};
+
+/* =========================================================
+   수익화: 인앱 결제 (결제를 지원하는 사이트에서만 상점 표시)
+   ========================================================= */
+const PRODUCTS = { remove_ads: { perm: true }, starter_pack: { perm: true }, gold_pack: { perm: false } };
+const Shop = {
+  items: [], ok: false,
+  sup() { try { return !!(Platform.b && Platform.b.payments && Platform.b.payments.isSupported); } catch (e) { return false; } },
+  async init() {
+    if (!this.sup()) return;
+    try { const cat = await Platform.b.payments.getCatalog(); this.items = (cat || []).filter(c => PRODUCTS[c.id]); } catch (e) { this.items = []; }
+    try { const ps = await Platform.b.payments.getPurchases(); for (const p of ps || []) this.grant(p.id); } catch (e) {}
+    this.ok = this.items.length > 0;
+  },
+  owned(id) { return (id === 'remove_ads' && save.noAds) || (id === 'starter_pack' && save.iap.starter); },
+  grant(id) {
+    if (id === 'remove_ads') save.noAds = true;
+    else if (id === 'starter_pack') { if (!save.iap.starter) { save.iap.starter = true; save.hammer += 5; save.gold += 500; addItem(genItem(Math.max(3, save.day), 2)); } }
+    else if (id === 'gold_pack') { save.gold += 1000; try { Platform.b.payments.consumePurchase(id).catch(() => {}); } catch (e) {} }
+    else return;
+    persist(true);
+  },
+  buy(id) {
+    try {
+      Platform.b.payments.purchase(id).then(() => { this.grant(id); Sound.play('chest'); showToast(t('buyOk')); popup = null; showShop(); })
+        .catch(() => showToast(t('buyFail')));
+    } catch (e) { showToast(t('buyFail')); }
+  }
+};
+function showShop() {
+  const btns = Shop.items.map(c => Shop.owned(c.id)
+    ? { label: t('p_' + c.id), sub: t('owned'), color: '#adb5bd', disabled: true }
+    : { label: t('p_' + c.id), sub: `${t('p_' + c.id + 'D')} · ${c.price}`, color: c.id === 'starter_pack' ? '#e8590c' : '#1971c2', cb: () => Shop.buy(c.id) });
+  btns.push({ label: t('close'), color: '#ff8a3d', cb: closePopup });
+  showPopup({ title: t('shopT'), lines: [], buttons: btns });
+}
+
+/* =========================================================
+   영역별 기록 (리더보드) · 문의 및 연락
+   플랫폼이 순위표를 지원할 때만 전체 순위를 보여 주고, 아니면 내 기록만 보여 줌
+   ========================================================= */
+const LB = [
+  { id: 'best_day', key: 'bestDay', name: 'lbDay', desc: 'lbDayD', unit: 'unitDay', col: '#ff8a3d' },
+  { id: 'gather_best', key: 'bestGather', name: 'lbGather', desc: 'lbGatherD', unit: 'unitRes', col: '#2f9e44' },
+  { id: 'night_kills', key: 'bestKills', name: 'lbKills', desc: 'lbKillsD', unit: 'unitKill', col: '#7048e8' },
+  { id: 'village_level', key: 'villageLv', name: 'lbVillage', desc: 'lbVillageD', unit: 'unitLv', col: '#1971c2' },
+];
+const villageLv = () => SLOTS_B.reduce((a, k) => a + (save.b[k] || 0), 0);
+const SLOTS_B = ['smith', 'farm', 'wall', 'shop'];
+const Ranking = {
+  type() { try { return (Platform.b && Platform.b.leaderboards && Platform.b.leaderboards.type) || 'not_available'; } catch (e) { return 'not_available'; } },
+  on() { return this.type() !== 'not_available'; },
+  value(lb) { return lb.key === 'villageLv' ? villageLv() : (save[lb.key] || 0); },
+  submit(id) {
+    if (!this.on()) return;
+    const lb = LB.find(l => l.id === id), v = Math.floor(this.value(lb));
+    if (v <= 0) return;
+    try { Platform.b.leaderboards.setScore(id, v).catch(() => {}); } catch (e) {}
+    delete this.cache[id];
+  },
+  best(key, v, id) { if (v > (save[key] || 0)) { save[key] = v; this.submit(id); return true; } return false; },
+  cache: {},
+  load(id) {
+    if (this.type() !== 'in_game' || (this.cache[id] && this.cache[id].state !== 'fail')) return;
+    this.cache[id] = { state: 'loading', list: [] };
+    try {
+      Platform.b.leaderboards.getEntries(id)
+        .then(list => { this.cache[id] = { state: 'ok', list: (list || []).slice(0, 10) }; })
+        .catch(() => { this.cache[id] = { state: 'fail', list: [] }; });
+    } catch (e) { this.cache[id] = { state: 'fail', list: [] }; }
+  },
+  popup(id) { try { Platform.b.leaderboards.showNativePopup(id).catch(() => {}); } catch (e) {} },
+};
+scenes.records = {
+  muteAt: [656, 65],
+  outer: ['#1b2350', '#2b1f45'],
+  prev: null,
+  enter() { this.t = 0; this.tab = this.tab || 0; Ranking.load(LB[this.tab].id); },
+  update(dt) { this.t += dt; },
+  buttons() {
+    const b = [{ x: 30, y: 30, w: 170, h: 70, label: '← ' + t('back'), color: '#495057', size: 26, r: 22, cb: () => { floats = []; scene = this.prev || scenes.title; } }];
+    LB.forEach((lb, i) => b.push({ x: 30 + i * 166, y: 140, w: 154, h: 84, label: t(lb.name), color: this.tab === i ? lb.col : 'rgba(255,255,255,.14)', size: 24, r: 20,
+      cb: () => { this.tab = i; Ranking.load(lb.id); } }));
+    if (Ranking.type() === 'native_popup') b.push({ x: 160, y: 600, w: 400, h: 96, label: t('rankOpen'), color: LB[this.tab].col, size: 30, cb: () => Ranking.popup(LB[this.tab].id) });
+    return b;
+  },
+  down(x, y) { tapButtons(this.buttons(), x, y); },
+  draw() {
+    skyBg('#1b2350', '#2b1f45');
+    ctx.font = `900 40px ${FONT}`; { const bw = ctx.measureText(t('recTitle')).width; drawIcon('trophy', W / 2 - bw / 2 - 26 + 40, 64, 40, '#ffd43b'); txt(t('recTitle'), W / 2 + 40, 66, 36, '#fff', 'center', '900', false, 330); }
+    for (const b of this.buttons()) button(b);
+    const lb = LB[this.tab], v = Ranking.value(lb);
+    rr(30, 250, 660, 300, 28); ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.fill();
+    ctx.lineWidth = 4; ctx.strokeStyle = lb.col; ctx.stroke();
+    txt(t(lb.desc), W / 2, 296, 28, '#dee2e6', 'center', '800', false, 620);
+    txt(t('myBest'), W / 2, 356, 24, '#adb5bd', 'center', '700');
+    txt(t(lb.unit, { n: v }), W / 2, 440, 84, '#ffd43b', 'center', '900', true, 600);
+    // 네 영역 요약
+    LB.forEach((o, i) => { const x = 30 + i * 166 + 77; txt(t(o.unit, { n: Ranking.value(o) }), x, 520, 22, i === this.tab ? '#fff' : '#adb5bd', 'center', '800', false, 150); });
+    const ty = Ranking.type();
+    rr(30, 580, 660, 600, 28); ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fill();
+    if (ty === 'in_game') {
+      txt(t('rankTop'), 60, 620, 26, '#fff', 'left', '900');
+      const c = Ranking.cache[lb.id];
+      if (!c || c.state === 'loading') txt(t('rankLoading'), W / 2, 820, 26, '#ced4da');
+      else if (c.state === 'fail') txt(t('rankFail'), W / 2, 820, 26, '#ffa8a8', 'center', '700', false, 600);
+      else if (!c.list.length) txt(t('rankEmpty'), W / 2, 820, 26, '#ced4da');
+      else c.list.forEach((e, i) => {
+        const y = 680 + i * 50;
+        if (i % 2 === 0) { rr(46, y - 22, 628, 44, 12); ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.fill(); }
+        txt(String(e.rank || i + 1), 90, y, 26, i < 3 ? '#ffd43b' : '#fff', 'center', '900');
+        txt(String(e.name || '-'), 140, y, 24, '#fff', 'left', '700', false, 360);
+        txt(String(e.score), 650, y, 26, '#ffd43b', 'right', '900', false, 150);
+      });
+    } else if (ty === 'native_popup') {
+      txt(t('rankPopup'), W / 2, 760, 26, '#ced4da', 'center', '700', false, 600);
+    } else if (ty === 'native') {
+      txt(t('rankNative'), W / 2, 800, 26, '#ced4da', 'center', '700', false, 600);
+    } else {
+      txt(t('rankLocal'), W / 2, 760, 26, '#ced4da', 'center', '700', false, 600);
+      txt(t('rankLocal2'), W / 2, 806, 22, '#868e96', 'center', '700', false, 600);
+    }
+    drawFloats();
+  }
+};
+function openRecords() { const r = scenes.records; r.prev = scene; floats = []; scene = r; r.enter(); }
+const GAME_VER = '0.8', CONTACT_URL = 'https://btypenine.itch.io';
+function linksAllowed() { if (!Platform.b) return true; try { return Platform.b.platform.isExternalLinksAllowed === true; } catch (e) { return false; } }
+function showContact() {
+  const can = linksAllowed();
+  showPopup({ title: t('contact'), lines: [t('cBody'), can ? t('cLink') : t('cHere'), { text: t('cId', { v: GAME_VER, id: save.pid }), color: '#868e96', size: 22 }],
+    buttons: [
+      ...(can ? [{ label: t('cOpen'), color: '#fa5c5c', cb: () => { try { window.open(CONTACT_URL, '_blank', 'noopener'); } catch (e) {} } }] : []),
+      { label: t('newsBtn'), color: '#2f9e44', cb: () => { popup = null; showNews(); } },
+      { label: t('back'), color: '#ff8a3d', cb: () => { popup = null; showSettings(); } }] });
+}
+
+/* =========================================================
+   밤: 생존 전투 (뱀서류)
+   ========================================================= */
+const WORLD = 3000;
+const ENEMY = {
+  slime: { hp: 22, spd: 72, dmg: 6, xp: 1, r: 18, color: '#66bb6a' },
+  bat: { hp: 12, spd: 138, dmg: 5, xp: 1, r: 14, color: '#ab47bc' },
+  golem: { hp: 95, spd: 46, dmg: 16, xp: 4, r: 30, color: '#8d6e63' },
+  king: { hp: 650, spd: 58, dmg: 24, xp: 25, r: 54, color: '#43a047', boss: true },
+  lord: { hp: 3200, spd: 62, dmg: 35, xp: 80, r: 72, color: '#c62828', boss: true },
+};
+const WEAPON_KEYS = ['bolt', 'axe', 'lightning', 'aura', 'arrow'];
+const PASSIVES = { speed: 5, vital: 5, magnet: 3, haste: 5, power: 5 };
+const keys = new Set();
+scenes.night = {
+  muteAt: [660, 215],
+  outer: ['#22314a', '#141b33'],
+  enter() {
+    save.phase = 'night'; persist();
+    const day = save.day;
+    this.day = day; this.dur = Math.min(180, 80 + day * 10); this.t = 0;
+    this.h = { x: WORLD / 2, y: WORLD / 2, r: 22, inv: 0, dirx: 1, diry: 0, face: 1 };
+    this.pas = { speed: 0, vital: 0, magnet: 0, haste: 0, power: 0 };
+    this.w = { bolt: 1 }; this.cd = { bolt: 0, lightning: 0, arrow: 0, aura: 0 };
+    this.axeAng = 0; this.axes = []; this.maxHp = 0;
+    this.recalc(); this.h.hp = this.maxHp;
+    this.en = []; this.pr = []; this.gems = []; this.coins = []; this.fx = []; this.items = []; this.loot = [];
+    this.kills = 0; this.goldGot = 0; this.lv = 1; this.xp = 0; this.need = 5; this.pendingLv = 0;
+    this.spawnT = 0.5; this.chestT = 35; this.nextBossT = day === 1 ? 45 : 35; this.cpFx = 0; this.axeSnd = 0; this.rerolled = false; this.revived = false; this.done = false; this.kingSpawned = false; this.lordSpawned = false; this.hitFx = 0;
+    this.joy = null; this.joyId = null;
+    this.scale = 1 + 0.22 * (day - 1); this.dmgScale = 1 + 0.12 * (day - 1);
+    AdBridge.gameplayStart(); Sound.play('night');
+    if (!save.tut.night) {
+      save.tut.night = true; persist();
+      showPopup({ title: t('nT'), lines: [t('n1'), t('n2'), t('n3'), t('n4'), { text: t('n5', { s: this.dur }), color: '#d9480f' }, { text: t('n6', { c: 15 }), color: '#7048e8' }], buttons: [{ label: t('go'), color: '#5e35b1', cb: closePopup }] });
+    }
+  },
+  recalc() {
+    const b = save.b, p = this.pas, G = gearStats();
+    this.dmgMul = (1 + b.smith * 0.15) * (1 + p.power * 0.1) * (1 + G.atk / 100);
+    const oldMax = this.maxHp;
+    this.maxHp = 100 + b.farm * 20 + p.vital * 20 + G.hp;
+    this.taken = 1 - Math.min(0.7, b.wall * 0.06 + G.dr / 100);
+    this.spd = 260 * (1 + p.speed * 0.1 + G.spd / 100);
+    this.mag = 90 * (1 + p.magnet * 0.4 + G.mag / 100);
+    this.cdMul = Math.pow(0.92, p.haste) * (1 - Math.min(0.5, G.cdr / 100));
+    this.xpMul = 1 + G.xp / 100;
+    if (oldMax && this.h.hp > this.maxHp) this.h.hp = this.maxHp;
+  },
+  down(x, y, id) { if (this.joyId == null) { this.joyId = id; this.joy = { sx: x, sy: y, x, y }; } },
+  move(x, y, id) { if (this.joy && id === this.joyId) { this.joy.x = x; this.joy.y = y; } },
+  up(x, y, id) { if (id === this.joyId) { this.joy = null; this.joyId = null; } },
+  cancelInput() { this.joy = null; this.joyId = null; },
+  spawn(k, hpMul = 1) {
+    if (!k) {
+      if (this.en.length >= 240) return;
+      const w = { slime: 10 };
+      if (this.t > 12 || this.day >= 2) w.bat = 6;
+      if (this.t > 35 || this.day >= 3) w.golem = 2 + this.day * 0.5;
+      k = pick(w);
+    }
+    const T = ENEMY[k], a = rand(0, Math.PI * 2), d = rand(780, 900), h = this.h;
+    this.en.push({ k, x: clamp(h.x + Math.cos(a) * d, 0, WORLD), y: clamp(h.y + Math.sin(a) * d, 0, WORLD),
+      hp: T.hp * this.scale * hpMul, maxhp: T.hp * this.scale * hpMul, spd: T.spd * rand(0.9, 1.1), dmg: T.dmg * this.dmgScale, xp: T.xp, r: T.r, flash: 0, ph: rand(0, 6) });
+  },
+  nearest(x, y, max) { let b = null, bd = max * max; for (const e of this.en) { if (e.dead) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < bd) { bd = d; b = e; } } return b; },
+  shoot(x, y, a, spd, r, dmg, pierce, life, kind) { this.pr.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r, dmg, pierce, life, kind, a, hitSet: new Set() }); },
+  hurt(e, d) { if (e.dead) return; e.hp -= d; e.flash = 0.08; if (e.hp <= 0) this.kill(e); },
+  kill(e) {
+    e.dead = true; this.kills++; Sound.play('kill', 0.9 + Math.random() * 0.25); Daily.add('kills');
+    if (this.gems.length < 350) this.gems.push({ x: e.x, y: e.y, v: e.xp }); else this.xp += e.xp * this.xpMul;
+    if (ENEMY[e.k].boss) {
+      for (let i = 0; i < 12; i++) this.coins.push({ x: e.x + rand(-60, 60), y: e.y + rand(-60, 60), v: randi(2, 4) });
+      this.items.push({ x: e.x, y: e.y, k: 'chest', minR: e.k === 'lord' ? 2 : 1 });
+      floatText(e.x, e.y - 60, t('slain', { n: t(e.k) }), '#ffd43b', 44);
+      Daily.add('boss');
+      const add = e.k === 'lord' ? 30 : 15;           // 체크포인트: 보스 처치 → 밤 시간 연장
+      this.dur += add; this.cpFx = 1.6; this.cpAdd = add; Sound.play('checkpoint');
+      floatText(this.h.x, this.h.y - 150, t('timePlus', { s: add }), '#69db7c', 54);
+      if (e.k === 'king') this.nextBossT = this.t + 40;
+    } else {
+      const r = Math.random();
+      if (Math.random() < 0.1) this.coins.push({ x: e.x, y: e.y, v: randi(1, 3) });
+      if (e.k === 'golem' && Math.random() < 0.03) this.items.push({ x: e.x, y: e.y, k: 'chest', minR: 0 });
+      else if (r < 0.012) this.items.push({ x: e.x, y: e.y, k: 'meat' });
+      else if (r < 0.016) this.items.push({ x: e.x, y: e.y, k: 'magnet' });
+      else if (r < 0.020) this.items.push({ x: e.x, y: e.y, k: 'bomb' });
+    }
+  },
+  useItem(it) {
+    const h = this.h;
+    Sound.play(it.k === 'chest' ? 'chest' : it.k === 'bomb' ? 'bomb' : 'levelup');
+    if (it.k === 'meat') { h.hp = Math.min(this.maxHp, h.hp + this.maxHp * 0.3); floatText(h.x, h.y - 50, t('fMeat'), '#ff8787', 34); }
+    else if (it.k === 'magnet') { for (const g of this.gems) g.pull = true; for (const c of this.coins) c.pull = true; floatText(h.x, h.y - 50, t('fMagnet'), '#4dd4ff', 36); }
+    else if (it.k === 'bomb') {
+      for (const e of this.en) if ((e.x - h.x) ** 2 + (e.y - h.y) ** 2 < 420 * 420) { if (ENEMY[e.k].boss) this.hurt(e, 300 * this.dmgMul); else this.hurt(e, 99999); }
+      this.fx.push({ k: 'ring', x: h.x, y: h.y, t: 0, c: '255,180,80' }); floatText(h.x, h.y - 60, t('fBomb'), '#ffa94d', 48);
+    } else if (it.k === 'chest') {
+      const g = genItem(this.day, it.minR || 0); const salv = addItem(g); this.loot.push(g);
+      floatText(h.x, h.y - 70, itemName(g), RAR_COL[g.rar], 34);
+      floatText(h.x, h.y - 110, salv ? t('autoSalv', { g: salv }) : t('fChest'), '#fff', 30);
+    }
+  },
+  weapons(dt) {
+    const h = this.h, m = this.dmgMul, c = this.cdMul, w = this.w;
+    if (w.bolt) {
+      const l = w.bolt; this.cd.bolt -= dt;
+      if (this.cd.bolt <= 0) {
+        const tgt = this.nearest(h.x, h.y, 700);
+        if (tgt) {
+          this.cd.bolt = (0.85 - 0.07 * (l - 1)) * c;
+          const n = 1 + Math.floor((l - 1) / 2), base = Math.atan2(tgt.y - h.y, tgt.x - h.x);
+          for (let i = 0; i < n; i++) this.shoot(h.x, h.y, base + (i - (n - 1) / 2) * 0.18, 640, 8, (12 + 4 * (l - 1)) * m, l >= 4 ? 2 : 1, 1.2, 'bolt');
+          Sound.play('w_bolt', rand(0.92, 1.12));
+        } else this.cd.bolt = 0.1;
+      }
+    }
+    if (w.axe) {
+      const l = w.axe, n = 1 + l, R = 100 + 6 * l, dmg = (9 + 3 * l) * m;
+      this.axeAng += dt * 3.4; this.axes = [];
+      this.axeSnd += dt * 3.4 * n; if (this.axeSnd >= Math.PI * 2) { this.axeSnd = 0; Sound.play('w_axe', rand(0.9, 1.1)); }
+      for (let i = 0; i < n; i++) {
+        const a = this.axeAng + i * Math.PI * 2 / n, ax = h.x + Math.cos(a) * R, ay = h.y + Math.sin(a) * R;
+        this.axes.push({ x: ax, y: ay });
+        for (const e of this.en) {
+          if (e.dead) continue;
+          if ((e.x - ax) ** 2 + (e.y - ay) ** 2 < (e.r + 20) ** 2 && (e.axeT || 0) <= this.t) { e.axeT = this.t + 0.45; this.hurt(e, dmg); }
+        }
+      }
+    }
+    if (w.lightning) {
+      const l = w.lightning; this.cd.lightning -= dt;
+      if (this.cd.lightning <= 0) {
+        this.cd.lightning = (1.9 - 0.15 * (l - 1)) * c;
+        const vis = this.en.filter(e => !e.dead && Math.abs(e.x - h.x) < W / 2 && Math.abs(e.y - h.y) < H / 2);
+        const n = 1 + Math.floor(l / 2), dmg = (28 + 10 * (l - 1)) * m;
+        if (vis.length) Sound.play('w_lightning', rand(0.9, 1.1));
+        for (let i = 0; i < n && vis.length; i++) {
+          const e = vis.splice(randi(0, vis.length - 1), 1)[0];
+          this.fx.push({ k: 'zap', x: e.x, y: e.y, t: 0 });
+          for (const o of this.en) if (!o.dead && (o.x - e.x) ** 2 + (o.y - e.y) ** 2 < (55 + o.r) ** 2) this.hurt(o, dmg);
+        }
+      }
+    }
+    if (w.aura) {
+      const l = w.aura, R = 80 + 12 * l; this.auraR = R; this.cd.aura -= dt;
+      if (this.cd.aura <= 0) {
+        this.cd.aura = 0.5; const dmg = (5 + 2 * l) * m; let hitA = false;
+        for (const e of this.en) if (!e.dead && (e.x - h.x) ** 2 + (e.y - h.y) ** 2 < (R + e.r) ** 2) { this.hurt(e, dmg); hitA = true; }
+        if (hitA) Sound.play('w_aura');
+      }
+    }
+    if (w.arrow) {
+      const l = w.arrow; this.cd.arrow -= dt;
+      if (this.cd.arrow <= 0) {
+        this.cd.arrow = (1.5 - 0.1 * (l - 1)) * c;
+        const n = 3 + l, base = Math.atan2(h.diry, h.dirx), spread = 0.9;
+        for (let i = 0; i < n; i++) this.shoot(h.x, h.y, base + (i / (n - 1) - 0.5) * spread, 720, 6, (8 + 2 * l) * m, 1, 0.8, 'arrow');
+        Sound.play('w_arrow', rand(0.95, 1.08));
+      }
+    }
+  },
+  separate() {
+    const cell = 48, grid = new Map();
+    for (const e of this.en) { const k = ((e.x / cell) | 0) * 10007 + ((e.y / cell) | 0); let a = grid.get(k); if (!a) { a = []; grid.set(k, a); } a.push(e); }
+    for (const a of grid.values()) {
+      const n = Math.min(a.length, 10);
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+        const p = a[i], q = a[j], dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy) || 0.01, min = (p.r + q.r) * 0.8;
+        if (d < min) { const push = (min - d) / d * 0.25; p.x -= dx * push; p.y -= dy * push; q.x += dx * push; q.y += dy * push; }
+      }
+    }
+  },
+  options() {
+    const list = [], owned = Object.keys(this.w).length;
+    for (const k of WEAPON_KEYS) {
+      const l = this.w[k] || 0;
+      if (l === 0 && owned < 5) list.push({ label: t('getW', { n: t(k) }), sub: t(k + '1'), color: '#f76707', apply: () => { this.w[k] = 1; } });
+      else if (l > 0 && l < 5) list.push({ label: `${t(k)} Lv.${l + 1}`, sub: t(k + 'U'), color: '#e8590c', apply: () => { this.w[k]++; } });
+    }
+    for (const k in PASSIVES) {
+      const l = this.pas[k];
+      if (l < PASSIVES[k]) list.push({ label: `${t(k)} Lv.${l + 1}`, sub: t(k + 'D'), color: '#0ca678',
+        apply: () => { this.pas[k]++; this.recalc(); if (k === 'vital') this.h.hp = Math.min(this.maxHp, this.h.hp + 40); } });
+    }
+    const out = shuffle(list).slice(0, 3);
+    if (!out.length) out.push({ label: t('heal'), sub: t('heal50'), color: '#0ca678', apply: () => { this.h.hp = Math.min(this.maxHp, this.h.hp + 50); } });
+    return out;
+  },
+  showLevelUp() {
+    this.pendingLv--; this.cancelInput(); Sound.play('levelup');
+    this.lvPopup(this.options());
+  },
+  lvPopup(opts) {                                   // 광고 보고 다시 뽑기: 밤마다 1번
+    showPopup({ title: t('lvUp', { l: this.lv }), lines: [t('choose')], noClose: true,
+      buttons: [...opts.map(o => ({ label: o.label, sub: o.sub, color: o.color, cb: () => { o.apply(); this.recalc(); closePopup(); } })),
+        ...(this.rerolled ? [] : adBtn({ label: t('lvReroll'), ad: true, color: '#7c4dff', size: 28, cb: () => AdBridge.rewarded(() => { if (this.rerolled) return; this.rerolled = true; popup = null; this.lvPopup(this.options()); }, 'skill_reroll') }))] });
+  },
+  onDeath() {
+    Sound.play('defeat');
+    this.cancelInput(); AdBridge.gameplayStop();
+    const btns = [];
+    if (!this.revived && AdBridge.canReward()) btns.push({ label: t('revive'), sub: t('reviveS'), ad: true, color: '#7c4dff',
+      cb: () => AdBridge.rewarded(() => {
+        this.revived = true; this.h.hp = this.maxHp * 0.5; this.h.inv = 2; Sound.play('revive');
+        const h = this.h; for (const e of this.en) if (!ENEMY[e.k].boss && (e.x - h.x) ** 2 + (e.y - h.y) ** 2 < 380 * 380) e.dead = true;
+        this.fx.push({ k: 'ring', x: h.x, y: h.y, t: 0, c: '180,140,255' });
+        closePopup(); AdBridge.gameplayStart();
+      }, 'revive') });
+    btns.push({ label: t('retreat'), sub: t('retreatS'), color: '#5c677d', cb: () => { closePopup(); this.finish(false); } });
+    showPopup({ title: t('dead'), noClose: true, lines: [t('deadInfo', { k: this.kills, s: Math.floor(this.t) })], buttons: btns });
+  },
+  finish(survived) {
+    this.done = true; AdBridge.gameplayStop();
+    go('dawn', { survived, kills: this.kills, gold: this.goldGot, day: this.day, time: Math.floor(this.t), loot: this.loot });
+  },
+  update(dt) {
+    if (this.done) return;
+    this.t += dt; const h = this.h;
+    let mx = 0, my = 0;
+    if (keys.has('arrowleft') || keys.has('a')) mx -= 1;
+    if (keys.has('arrowright') || keys.has('d')) mx += 1;
+    if (keys.has('arrowup') || keys.has('w')) my -= 1;
+    if (keys.has('arrowdown') || keys.has('s')) my += 1;
+    if (this.joy) { const dx = this.joy.x - this.joy.sx, dy = this.joy.y - this.joy.sy, l = Math.hypot(dx, dy); if (l > 8) { const k = Math.min(1, l / 60); mx += dx / l * k; my += dy / l * k; } }
+    const ml = Math.hypot(mx, my);
+    if (ml > 1) { mx /= ml; my /= ml; }
+    if (ml > 0.05) { const n = Math.hypot(mx, my); h.dirx = mx / n; h.diry = my / n; if (Math.abs(mx) > 0.1) h.face = mx > 0 ? 1 : -1; }
+    h.x = clamp(h.x + mx * this.spd * dt, 30, WORLD - 30); h.y = clamp(h.y + my * this.spd * dt, 30, WORLD - 30);
+    h.inv -= dt; this.hitFx = Math.max(0, this.hitFx - dt);
+    // 몬스터 생성
+    this.spawnT -= dt;
+    if (this.spawnT <= 0) {
+      this.spawnT = Math.max(0.12, (this.day === 1 ? 1.0 : 0.85) - this.t * 0.005 - (this.day - 1) * 0.06);
+      const n = 1 + Math.floor(this.t / 35) + Math.floor((this.day - 1) / 2);
+      for (let i = 0; i < n; i++) this.spawn();
+    }
+    // 정기 보물상자
+    this.chestT -= dt;
+    if (this.chestT <= 0) { this.chestT = 40; const a = rand(0, 6.28), d = rand(260, 330); this.items.push({ x: clamp(h.x + Math.cos(a) * d, 40, WORLD - 40), y: clamp(h.y + Math.sin(a) * d, 40, WORLD - 40), k: 'chest', minR: 0 }); }
+    if (this.t >= this.nextBossT && this.dur - this.t > 12 && !this.en.some(e => e.k === 'king')) {   // 체크포인트 보스 (한 번에 한 마리)
+      this.nextBossT = Infinity; this.spawn('king', this.day === 1 ? 0.45 : 1); floatText(h.x, h.y - 140, t('cpBoss', { s: 15 }), '#ff6b6b', 40);
+    }
+    if (this.day % 7 === 0 && !this.lordSpawned && this.t > this.dur * 0.45) { this.lordSpawned = true; this.spawn('lord'); floatText(h.x, h.y - 190, t('appear', { n: t('lord') }), '#ff6b6b', 50); }
+    this.weapons(dt);
+    for (const p of this.pr) {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+      for (const e of this.en) {
+        if (e.dead || p.hitSet.has(e)) continue;
+        if ((e.x - p.x) ** 2 + (e.y - p.y) ** 2 < (e.r + p.r) ** 2) { this.hurt(e, p.dmg); p.hitSet.add(e); if (--p.pierce <= 0) { p.life = 0; break; } }
+      }
+    }
+    this.pr = this.pr.filter(p => p.life > 0);
+    for (const e of this.en) {
+      if (e.dead) continue;
+      const dx = h.x - e.x, dy = h.y - e.y, d = Math.hypot(dx, dy) || 1;
+      e.x += dx / d * e.spd * dt; e.y += dy / d * e.spd * dt;
+      if (e.flash > 0) e.flash -= dt;
+      if (d > 1500 && !ENEMY[e.k].boss) { const a = rand(0, 6.28); e.x = h.x + Math.cos(a) * 820; e.y = h.y + Math.sin(a) * 820; }
+      if (d < e.r + h.r && h.inv <= 0) { h.hp -= e.dmg * this.taken; h.inv = 0.6; this.hitFx = 0.25; Sound.play('hurt'); }
+    }
+    this.separate();
+    this.en = this.en.filter(e => !e.dead);
+    const pull = (o, onGet) => {
+      const dx = h.x - o.x, dy = h.y - o.y, d = Math.hypot(dx, dy) || 1;
+      if (d < this.mag || o.pull) { o.pull = true; const s = Math.min(d, 560 * dt); o.x += dx / d * s; o.y += dy / d * s; }
+      if (d < 26) { o.got = true; onGet(o); }
+    };
+    for (const g of this.gems) pull(g, o => { this.xp += o.v * this.xpMul; Sound.play('gem', 1 + Math.random() * 0.2); });
+    for (const c of this.coins) pull(c, o => { this.goldGot += o.v; Sound.play('coin'); floatText(h.x, h.y - 40, `+${o.v}`, '#ffd43b', 26); });
+    this.gems = this.gems.filter(g => !g.got); this.coins = this.coins.filter(c => !c.got);
+    for (const it of this.items) if ((it.x - h.x) ** 2 + (it.y - h.y) ** 2 < 42 * 42) { it.got = true; this.useItem(it); }
+    this.items = this.items.filter(it => !it.got);
+    while (this.xp >= this.need) { this.xp -= this.need; this.lv++; this.need = Math.round(this.need * 1.25 + 3); this.pendingLv++; }
+    for (const f of this.fx) f.t += dt; this.fx = this.fx.filter(f => f.t < 0.5);
+    if (this.cpFx > 0) this.cpFx -= dt;
+    if (h.hp <= 0) { h.hp = 0; this.onDeath(); return; }
+    if (this.t >= this.dur) { this.finish(true); return; }
+    if (this.pendingLv > 0 && !popup) this.showLevelUp();
+  },
+  drawField(it, x, y) {
+    const bob = Math.sin(this.t * 4 + x * 0.01) * 4; y += bob;
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(x, y + 22 - bob, 18, 6, 0, 0, 7); ctx.fill();
+    if (it.k === 'chest') {
+      const col = it.minR >= 2 ? '#b197fc' : it.minR === 1 ? '#4dabf7' : '#ffd43b';
+      ctx.fillStyle = 'rgba(255,230,120,.25)'; ctx.beginPath(); ctx.arc(x, y, 34 + Math.sin(this.t * 6) * 4, 0, 7); ctx.fill();
+      rr(x - 22, y - 14, 44, 32, 6); ctx.fillStyle = '#8d5524'; ctx.fill();
+      rr(x - 24, y - 22, 48, 14, 6); ctx.fillStyle = '#a0612e'; ctx.fill();
+      ctx.fillStyle = col; ctx.fillRect(x - 4, y - 22, 8, 40); ctx.fillRect(x - 24, y - 6, 48, 5);
+    } else if (it.k === 'meat') {
+      ctx.fillStyle = '#c2410c'; ctx.beginPath(); ctx.ellipse(x - 2, y, 15, 12, -0.5, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#f8f9fa'; ctx.lineWidth = 6; ctx.lineCap = 'round'; line(x + 8, y - 6, x + 18, y - 14);
+    } else if (it.k === 'magnet') {
+      ctx.strokeStyle = '#e03131'; ctx.lineWidth = 9; ctx.lineCap = 'butt'; ctx.beginPath(); ctx.arc(x, y - 2, 12, Math.PI, 0); ctx.stroke();
+      ctx.strokeStyle = '#e03131'; line(x - 12, y - 2, x - 12, y + 12); line(x + 12, y - 2, x + 12, y + 12);
+      ctx.strokeStyle = '#dee2e6'; line(x - 12, y + 8, x - 12, y + 14); line(x + 12, y + 8, x + 12, y + 14);
+    } else {
+      ctx.fillStyle = '#212529'; ctx.beginPath(); ctx.arc(x, y + 2, 15, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#ced4da'; ctx.lineWidth = 3; line(x + 8, y - 10, x + 14, y - 18);
+      ctx.fillStyle = Math.floor(this.t * 10) % 2 ? '#ffd43b' : '#ff6b6b'; ctx.beginPath(); ctx.arc(x + 15, y - 19, 4, 0, 7); ctx.fill();
+    }
+  },
+  drawEnemy(e, x, y) {
+    const T = ENEMY[e.k], col = e.flash > 0 ? '#ffffff' : T.color, r = e.r, wob = Math.sin(this.t * 8 + e.ph);
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(x, y + r * 0.85, r * 0.9, r * 0.3, 0, 0, 7); ctx.fill();
+    if (e.k === 'slime' || e.k === 'king') {
+      ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, y + wob * r * 0.06, r * (1 + wob * 0.05), r * (0.85 - wob * 0.05), 0, 0, 7); ctx.fill();
+      if (e.k === 'king') { ctx.fillStyle = '#ffd43b'; ctx.beginPath(); ctx.moveTo(x - 30, y - r * 0.7); ctx.lineTo(x - 30, y - r * 1.25); ctx.lineTo(x - 15, y - r * 0.95); ctx.lineTo(x, y - r * 1.35); ctx.lineTo(x + 15, y - r * 0.95); ctx.lineTo(x + 30, y - r * 1.25); ctx.lineTo(x + 30, y - r * 0.7); ctx.closePath(); ctx.fill(); }
+    } else if (e.k === 'bat') {
+      ctx.fillStyle = col; const f = Math.sin(this.t * 20 + e.ph) * 8;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - r * 2, y - 6 + f); ctx.lineTo(x - r * 0.8, y + 6); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + r * 2, y - 6 + f); ctx.lineTo(x + r * 0.8, y + 6); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, r * 0.8, 0, 7); ctx.fill();
+    } else if (e.k === 'golem') {
+      rr(x - r, y - r, r * 2, r * 2, r * 0.4); ctx.fillStyle = col; ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(x - r * 0.6, y + r * 0.2, r * 1.2, r * 0.25);
+    } else {
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+      ctx.fillStyle = '#3b0a0a'; ctx.beginPath(); ctx.moveTo(x - r * 0.7, y - r * 0.5); ctx.lineTo(x - r * 0.95, y - r * 1.3); ctx.lineTo(x - r * 0.3, y - r * 0.85); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x + r * 0.7, y - r * 0.5); ctx.lineTo(x + r * 0.95, y - r * 1.3); ctx.lineTo(x + r * 0.3, y - r * 0.85); ctx.fill();
+    }
+    const ex = Math.sign(this.h.x - e.x) * r * 0.12;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x - r * 0.32 + ex, y - r * 0.15, r * 0.2, 0, 7); ctx.arc(x + r * 0.32 + ex, y - r * 0.15, r * 0.2, 0, 7); ctx.fill();
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(x - r * 0.32 + ex * 1.6, y - r * 0.15, r * 0.1, 0, 7); ctx.arc(x + r * 0.32 + ex * 1.6, y - r * 0.15, r * 0.1, 0, 7); ctx.fill();
+    if (T.boss) {
+      rr(x - 60, y - r - 34, 120, 12, 6); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fill();
+      rr(x - 60, y - r - 34, 120 * clamp(e.hp / e.maxhp, 0, 1), 12, 6); ctx.fillStyle = '#ff6b6b'; ctx.fill();
+    }
+  },
+  draw() {
+    const h = this.h, cx = h.x - W / 2, cy = h.y - H / 2;
+    ctx.fillStyle = '#22314a'; ctx.fillRect(0, 0, W, H);
+    const ts = 110, tx0 = Math.floor(cx / ts), ty0 = Math.floor(cy / ts);
+    for (let ty = ty0; ty <= ty0 + Math.ceil(H / ts) + 1; ty++) for (let tx = tx0; tx <= tx0 + Math.ceil(W / ts) + 1; tx++) {
+      const v = hash2(tx, ty), sx = tx * ts - cx, sy = ty * ts - cy;
+      if ((tx + ty) & 1) { ctx.fillStyle = 'rgba(255,255,255,.025)'; ctx.fillRect(sx, sy, ts, ts); }
+      if (v < 0.22) { ctx.fillStyle = '#2f4a3a'; const gx = sx + v * 400 % ts, gy = sy + v * 900 % ts; ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx + 6, gy - 14); ctx.lineTo(gx + 10, gy); ctx.lineTo(gx + 16, gy - 10); ctx.lineTo(gx + 20, gy); ctx.fill(); }
+      else if (v > 0.95) { ctx.fillStyle = '#3a4a63'; ctx.beginPath(); ctx.ellipse(sx + 50, sy + 50, 14, 9, 0, 0, 7); ctx.fill(); }
+    }
+    ctx.strokeStyle = 'rgba(255,107,107,.6)'; ctx.lineWidth = 8; ctx.strokeRect(-cx, -cy, WORLD, WORLD);
+    if (this.w.aura) {
+      const R = this.auraR || 92, g = ctx.createRadialGradient(W / 2, H / 2, R * 0.3, W / 2, H / 2, R);
+      g.addColorStop(0, 'rgba(255,120,40,0)'); g.addColorStop(0.75, 'rgba(255,120,40,.18)'); g.addColorStop(1, 'rgba(255,170,60,.45)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(W / 2, H / 2, R, 0, 7); ctx.fill();
+    }
+    for (const it of this.items) { const x = it.x - cx, y = it.y - cy; if (x > -40 && y > -40 && x < W + 40 && y < H + 40) this.drawField(it, x, y); }
+    for (const g of this.gems) {
+      const x = g.x - cx, y = g.y - cy; if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
+      const s = g.v >= 20 ? 14 : g.v >= 4 ? 11 : 8;
+      ctx.fillStyle = g.v >= 20 ? '#ff6b6b' : g.v >= 4 ? '#51cf66' : '#4dd4ff';
+      ctx.beginPath(); ctx.moveTo(x, y - s); ctx.lineTo(x + s * 0.7, y); ctx.lineTo(x, y + s); ctx.lineTo(x - s * 0.7, y); ctx.closePath(); ctx.fill();
+    }
+    for (const c of this.coins) {
+      const x = c.x - cx, y = c.y - cy;
+      ctx.fillStyle = '#c99400'; ctx.beginPath(); ctx.arc(x, y + 2, 11, 0, 7); ctx.fill();
+      ctx.fillStyle = '#ffd43b'; ctx.beginPath(); ctx.arc(x, y, 10, 0, 7); ctx.fill();
+    }
+    const vis = this.en.filter(e => Math.abs(e.x - h.x) < W / 2 + 90 && Math.abs(e.y - h.y) < H / 2 + 90).sort((a, b) => a.y - b.y);
+    for (const e of vis) this.drawEnemy(e, e.x - cx, e.y - cy);
+    for (const p of this.pr) {
+      const x = p.x - cx, y = p.y - cy;
+      if (p.kind === 'bolt') {
+        ctx.fillStyle = 'rgba(120,200,255,.35)'; ctx.beginPath(); ctx.arc(x, y, p.r * 2, 0, 7); ctx.fill();
+        ctx.fillStyle = '#d0f0ff'; ctx.beginPath(); ctx.arc(x, y, p.r, 0, 7); ctx.fill();
+      } else {
+        ctx.strokeStyle = '#ffe8a3'; ctx.lineWidth = 4; ctx.lineCap = 'round'; line(x, y, x - Math.cos(p.a) * 26, y - Math.sin(p.a) * 26);
+      }
+    }
+    for (const a of this.axes) {
+      const x = a.x - cx, y = a.y - cy;
+      ctx.save(); ctx.translate(x, y); ctx.rotate(this.t * 14);
+      ctx.fillStyle = '#8d6e63'; ctx.fillRect(-4, -20, 8, 40);
+      ctx.fillStyle = '#dee2e6'; ctx.beginPath(); ctx.moveTo(4, -20); ctx.quadraticCurveTo(24, -10, 4, 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-4, 20); ctx.quadraticCurveTo(-24, 10, -4, -2); ctx.fill();
+      ctx.restore();
+    }
+    const hx = W / 2, hy = H / 2, blink = h.inv > 0 && Math.floor(this.t * 20) % 2 === 0;
+    ctx.globalAlpha = blink ? 0.45 : 1;
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(hx, hy + 22, 22, 8, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#3b82f6'; ctx.beginPath(); ctx.arc(hx, hy, 22, 0, 7); ctx.fill();
+    ctx.fillStyle = '#1e3a8a'; ctx.beginPath(); ctx.moveTo(hx - 24, hy - 10); ctx.lineTo(hx, hy - 46); ctx.lineTo(hx + 24, hy - 10); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffd43b'; ctx.beginPath(); ctx.arc(hx, hy - 46, 5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hx - 7 + h.face * 5, hy, 5, 0, 7); ctx.arc(hx + 7 + h.face * 5, hy, 5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(hx - 7 + h.face * 7, hy, 2.5, 0, 7); ctx.arc(hx + 7 + h.face * 7, hy, 2.5, 0, 7); ctx.fill();
+    ctx.globalAlpha = 1;
+    rr(hx - 32, hy + 34, 64, 9, 4); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fill();
+    rr(hx - 32, hy + 34, 64 * clamp(h.hp / this.maxHp, 0, 1), 9, 4); ctx.fillStyle = '#ff6b6b'; ctx.fill();
+    for (const f of this.fx) {
+      const x = f.x - cx, y = f.y - cy, a = 1 - f.t / 0.5;
+      if (f.k === 'zap') {
+        ctx.strokeStyle = `rgba(255,250,180,${a})`; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x + 10, y - 420);
+        for (let i = 1; i <= 6; i++) ctx.lineTo(x + (i % 2 ? -18 : 18) * (1 - i / 6), y - 420 + i * 70);
+        ctx.stroke();
+        ctx.fillStyle = `rgba(255,250,180,${a * 0.5})`; ctx.beginPath(); ctx.arc(x, y, 55, 0, 7); ctx.fill();
+      } else if (f.k === 'ring') {
+        ctx.strokeStyle = `rgba(${f.c || '180,140,255'},${a})`; ctx.lineWidth = 14; ctx.beginPath(); ctx.arc(x, y, 400 * (f.t / 0.5), 0, 7); ctx.stroke();
+      }
+    }
+    // 화면 밖 상자 방향 표시
+    for (const it of this.items) {
+      if (it.k !== 'chest') continue;
+      const dx = it.x - h.x, dy = it.y - h.y;
+      if (Math.abs(dx) < W / 2 - 20 && Math.abs(dy) < H / 2 - 20) continue;
+      const a = Math.atan2(dy, dx), ax = W / 2 + Math.cos(a) * 300, ay = H / 2 + Math.sin(a) * 520;
+      ctx.save(); ctx.translate(ax, ay); ctx.rotate(a); ctx.fillStyle = '#ffd43b'; ctx.beginPath(); ctx.moveTo(18, 0); ctx.lineTo(-10, -12); ctx.lineTo(-10, 12); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    drawFloats(cx, cy);
+    const v = ctx.createRadialGradient(W / 2, H / 2, 240, W / 2, H / 2, 760);
+    v.addColorStop(0, 'rgba(5,8,25,0)'); v.addColorStop(1, 'rgba(5,8,25,.62)');
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+    if (this.hitFx > 0) { ctx.fillStyle = `rgba(255,40,40,${this.hitFx * 0.6})`; ctx.fillRect(0, 0, W, H); }
+    if (this.joy) {
+      const j = this.joy, dx = j.x - j.sx, dy = j.y - j.sy, l = Math.hypot(dx, dy), k = l > 70 ? 70 / l : 1;
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(j.sx, j.sy, 70, 0, 7); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(j.sx + dx * k, j.sy + dy * k, 30, 0, 7); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(10,14,35,.72)'; ctx.fillRect(0, 0, W, 170);
+    txt(t('nHead', { d: this.day }), 30, 42, 32, '#fff', 'left', '900');
+    const cpOn = this.cpFx > 0, pulse = cpOn ? 1 + Math.sin(this.cpFx * 14) * 0.08 : 1;
+    txt(t('dawnIn', { t: mmss(this.dur - this.t) }), 690, 42, 30 * pulse, cpOn ? '#69db7c' : '#ffd43b', 'right', '800');
+    if (cpOn) txt(t('timePlus', { s: this.cpAdd }), W / 2, 200, 32, '#69db7c', 'center', '900', true);
+    rr(30, 74, 660, 18, 9); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fill();
+    rr(30, 74, 660 * clamp(this.t / this.dur, 0, 1), 18, 9); ctx.fillStyle = '#ffd43b'; ctx.fill();
+    rr(30, 104, 660, 22, 11); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fill();
+    rr(30, 104, 660 * clamp(this.xp / this.need, 0, 1), 22, 11); ctx.fillStyle = '#4dd4ff'; ctx.fill();
+    txt(`Lv.${this.lv}`, W / 2, 116, 18, '#0b1a33', 'center', '900');
+    txt(t('hpT', { a: Math.ceil(h.hp), b: this.maxHp }), 30, 148, 22, '#ff8787', 'left', '800');
+    txt(t('kg', { k: this.kills, g: this.goldGot }) + (this.loot.length ? `   ${this.loot.length}` : ''), 690, 148, 22, '#fff', 'right', '800');
+    if (this.loot.length) { ctx.font = `800 22px ${FONT}`; drawIcon('chest', 690 - ctx.measureText(String(this.loot.length)).width - 18, 147, 22, '#ffd43b'); }
+    const wl = Object.keys(this.w).map(k => `${t(k)} ${this.w[k]}`).join(' · ');
+    txt(wl, W / 2, 1245, 22, 'rgba(255,255,255,.85)', 'center', '700', true, 680);
+  }
+};
+
+/* =========================================================
+   새벽: 정산
+   ========================================================= */
+scenes.dawn = {
+  muteAt: [662, 46],
+  outer: ['#ffb36b', '#ffe8c2'],
+  enter(r) {
+    this.r = r; this.t = 0; this.doubled = false; this.extra = false;
+    this.loot = (r.loot || []).slice();
+    this.bonus = r.survived ? 20 + r.day * 10 : 0;
+    this.pct = save.b.shop * 10 + gearStats().gold;
+    let gold = Math.round((r.gold + this.bonus) * (1 + this.pct / 100));
+    if (!r.survived) gold = Math.round(gold * 0.5);
+    this.gold = gold;
+    if (r.survived) { const g = genItem(r.day, 0); addItem(g); this.loot.push(g); if (Math.random() < 0.3) save.hammer++; }
+    Sound.play(r.survived ? 'dawn' : 'defeat');
+    save.gold += gold; save.totalKills += r.kills; save.day = r.day + 1; save.phase = 'puzzle';
+    this.newRec = [];
+    if (save.day > save.bestDay) { save.bestDay = save.day; Ranking.submit('best_day'); this.newRec.push(t('newBest', { n: t('unitDay', { n: save.bestDay }) })); }
+    if (r.survived) Daily.add('survive');
+    if (Ranking.best('bestKills', r.kills, 'night_kills')) this.newRec.push(t('newBest', { n: t('unitKill', { n: r.kills }) }));
+    this.newRec.forEach((m, i) => floatText(W / 2, 640 - i * 56, m, '#e8590c', 40));
+    persist();
+  },
+  update(dt) { this.t += dt; },
+  buttons() {
+    const b = [];
+    if (!this.doubled && this.gold > 0 && AdBridge.canReward()) b.push({ x: 60, y: 905, w: 290, h: 100, label: t('dbl'), sub: t('dblS', { g: this.gold }), ad: true, color: '#7c4dff', size: 30,
+      cb: () => AdBridge.rewarded(() => { if (this.doubled) return; this.doubled = true; save.gold += this.gold; persist(); floatText(W / 2, 760, t('goldN', { g: this.gold }), '#ffd43b', 50); }, 'double_gold') });
+    if (!this.extra && AdBridge.canReward()) b.push({ x: 370, y: 905, w: 290, h: 100, label: t('moreChest'), sub: t('moreChestS'), ad: true, color: '#7c4dff', size: 28,
+      cb: () => AdBridge.rewarded(() => { if (this.extra) return; this.extra = true; const g = genItem(this.r.day, 0); const s = addItem(g); this.loot.push(g); floatText(W / 2, 760, s ? t('autoSalv', { g: s }) : itemName(g), RAR_COL[g.rar], 40); }, 'extra_chest') });
+    b.push({ x: 60, y: 1035, w: 220, h: 120, label: t('bag'), icon: 'bag', color: '#1971c2', size: 30, cb: () => openBag() });
+    b.push({ x: 300, y: 1035, w: 360, h: 120, label: t('nextDay', { d: save.day }), color: '#ff8a3d', cb: () => AdBridge.interstitial(() => go('puzzle')) });
+    return b;
+  },
+  draw() {
+    const r = this.r;
+    skyBg('#ffb36b', '#ffe8c2');
+    const sy = 330 - Math.min(1, this.t) * 80;
+    ctx.fillStyle = 'rgba(255,240,180,.6)'; ctx.beginPath(); ctx.arc(W / 2, sy, 140, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff1a8'; ctx.beginPath(); ctx.arc(W / 2, sy, 95, 0, 7); ctx.fill();
+    ctx.fillStyle = '#e8a25d'; ctx.fillRect(0, 300, W, 980);
+    txt(r.survived ? t('dWin') : t('dLose'), W / 2, 130, 52, '#5a2d0c', 'center', '900', false, 680);
+    txt(t('dRes', { d: r.day }), W / 2, 190, 30, '#7a4a20', 'center', '800');
+    rr(60, 240, 600, 420, 30); ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fill();
+    const rows = [
+      [t('rKills'), t('rKv', { k: r.kills })],
+      [t('rTime'), t('rTv', { s: r.time })],
+      [t('rGold'), `${r.gold}`],
+      [t('rBonus'), r.survived ? `+${this.bonus}` : t('none')],
+      [t('rShop'), `+${this.pct}%`],
+    ];
+    rows.forEach((row, i) => { txt(row[0], 100, 290 + i * 54, 27, '#6c5843', 'left', '700', false, 330); txt(row[1], 620, 290 + i * 54, 27, '#3b2a1a', 'right', '800'); });
+    if (!r.survived) txt(t('half'), 360, 290 + 5 * 50, 22, '#e03131', 'center', '700');
+    ctx.fillStyle = '#e9d5bd'; ctx.fillRect(100, 575, 520, 3);
+    txt(t('earned'), 100, 615, 32, '#3b2a1a', 'left', '900');
+    txt(`${this.doubled ? this.gold * 2 : this.gold}`, 620, 615, 40, RES.gold.ink, 'right', '900');
+    // 장비
+    rr(60, 680, 600, 190, 26); ctx.fillStyle = 'rgba(40,30,20,.75)'; ctx.fill();
+    txt(this.loot.length ? t('loot', { n: this.loot.length }) : t('noLoot'), 90, 712, 24, '#ffe8c2', 'left', '800');
+    this.loot.slice(-5).forEach((it, i) => itemIcon(it, 125 + i * 118, 800, 96));
+    for (const b of this.buttons()) button(b);
+    drawFloats();
+  },
+  down(x, y) { tapButtons(this.buttons(), x, y); }
+};
+
+/* =========================================================
+   입력 · 루프
+   ========================================================= */
+function toLocal(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left - OX) / S, y: (e.clientY - r.top - OY) / S }; }
+const blocked = () => AdBridge.active || needRotate();
+function muteRect() { const p = (scene && scene.muteAt) || [660, 62]; return { x: p[0] - 34, y: p[1] - 34, w: 68, h: 68 }; }
+function drawMute() {
+  const r = muteRect(), cx = r.x + 34, cy = r.y + 34, m = Sound.muted();
+  ctx.fillStyle = 'rgba(20,30,60,.65)'; ctx.beginPath(); ctx.arc(cx, cy, 30, 0, 7); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(cx - 15, cy - 6); ctx.lineTo(cx - 8, cy - 6); ctx.lineTo(cx + 2, cy - 15); ctx.lineTo(cx + 2, cy + 15); ctx.lineTo(cx - 8, cy + 6); ctx.lineTo(cx - 15, cy + 6); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+  if (m) { line(cx + 8, cy - 7, cx + 20, cy + 7); line(cx + 20, cy - 7, cx + 8, cy + 7); }
+  else { ctx.beginPath(); ctx.arc(cx + 3, cy, 9, -0.8, 0.8); ctx.stroke(); ctx.beginPath(); ctx.arc(cx + 3, cy, 16, -0.8, 0.8); ctx.stroke(); }
+}
+cv.addEventListener('pointerdown', e => {
+  e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  const p = toLocal(e);
+  Sound.userGesture = true; Sound.unlock();
+  if (blocked() || !scene) return;
+  if (popup) { handlePopup(p); return; }
+  if (hit(muteRect(), p.x, p.y)) { Sound.toggle(); Sound.play('click'); return; }
+  if (scene.down) scene.down(p.x, p.y, e.pointerId);
+});
+cv.addEventListener('pointermove', e => { if (blocked() || popup || !scene) return; const p = toLocal(e); if (scene.move) scene.move(p.x, p.y, e.pointerId); });
+const endPtr = e => { if (!scene) return; const p = toLocal(e); if (scene.up) scene.up(p.x, p.y, e.pointerId); };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+document.addEventListener('contextmenu', e => e.preventDefault());
+addEventListener('keydown', e => { Sound.userGesture = true; Sound.unlock(); keys.add(e.key.toLowerCase()); if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault(); });
+addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+addEventListener('blur', () => keys.clear());
+function pauseNight() {
+  if (scene === scenes.night && !scene.done && !popup) {
+    scene.cancelInput();
+    showPopup({ title: t('pause'), lines: [t('pauseB')], buttons: [{ label: t('resume'), color: '#5e35b1', cb: closePopup }] });
+  }
+}
+function onPlatformPause() { keys.clear(); pauseNight(); }
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) return;
+  persist(true); keys.clear(); pauseNight();
+});
+// 게임 영역 바깥: 빈 여백 대신 장면에 맞는 배경
+function drawOuter() {
+  if (OX < 1 && OY < 1) return;
+  const c = (scene && scene.outer) || ['#1b2350', '#0f1424'];
+  const g = ctx.createLinearGradient(0, 0, 0, VH); g.addColorStop(0, c[0]); g.addColorStop(1, c[1]);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
+  const s = 44 * Math.max(0.6, S * 1.4), types = ['wood', 'stone', 'gold'];
+  for (let i = 0; i < 70; i++) {
+    const x = hash2(i, 7) * VW, y = hash2(i, 13) * VH;
+    if (x > OX - s && x < OX + W * S && y > OY - s && y < OY + H * S) continue;
+    drawCell(x, y, s * (0.6 + hash2(i, 3) * 0.6), types[i % 3], 0.22);
+  }
+  ctx.fillStyle = 'rgba(0,0,0,.25)';
+  if (OX >= 1) { ctx.fillRect(OX - 6, 0, 6, VH); ctx.fillRect(OX + W * S, 0, 6, VH); }
+  if (OY >= 1) { ctx.fillRect(0, OY - 6, VW, 6); ctx.fillRect(0, OY + H * S, VW, 6); }
+}
+function drawRotate() {
+  ctx.fillStyle = '#10142b'; ctx.fillRect(0, 0, VW, VH);
+  const cx = VW / 2, cy = VH / 2 - 20, k = Math.min(VW, VH) / 400;
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(-Math.PI / 2 * (0.5 + 0.5 * Math.sin(performance.now() / 600)));
+  rr(-30 * k, -52 * k, 60 * k, 104 * k, 10 * k); ctx.strokeStyle = '#ffd43b'; ctx.lineWidth = 5 * k; ctx.stroke();
+  ctx.restore();
+  txt(t('rotate'), cx, cy + 90 * k, 22 * k, '#fff', 'center', '800');
+}
+function drawToast() {
+  if (!toast) return;
+  const a = clamp(2.2 - toast.t, 0, 1); ctx.globalAlpha = a;
+  ctx.font = `700 24px ${FONT}`; const w = ctx.measureText(toast.text).width + 48;
+  rr(W / 2 - w / 2, 120, w, 52, 26); ctx.fillStyle = 'rgba(15,20,40,.85)'; ctx.fill();
+  txt(toast.text, W / 2, 147, 24, '#fff', 'center', '700'); ctx.globalAlpha = 1;
+}
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  try {
+    const halted = AdBridge.active || Platform.paused || needRotate();
+    if (!halted && !popup && scene.update) scene.update(dt);
+    if (!halted && !popup) updFloats(dt);
+    if (toast) { toast.t += dt; if (toast.t > 2.2) toast = null; }
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, VW, VH);
+    if (needRotate()) { drawRotate(); requestAnimationFrame(frame); return; }
+    drawOuter();
+    ctx.setTransform(S * DPR, 0, 0, S * DPR, OX * DPR, OY * DPR);
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip();
+    scene.draw();
+    drawMute();
+    ctx.restore();
+    if (popup) {
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = 'rgba(8,10,25,.62)'; ctx.fillRect(0, 0, VW, VH);
+      ctx.setTransform(S * DPR, 0, 0, S * DPR, OX * DPR, OY * DPR); drawPopup();
+    }
+    drawToast();
+    Sound.tick();
+  } catch (err) { console.error(err); }
+  requestAnimationFrame(frame);
+}
+async function boot() {
+  await initBridge();
+  save = await loadSaveAsync();
+  Sound.init();
+  document.documentElement.lang = save.lang;
+  Install.init();
+  go('title');
+  bootRewards();
+  Shop.init();
+  requestAnimationFrame(frame);
+  // 첫 화면이 실제로 그려지고 조작 가능해진 뒤 game_ready 전송
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (Platform.b) Platform.b.platform.sendMessage('game_ready').catch(() => {}); }));
+}
+boot();
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "advertisement": {
+    "minimumDelayBetweenInterstitial": 60
+  },
+  "leaderboards": [
+    {
+      "id": "best_day",
+      "isMain": true
+    },
+    {
+      "id": "gather_best"
+    },
+    {
+      "id": "night_kills"
+    },
+    {
+      "id": "village_level"
+    }
+  ],
+  "saas": {
+    "publicToken": "cmw7b41hk116gmt0hqu163daw",
+    "leaderboards": {
+      "platforms": [
+        "playgama",
+        "qa_tool"
+      ]
+    }
+  },
+  "payments": [
+    {
+      "id": "remove_ads"
+    },
+    {
+      "id": "starter_pack"
+    },
+    {
+      "id": "gold_pack"
+    }
+  ]
+}
