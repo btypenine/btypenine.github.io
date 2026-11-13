@@ -1,0 +1,8 @@
+build/
+out/
+*.jks
+*.keystore
+*.p12
+*.idsig
+keystore*.txt
+pass*.txt

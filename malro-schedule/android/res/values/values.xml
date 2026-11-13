@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">말로 일정</string>
+    <color name="ic_bg">#1C1B19</color>
+    <!-- 앱 쪽 연결 선언(사이트 쪽은 btypenine.github.io/.well-known/assetlinks.json) -->
+    <string name="asset_statements" translatable="false">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://btypenine.github.io\"}}]</string>
+</resources>
