@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.btypenine.malro",
+      "sha256_cert_fingerprints": [
+        "02:F6:9A:51:26:0C:8D:60:D9:7E:ED:DA:77:72:89:8F:D2:7F:59:5E:6A:D9:73:7C:C1:D9:40:B0:DF:A8:F7:A2"
+      ]
+    }
+  }
+]
