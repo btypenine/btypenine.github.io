@@ -326,6 +326,36 @@ const KoParse = (() => {
   const MARK = '(오전|오후|아침|저녁|밤|새벽|낮|점심)';
   const PARTICLES = new Set(['에', '에는', '엔', '은', '는', '부터', '까지', '에서', '쯤', '경', '정도', '께', '에서부터', '이', '가', '을', '를', '좀', '그리고', '이랑', '랑']);
 
+  // 구어·음성인식 오인식 보정 + 한글 숫자 날짜 → 숫자 (parse·parseQuery 공통)
+  const SN = { 일: 1, 이: 2, 삼: 3, 사: 4, 오: 5, 육: 6, 유: 6, 칠: 7, 팔: 8, 구: 9 };
+  const sino = s => {
+    if (s === '십') return 10;
+    if (s.length === 1) return SN[s] || null;
+    const m0 = s.match(/^([이삼])?십([일이삼사오육칠팔구])?$/);
+    return m0 ? (m0[1] ? SN[m0[1]] : 1) * 10 + (m0[2] ? SN[m0[2]] : 0) : null;
+  };
+  const MON = { 시: 10, 유: 6, 십이: 12, 십일: 11, 십: 10 };
+  const monN = w => MON[w] || sino(w);
+  const DAYW = '([이삼]?십[일이삼사오육칠팔구]?|[일이삼사오육칠팔구])';
+  function normKo(t) {
+    const TIMEW = '(?:\\s*(?:오전|오후|아침|저녁|밤|새벽|낮|점심|\\d|열|아홉|여덟|일곱|여섯|다섯|네|세|두|한))';
+    t = t.replace(/(^|\s)낼(?=\s|$|\d|은|에|모레|모래|오전|오후|아침|저녁|밤|새벽|점심|낮|열|아홉|여덟|일곱|여섯|다섯|네|세|두|한)/g, '$1내일');
+    t = t.replace(/내일\s*모래/g, '내일모레');
+    t = t.replace(new RegExp('(^|\\s)모래(?=' + TIMEW + '|\\s*(?:에|는|은)?\\s*$)', 'g'), '$1모레');
+    t = t.replace(/(^|\s|주)(월|화|수|목|금|토|일)욜/g, '$1$2요일');
+    t = t.replace(/~/g, ' ');
+    // 「십이월 십일」→ 12월 10일 (월 뒤에 날이 올 때)
+    t = t.replace(new RegExp('(^|\\s)(시|십이|십일|십|일|이|삼|사|오|유|육|칠|팔|구)월\\s*(?:' + DAYW + '일(?![가-힣])|(\\d{1,2})\\s*일)', 'g'), (m0, p, w, d1, d2) => {
+      const mo = monN(w), dd = d1 ? sino(d1) : +d2;
+      return mo && dd && dd <= 31 ? p + mo + '월 ' + dd + '일' : m0;
+    });
+    // 「십이월 일정」처럼 월만 말한 확인 질문
+    t = t.replace(/(^|\s)(시|십이|십일|십|일|이|삼|사|오|유|육|칠|팔|구)월(?=\s*(?:에|에는|엔)?\s*(?:일정|스케줄|약속|뭐|할\s*일))/g, (m0, p, w) => p + monN(w) + '월');
+    // 「이십오일」→ 25일 (십이 들어간 날만 단독 변환 — 「오일 교환」 같은 오변환 방지)
+    t = t.replace(/(^|\s)([이삼]?십[일이삼사오육칠팔구]?)일(?=\s|$|에|까지|부터|은|는)/g, (m0, p, w) => { const n = sino(w); return n && n <= 31 ? p + n + '일' : m0; });
+    return t;
+  }
+
   function parse(raw, now = new Date()) {
     const today = day0(now);
     let t = ' ' + String(raw || '').replace(/[.,!?。·]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
@@ -340,7 +370,7 @@ const KoParse = (() => {
     for (const [w, n] of SINO_MIN) {
       t = t.replace(new RegExp('(\\d시\\s?)' + w + '\\s?분', 'g'), (m, p) => p + n + '분');
     }
-    t = t.replace(/낼(?=\s|$|은|에)/g, '내일');
+    t = normKo(t);
 
     let date = null, time = null, end = null, approx = false;
     const cut = re => { const m = t.match(re); if (m) { t = t.replace(m[0], ' '); } return m; };
@@ -427,7 +457,12 @@ const KoParse = (() => {
       else if ((m = cut(/자정/))) time = '00:00';
       else {
         const mk = t.match(/(점심|저녁|아침)/);
-        if (mk) time = { 점심: '12:00', 저녁: '19:00', 아침: '08:00' }[mk[1]], approx = true;
+        if (mk) {
+          time = { 점심: '12:00', 저녁: '19:00', 아침: '08:00' }[mk[1]], approx = true;
+          // 「점심 약속」「저녁 식사」처럼 제목의 일부면 남기고, 시간만 뜻하면 제목에서 뺌
+          const mw = t.match(/(^|\s)(점심|저녁|아침)(에|엔|쯤)?(?=\s)(\s+\S+)?/);
+          if (mw && !/^\s*(약속|식사|밥|모임|회식|미팅|먹기|모임|운동|산책|준비)/.test(mw[4] || '') && (mw[4] || '').trim()) t = t.replace(mw[1] + mw[2] + (mw[3] || ''), ' ');
+        }
       }
     }
 
@@ -443,11 +478,13 @@ const KoParse = (() => {
     t = t.replace(/(잡아|넣어|적어|기억해|알려|챙겨)\s*(?:줘|주세요|둬|놔|줄래)/g, ' ');
     t = t.replace(/(해야\s*(?:돼|되|함|해|됨|한다))|(가야\s*(?:돼|되|함|해|됨|한다))/g, m0 => m0.startsWith('가') ? '가기' : '');
     t = t.replace(/\s(있어|있음|있다|있습니다|있어요|있고|있네|예정|예정임|할\s*것)(?=\s|$)/g, ' ');
-    t = t.replace(/\s일정(?=\s|$)/g, ' ');
+    t = t.replace(/\s일정(?=\s*$)/, ' ');   // 맨 끝 「일정」만 뺌 (「일정 조율 회의」는 유지)
+    if (time) t = t.replace(/(^|\s)(이따가?|있다가|좀\s*있다가)(?=\s|$)/g, ' ');
+    if (end) t = t.replace(/(^|\s)사이(에|에는)?(?=\s|$)/g, ' ');
 
     let place = '';
-    const pm = t.match(/(?:^|\s)([가-힣A-Za-z0-9]{2,12})에서(?=\s)/);
-    if (pm && !PARTICLES.has(pm[1])) { place = pm[1]; t = t.replace(pm[0], ' '); }
+    const pm = t.match(/(?:^|\s)([가-힣A-Za-z0-9]{1,12})에서(?=\s)/);
+    if (pm && !PARTICLES.has(pm[1]) && !/^(거|것|데|중|뒤|앞|후|곳|쪽|시|분)$/.test(pm[1])) { place = pm[1]; t = t.replace(pm[0], ' '); }
 
     let words = t.trim().split(/\s+/).filter(w => w && !PARTICLES.has(w));
     while (words.length && /^(에|에는|은|는|부터|까지|쯤)$/.test(words[0])) words.shift();
@@ -466,17 +503,22 @@ const KoParse = (() => {
   }
 
   // ---------- 일정 확인(질문) 해석 ----------
-  const QWORDS = /(일정|스케줄|약속|할\s*일|뭐야|뭐|뭔가|뭔|무슨|무엇|어떤|있어요|있습니까|있었지|있었나|있어|있나|있니|있냐|있지|잡혀\s*있는|잡혀\s*있어|잡혀|알려\s*줄래|알려\s*주세요|알려\s*줘|알려|확인해\s*줘|확인|보여\s*줘|보여|읽어\s*줘|읽어|브리핑|조회|좀|언제야|언제|며칠이었지|며칠이야|며칠|몇\s*시야|몇\s*시|이었지|였지|였더라|더라|이야|이지|예요|에요|어때|이랑|들|해야\s*돼|해야\s*할|해야)(?=\s|$|\?)/g;
+  const QWORDS = /(일정|스케줄|약속|할\s*일|뭐야|뭐|뭔가|뭔|무슨|무엇|어떤|있어요|있습니까|있었지|있었나|있어|있나|있니|있냐|있지|잡혀\s*있는|잡혀\s*있어|잡혀|알려\s*줄래|알려\s*주세요|알려\s*줘|알려|확인해\s*줘|확인|보여\s*줘|보여|읽어\s*줘|읽어|브리핑|조회|좀|언제야|언제|며칠이었지|며칠이야|며칠|몇\s*시야|몇\s*시|이었지|였지|였더라|더라|이야|이지|예요|에요|어때|이랑|들|해야\s*돼|해야\s*할|해야|하지|하더라|했지|했더라|해)(?=\s|$|\?)/g;
   function parseQuery(raw, now = new Date()) {
     const s = String(raw || '').trim();
-    const t = ' ' + s.replace(/[.,!。·]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+    const t = normKo(' ' + s.replace(/[.,!。·]/g, ' ').replace(/\s+/g, ' ').trim() + ' ');
     const hasHour = /\d{1,2}\s*시(?![간작])|(^|\s)(열두|열한|열|아홉|여덟|일곱|여섯|다섯|네|세|두|한)\s?시(?![간작])/.test(t);
     const Q1 = /(일정|스케줄|약속|할\s*일)\s*(이|은|는|좀|들)?\s*(뭐|뭔|무엇|알려|확인|보여|읽어|브리핑|몇)/;
-    const Q2 = /(뭐|뭔가|무슨\s*일|무슨\s*일정|어떤\s*일정)\s*(있|잡혀|해야)/;
+    // 「뭐 있는지 정리하기」처럼 ~는지/~할지 절은 질문이 아님
+    const Q2 = /(뭐|뭔가|무슨\s*일|무슨\s*일정|어떤\s*일정)\s*(있(?!는지|던지|을지)|잡혀(?!\s*있는지)|해야(?!\s*할지|\s*하는지))/;
     const Q3 = /(일정|스케줄|약속|할\s*일)\s*(있어|있나|있니|있냐|있어요|있습니까|있지|잡혀\s*있어|어때|어떻게\s*돼)\s*\??\s*$/;
     const Q4 = /(언제|며칠|몇\s*시)\s*(야|지|더라|였지|이었지|였더라|니|예요|에요|이야|이지|였어|있어|에\s*있어|잡혀\s*있어|로\s*잡혔지|였나)?\s*\??\s*$/;
-    const Q5 = /^\s*(일정\s*)?(확인|브리핑|조회)/;
-    const isQ = Q2.test(t) || Q4.test(t) || (!hasHour && (Q1.test(t) || Q3.test(t) || Q5.test(t) || /\?\s*$/.test(s)));
+    const Q5 = /^\s*(일정\s*)?(확인|브리핑|조회)(?=\s|$|해|좀)/;   // 「확인서 제출」 제외
+    // 「내일 몇 시에 회의야」「골프 언제 치지」처럼 의문사 뒤에 말이 더 붙는 질문
+    const Q6 = /(^|\s)(언제|며칠|몇\s*시)(에|쯤|에는)?\s+\S.*(야|이야|이지|지|더라|였지|였더라|이었지|니|냐|예요|에요|있어|있나|잡혀\s*있어)\s*\??\s*$/;
+    const Q7 = /(뭐|무슨\s*일)\s*(해|하지|하더라|하나|하니|했지|했더라)\s*\??\s*$/;   // 「주말 뭐 해」
+    const TODO = /[가-힣]기\s*$/.test(t) && !/\?\s*$/.test(s);   // 「~하기」로 끝나면 할 일 등록
+    const isQ = !TODO && (Q2.test(t) || Q4.test(t) || Q6.test(t) || Q7.test(t) || (!hasHour && (Q1.test(t) || Q3.test(t) || Q5.test(t) || /\?\s*$/.test(s))));
     if (!isQ) return null;
 
     const today = day0(now);
@@ -500,9 +542,11 @@ const KoParse = (() => {
       if (p.date && /오늘|금일|내일|낼|모레|글피|요일|\d+\s*일|\d+\s*월|\/|주말/.test(t)) { from = to = new Date(p.date + 'T00:00'); label = ''; }
     }
     // 남는 말 → 검색어
-    rest = rest.replace(/(지난|저번|다다음|다음|담|이번|금)\s*주\s*(주말)?|주말|(다음|담|이번|이)\s*달|\d{1,2}\s*월(?!\s*\d)|앞으로|다가오는|남은|예정된|날짜\s*미정|목록/g, ' ');
-    let kw = parse(rest.replace(/(언제|며칠|몇\s*시).*$/, ' '), now).title;
-    kw = (' ' + kw + ' ').replace(QWORDS, ' ').replace(/\s(에|은|는|이|가|을|를|의|도|일정)(?=\s)/g, ' ').replace(/(은|는|을|를)(?=\s)/g, ' ').replace(/\s+/g, ' ').trim();
+    rest = rest.replace(/(지난|저번|다다음|다음|담|이번|금)\s*주\s*(주말|말)?|주말|(다음|담|이번|이)\s*달|\d{1,2}\s*월(?!\s*\d)|앞으로|다가오는|남은|예정된|날짜\s*미정|목록/g, ' ');
+    // 의문사 뒤: 「회의야」처럼 명사+이다 꼴만 검색어로 남기고 「치지」 같은 동사는 버림
+    const qcut = s0 => s0.replace(/(언제|며칠|몇\s*시)(에|쯤|에는)?(.*)$/, (m0, w, p2, after) => ' ' + after.trim().split(/\s+/).map(x => { const y = x.replace(/\?$/, ''); const z = y.replace(/(이었지|였지|였더라|이었더라|이더라|이야|이지|예요|에요|였어|였나|야)$/, ''); return z && z !== y && z.length >= 1 && !/^(있|없|뭐|무엇)/.test(z) ? z : ''; }).join(' ') + ' ');
+    let kw = parse(qcut(rest), now).title;
+    kw = (' ' + kw + ' ').replace(/(브리핑|확인|조회|정리)\s*해\s*(줘|주세요|줄래)/g, ' ').replace(QWORDS, ' ').replace(/(이랑|하고|한테|에게|께서|(?<=[가-힣]{2})랑)(?=\s)/g, ' ').replace(/\s(에|은|는|이|가|을|를|의|도|일정)(?=\s)/g, ' ').replace(/(은|는|을|를)(?=\s)/g, ' ').replace(/\s+/g, ' ').trim();
     if (kw === '일정' || kw.length < 1) kw = '';
     if (!from && !nodate && !kw) { from = today; to = addDays(today, 6); label = '앞으로 7일'; }
     return { from: from ? ymd(from) : null, to: to ? ymd(to) : null, label, keyword: kw, nodate };
