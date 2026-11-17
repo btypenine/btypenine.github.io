@@ -75,7 +75,10 @@ main{padding-bottom:calc(220px + env(safe-area-inset-bottom))}
 .inrow button{flex:none;border:0;background:var(--ink);color:#fff;border-radius:12px;padding:0 16px;font-weight:600;white-space:nowrap}
 .hint{font-size:12.5px;color:var(--sub);text-align:center;margin:-4px 0 10px;display:none}
 .hint.show{display:block}
-.microw{display:flex;align-items:center;justify-content:center;gap:22px}
+.microw{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:16px}
+.microw .lft,.microw .rgt{display:flex;gap:12px;min-width:0}
+.microw .lft{justify-content:flex-end}
+.microw .rgt{justify-content:flex-start}
 .side{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;flex:none}
 .mic{position:relative;width:80px;height:80px;border-radius:50%;border:0;background:var(--ink);color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(0,0,0,.18);flex:none;transition:transform .12s}
 .mic:active{transform:scale(.96)}
@@ -190,6 +193,50 @@ ul.tips li{margin:3px 0}
 .calsel{margin-top:6px}
 .calempty{color:var(--sub);font-size:14px;background:var(--card);border-radius:14px;padding:14px;text-align:center}
 @media (min-width:700px){ .brand h1{font-size:23px} }
+/* 💡 메모 */
+.side.memo{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff8e6;border-color:#f0d9a0;line-height:1;padding:0}
+.side.memo .e{font-size:19px}
+.side.memo small{font-size:10.5px;font-weight:600;color:#8a5a00;margin-top:3px;white-space:nowrap}
+.mic{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.mic.listening.memo,.mic.busy.memo{background:#e09a00}
+.mic.listening.memo::before{border-color:#e09a00}
+.inrow.memo input{border-color:#e9c46a;background:#fffaf0}
+.inrow.memo button{background:#b97900}
+.tab[data-tab=memo].on{background:#b97900}
+.mhead{margin-top:14px}
+.msearch{display:flex;gap:8px;margin-bottom:10px}
+.msearch input{flex:1;min-width:0;border:1px solid var(--line);background:var(--card);border-radius:11px;padding:10px 12px;font-size:16px}
+.mchips button.on{background:#b97900;border-color:#b97900}
+.mqbar{display:flex;align-items:center;gap:8px;background:#fff4e0;border-radius:12px;padding:8px 8px 8px 12px;margin-bottom:10px}
+.mqbar .tx{flex:1;min-width:0;font-size:14px;color:#5c4200;text-wrap:pretty}
+.mqbar .mqx{flex:none;border:0;background:rgba(0,0,0,.06);border-radius:9px;width:34px;height:34px;font-size:14px}
+.mcnt{font-size:12.5px;color:var(--sub);margin:2px 2px 8px;white-space:nowrap}
+.mcard{display:flex;gap:6px;align-items:flex-start;background:var(--card);border-radius:14px;padding:10px 12px 12px 6px;margin-bottom:8px;box-shadow:var(--shadow);border:1px solid transparent}
+.mcard.new{border-color:#e09a00;animation:flashm 1.6s ease-out}
+@keyframes flashm{0%{background:#fff4dc}100%{background:var(--card)}}
+.star{flex:none;width:38px;height:38px;border:0;background:none;font-size:21px;line-height:1;padding:0;color:#cfc9bc}
+.star.on{color:#e09a00}
+.mbody{flex:1;min-width:0;cursor:pointer;padding-top:6px}
+.mttl{font-size:16px;font-weight:600;text-wrap:pretty}
+.mtx{font-size:14px;color:#3d3a35;margin-top:3px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.mmeta{display:flex;flex-wrap:wrap;gap:5px 8px;margin-top:7px;font-size:12.5px;color:var(--sub);align-items:center}
+.mmeta span{white-space:nowrap}
+.mcat{border:0;background:#fff4e0;color:#8a5a00;border-radius:7px;padding:3px 8px;font-size:12.5px;white-space:nowrap}
+.msch{border:1px solid #c5d6f7;background:#e8f0ff;color:#1d4fb8;border-radius:7px;padding:2px 8px;font-size:12.5px;white-space:nowrap}
+.mdone{color:var(--ok)}
+.chips.wrapc{flex-wrap:wrap;overflow:visible}
+.mwhen{font-size:13.5px;color:#1d4fb8;background:#eef4ff;border-radius:10px;padding:8px 10px;margin-bottom:10px;text-wrap:pretty}
+.mcrow{border:1px solid var(--line);border-radius:12px;padding:8px;margin-top:8px;background:#fff}
+.mcrow .r1{display:flex;gap:6px;align-items:center}
+.mcrow input{min-width:0;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:16px;background:var(--card)}
+.mcrow .em{width:54px;flex:none;text-align:center}
+.mcrow .nm{flex:1}
+.mcrow .x{flex:none;border:1px solid transparent;background:none;color:#c0392b;font-size:13.5px;padding:8px;border-radius:9px;white-space:nowrap}
+.mcrow .x.arm{background:#c0392b;color:#fff}
+.mcrow .fix{flex:none;font-size:12px;color:var(--sub);white-space:nowrap}
+.side.memo.on{background:#e09a00;border-color:#e09a00}.side.memo.on small{color:#fff}
+#mcatReset.arm{background:#c0392b;color:#fff;border-color:#c0392b}
+.mcrow textarea{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:14px;min-height:54px;resize:vertical;background:var(--card)}
 </style>
 </head>
 <body>
@@ -210,6 +257,7 @@ ul.tips li{margin:3px 0}
       <button class="tab" data-tab="up">예정<b id="cUp"></b></button>
       <button class="tab" data-tab="nodate">날짜 미정<b id="cNo"></b></button>
       <button class="tab" data-tab="past">지난 일정<b id="cPast"></b></button>
+      <button class="tab" data-tab="memo">💡 메모<b id="cMemo"></b></button>
     </div>
   </div>
 </header>
@@ -222,24 +270,29 @@ ul.tips li{margin:3px 0}
     <div class="hint" id="hint">이 화면에서는 음성 버튼을 쓸 수 없어요. 휴대폰 키보드의 🎤 마이크로 말한 뒤 「등록」을 누르세요.</div>
     <form class="inrow" id="inrow">
       <input id="txt" type="text" placeholder="예: 내일 오후 3시 거래처 미팅" autocomplete="off" enterkeyhint="done">
-      <button type="submit">등록</button>
+      <button type="submit" id="kbSubmit">등록</button>
     </form>
     <div class="microw">
+      <div class="lft">
       <button class="side" id="btnKb" aria-label="직접 입력">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 15h10"/></svg>
       </button>
-      <button class="mic" id="mic" aria-label="눌러서 말하기">
+      <button class="side memo" id="btnMemo" aria-label="메모 녹음"><span class="e">💡</span><small>메모</small></button>
+      </div>
+      <button class="mic" id="mic" aria-label="눌러서 말하기 · 길게 누르면 메모">
         <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>
       </button>
+      <div class="rgt">
       <button class="side" id="btnCheck" aria-label="일정 확인">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14l2.5 2.5L16 12"/></svg>
       </button>
+      </div>
     </div>
-    <div class="miclabel" id="micLbl">눌러서 말하기</div>
+    <div class="miclabel" id="micLbl">눌러서 말하기 · 길게 누르면 💡 메모</div>
   </div>
 </div>
 
-<div class="toast" id="toast"><div class="msg" id="toastMsg"></div><a id="toastPhone" class="tbtn" style="display:none">📱 삼성 달력</a><button id="toastEdit">수정</button><button id="toastUndo">되돌리기</button></div>
+<div class="toast" id="toast"><div class="msg" id="toastMsg"></div><a id="toastPhone" class="tbtn" style="display:none">📱 삼성 달력</a><button id="toastSched" style="display:none">📅 일정으로도</button><button id="toastEdit">수정</button><button id="toastUndo">되돌리기</button></div>
 
 <div class="scrim" id="editScrim" style="z-index:25">
   <div class="sheet" role="dialog" aria-label="일정 수정">
@@ -259,6 +312,25 @@ ul.tips li{margin:3px 0}
       <a class="btn" id="eGcal" target="_blank" rel="noopener">📅 구글 캘린더에 추가</a>
       <button class="btn del" id="eDel">삭제</button>
       <button class="btn" id="eClose">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="memoScrim" style="z-index:25">
+  <div class="sheet" role="dialog" aria-label="메모 수정">
+    <h3>💡 메모</h3>
+    <div class="raw" id="mRaw"></div>
+    <div class="f"><label>분류</label><div class="chips wrapc mchips" id="mCats"></div></div>
+    <div class="f"><label for="mTitle">제목</label><input id="mTitle"></div>
+    <div class="f"><label for="mText">내용 (말한 그대로)</label><textarea id="mText" style="min-height:110px"></textarea></div>
+    <div class="f"><label for="mTags">태그 (쉼표로 구분)</label><input id="mTags"></div>
+    <div class="mwhen" id="mWhen" style="display:none"></div>
+    <div class="btns">
+      <button class="btn pri" id="mSave">저장</button>
+      <button class="btn" id="mSched" style="display:none">📅 일정으로도 등록</button>
+      <button class="btn" id="mStar">☆ 고정</button>
+      <button class="btn del" id="mDel">삭제</button>
+      <button class="btn" id="mClose">닫기</button>
     </div>
   </div>
 </div>
@@ -295,6 +367,10 @@ ul.tips li{margin:3px 0}
       <div id="voiceList"></div>
       <div class="vrate"><span>말하기 속도</span><input type="range" id="rate" min="0.7" max="1.5" step="0.1" value="1"><b id="rateLbl">1.0배</b></div>
     </div>
+    <div class="set"><b>💡 메모 분류</b><p>메모에 아래 낱말이 들어 있으면 그 분류로 자동 정리함. 낱말은 쉼표로 구분. 「~형」처럼 앞에 ~를 붙이면 「동헌이형」같이 끝이 같은 말을 찾음. 어디에도 안 맞으면 「기타」로 감.</p>
+      <div id="mcatList"></div>
+      <div class="btns" style="margin-top:10px"><button class="btn" id="mcatAdd">+ 분류 추가</button><button class="btn" id="mcatReset">기본 분류로</button></div>
+    </div>
     <div class="set"><b>저장 위치</b><p id="storeDesc"></p>
       <div class="btns" style="margin-top:10px"><button class="btn" id="bkCopy">📋 백업 복사</button><button class="btn" id="bkPasteBtn">📥 백업 붙여넣기</button></div>
       <div id="bkBox" style="display:none;margin-top:10px"><div class="f"><textarea id="bkText" placeholder="다른 곳에서 「백업 복사」한 내용을 여기에 붙여넣기"></textarea></div><button class="btn pri" id="bkImport">가져오기</button></div>
@@ -306,6 +382,8 @@ ul.tips li{margin:3px 0}
         <li>장소: 「강남역에서」처럼 ~에서를 붙이면 장소로 분리</li>
         <li>오전·오후 없이 1~6시라고 하면 오후로 봄</li>
         <li>날짜·시간이 없으면 「날짜 미정」에 할 일처럼 쌓임</li>
+        <li><b>💡 메모:</b> 「메모 …」「아이디어 …」「기억해 …」「생각났는데 …」처럼 앞에 붙여 말하거나, 💡 버튼(또는 마이크 길게 누르기)을 누르고 말하면 일정 대신 메모로 저장·자동 분류. 메모 모드는 말을 길게 해도 끊기지 않고, 말을 멈추고 약 3초 뒤 저장(바로 저장하려면 버튼 한 번 더)</li>
+        <li><b>메모 확인:</b> 「아이디어 메모 보여줘」「이번주 메모 읽어줘」「윙스텝 관련 메모 찾아줘」</li>
         <li><b>확인:</b> 「내일 일정 알려줘」「이번주 뭐 있어?」「주말에 약속 있어?」「동헌이형 미팅 언제야?」처럼 물으면 등록하지 않고 해당 일정을 보여 줌</li>
       </ul>
     </div>
@@ -554,6 +632,150 @@ const KoParse = (() => {
   return { parse, parseQuery, ymd, pad, addDays, day0 };
 })();
 
+// 음성 메모 판별·분류기 — 기기 안에서 낱말 규칙으로만 동작 (메모 내용은 휴대폰 밖으로 안 나감)
+const KoMemo = (() => {
+  const DEFAULT_CATS = [
+    { id: 'biz', emoji: '💼', name: '사업 아이디어', words: ['사업', '수익', '매출', '시장', '고객', '판매', '팔기', '팔면', '팔아', '마케팅', '홍보', '창업', '부업', '투자', '돈', '브랜드', '광고', '가격', '유통', '수출', '영업', '플랫폼', '구독', '렌탈', '서비스', '상품', '유료', '수익화', '쇼핑몰', '스마트스토어', '특허', '거래처'] },
+    { id: 'dev', emoji: '🛠', name: '제품·개발', words: ['제품', '개발', '설계', '도면', '시제품', '기능', '앱', '프로그램', '코드', '센서', '모터', '부품', '브라켓', '회로', '3D', '프린터', '금형', '테스트', '개선', '버전', '디자인', '로봇', '장치', '모듈', '펌웨어', '배터리', '소재', '재질', '윙스텝', '윙가드', '키트', '교재', '화면', '버튼', '업데이트', '오류', '버그', '키오스크'] },
+    { id: 'work', emoji: '✅', name: '업무 할 일', words: ['처리', '제출', '보내기', '보내야', '준비', '정리', '견적', '계약', '서류', '신고', '결재', '납품', '발주', '회의', '미팅', '업체', '보고', '마감', '챙기', '세금', '계산서', '입금', '수금', '청구', '검토', '작성', '출장', '공문', '입찰', '직원', '채용', '전시회', '부스'] },
+    { id: 'people', emoji: '👤', name: '사람·연락', words: ['전화', '연락', '문자', '카톡', '메일', '만나', '안부', '소개', '부탁', '인사', '선물', '친구', '동기', '~형님', '~형', '~님', '~씨', '~대표', '~사장', '~팀장', '~부장', '~과장', '~이사'] },
+    { id: 'life', emoji: '🏡', name: '개인·생활', words: ['가족', '아내', '애들', '집에', '집안', '우리 집', '여행', '운동', '골프', '건강', '병원', '쇼핑', '장보기', '생일', '기념일', '취미', '어항', '산호', '맛집', '휴가', '독서', '영화', '캠핑', '등산', '산책', '다이어트', '청소', '세차', '바닷가'] },
+    { id: 'etc', emoji: '📝', name: '기타', words: [] },
+  ];
+  const clone = a => JSON.parse(JSON.stringify(a));
+  const sp = s => ' ' + String(s || '').replace(/\s+/g, ' ').trim() + ' ';
+
+  // ---------- 메모로 저장할 말인지 판별 ----------
+  // ① 앞에 붙이는 말: 메모 / 아이디어 / 기억해 / 생각났는데 / 떠오른 생각 / 기록해 줘
+  const TRIG = '(?:(?:갑자기\\s*|방금\\s*)?(?:좋은\\s*)?생각(?:이)?\\s*(?:났는데|났어|났다|났음|났어요|난\\s*건데)'
+    + '|(?:좋은\\s*)?아이디어(?:\\s*(?:인데|하나|메모|야|임|있어|생겼어|떠올랐어|떠올랐는데))?'
+    + '|메모(?:\\s*(?:해\\s*줘|해\\s*둬|해\\s*놔|해\\s*주세요|해|하기|할게|좀|하나))?'
+    + '|기억해\\s*(?:줘|둬|놔|주세요|야\\s*할\\s*(?:것|거|게)|둘\\s*(?:것|거))?|기억할\\s*(?:것|거)'
+    + '|기록\\s*(?:해\\s*줘|해\\s*둬)|떠오른\\s*생각)';
+  const PRE = new RegExp('^\\s*(' + TRIG + ')(?=\\s|[:：,]|$)\\s*[:：,]?\\s*');
+  const INTERJ = /^\s*(?:아\s*맞다|아\s*참|참|아|저기|음+|어+|자)\s*[,]?\s+/;
+  const NOT_IDEA = /^(회의|미팅|공모|공모전|발표|대회|모임|워크숍|세미나|경진)/;   // 「아이디어 회의 내일 3시」는 일정
+  // ② 뒤에 붙이는 말: 「~ 메모해 줘」「~ 기록해 둬」「~ 기억해 줘」 (날짜·시간이 없을 때만 — 있으면 기존처럼 일정)
+  const SUF = /\s*(?:이?라고|(?<=다)고)?\s*(?:메모|기록|기억)\s*(?:좀\s*)?(?:해\s*줘|해\s*둬|해\s*놔|해\s*주세요|해\s*줄래|해\s*두기)\s*[.!]?\s*$/;
+  function detect(raw) {
+    const s0 = String(raw || '').replace(/\s+/g, ' ').trim();
+    if (!s0) return null;
+    for (const s of [s0, s0.replace(INTERJ, '')]) {
+      const m = s.match(PRE);
+      if (m) {
+        const body = s.slice(m[0].length).trim();
+        if (/^(?:좋은\s*)?아이디어/.test(m[1]) && NOT_IDEA.test(body)) return null;
+        return { body, how: 'prefix', trigger: m[1].replace(/\s+/g, ' ').trim() };
+      }
+    }
+    const ms = s0.match(SUF);
+    if (ms) {
+      const body = s0.slice(0, ms.index).trim();
+      if (body && !KoParse.parse(body).confident) return { body, how: 'suffix', trigger: ms[0].trim() };
+    }
+    return null;
+  }
+
+  // ---------- 메모 확인 질문 (「아이디어 메모 보여줘」「이번주 메모 읽어줘」) ----------
+  const VERB = '(?:보여\\s*줘|보여\\s*주세요|보여\\s*줄래|보여|읽어\\s*줘|읽어\\s*주세요|읽어\\s*줄래|읽어|알려\\s*줘|알려\\s*주세요|알려|찾아\\s*줘|찾아\\s*주세요|찾아|검색해\\s*줘|검색|정리해\\s*줘|목록|뭐\\s*있어|뭐\\s*있지|뭐\\s*있었지|뭐\\s*있나|뭐였지|뭐야|몇\\s*개야|몇\\s*개|열어\\s*줘|열어)';
+  const MW = '(?:(?:메모|아이디어)(?:들|한\\s*거|한\\s*것|해\\s*둔\\s*거|해\\s*놓은\\s*거|적은\\s*거|남긴\\s*거)?|생각(?:들|한\\s*거|해\\s*둔\\s*거|해\\s*놓은\\s*거|남긴\\s*거))';
+  const QM1 = new RegExp(MW + '\\s*(?:(?:을|를|좀|은|는|이|가|목록|전부|다|모두|만|중에)\\s*)*' + VERB + '\\s*\\??\\s*$');
+  const QM2 = /^\s*메모\s*(?:에서|중에서|중에|중)\s+(.+?)\s*(?:찾아|검색)/;
+  const GENERIC = new Set(['아이디어', '메모', '생각', '할', '일']);
+  const catAliases = c => {
+    const n = String(c.name || '');
+    const a = new Set([n.replace(/[\s·/,]/g, '')]);
+    n.split(/[\s·/,]+/).forEach(x => { if (x.length >= 2 && !GENERIC.has(x)) a.add(x); });
+    if (/할\s*일/.test(n)) a.add('할일');
+    return [...a].filter(Boolean).sort((x, y) => y.length - x.length);
+  };
+  function parseQuery(raw, cats, now = new Date()) {
+    cats = cats && cats.length ? cats : DEFAULT_CATS;
+    const s = String(raw || '').trim();
+    const t = sp(s.replace(/[.,!?。·]/g, ' '));
+    const m2 = t.match(QM2);
+    if (!QM1.test(t) && !m2) return null;
+    const today = KoParse.day0(now), add = KoParse.addDays, ymd = KoParse.ymd;
+    const mon = add(today, -((today.getDay() + 6) % 7));
+    let from = null, to = null, label = '';
+    const P = [
+      [/(지난|저번)\s*주/, () => [add(mon, -7), add(mon, -1), '지난주']],
+      [/(이번\s*주|금주)/, () => [mon, add(mon, 6), '이번주']],
+      [/(지난|저번)\s*달/, () => [new Date(today.getFullYear(), today.getMonth() - 1, 1), new Date(today.getFullYear(), today.getMonth(), 0), '지난달']],
+      [/(이번\s*달|이달)/, () => [new Date(today.getFullYear(), today.getMonth(), 1), new Date(today.getFullYear(), today.getMonth() + 1, 0), '이번 달']],
+      [/(그저께|그제)/, () => [add(today, -2), add(today, -2), '그저께']],
+      [/어제/, () => [add(today, -1), add(today, -1), '어제']],
+      [/오늘/, () => [today, today, '오늘']],
+      [/(최근|요즘)/, () => [add(today, -6), today, '최근 7일']],
+    ];
+    let rest = t;
+    for (const [re, f] of P) { if (re.test(t)) { const [a, b, l] = f(); from = ymd(a); to = ymd(b); label = l; rest = rest.replace(re, ' '); break; } }
+    const star = /(별표|고정|중요|즐겨\s*찾기)/.test(t);
+    let cat = null;
+    const flat = rest.replace(/\s/g, '');
+    outer: for (const c of cats) for (const al of catAliases(c)) { if (flat.includes(al)) { cat = c.id; rest = rest.replace(new RegExp(al.split('').join('\\s*')), ' '); break outer; } }
+    let keyword = '';
+    if (m2) keyword = m2[1];
+    else {
+      keyword = rest.replace(new RegExp(VERB + '\\s*\\??\\s*$'), ' ')
+        .replace(new RegExp(MW, 'g'), ' ')
+        .replace(/(별표|고정|중요|즐겨\s*찾기)(한|된|해\s*둔)?/g, ' ');
+    }
+    keyword = sp(keyword).replace(/\s(관련된|관련|에\s*대한|대한|거|것|좀|다|전부|모두|만|중에|에서|중|내가|제가|했던|남긴|적은|한|들|목록|은|는|이|가|을|를|의|에)(?=\s)/g, ' ')
+      .split(/\s+/).filter(Boolean).map(w => w.length > 2 ? w.replace(/(이랑|에서|으로|이|가|은|는|을|를|의|에|로|랑)$/, '') : w).filter(w => w && !GENERIC.has(w)).join(' ');
+    return { from, to, label, cat, star, keyword, speak: /읽어/.test(t) };
+  }
+
+  // ---------- 자동 제목·분류·태그·날짜 ----------
+  function titleOf(body) {
+    const s = String(body || '').replace(/\s+/g, ' ').trim();
+    let f = s.split(/[.!?\n。]|,\s*/)[0].trim();
+    if (f.length < 4) f = s;
+    if (f.length > 24) { const c = f.lastIndexOf(' ', 24); f = f.slice(0, c > 8 ? c : 24).trim() + '…'; }
+    return f || '메모';
+  }
+  const stripJ = w => w.replace(/(이랑|이하고|하고|한테|에게|께서|께|랑|이|가|은|는|을|를|과|와|도|의|에서|에|으로|로)$/, '');
+  function classify(body, cats) {
+    cats = cats && cats.length ? cats : DEFAULT_CATS;
+    const plain = sp(String(body || '').replace(/아이디어/g, ' ').replace(/[.,!?。·~"'“”‘’()]/g, ' '));
+    const toks = plain.trim().split(' ').filter(Boolean).map(x => x.toLowerCase());
+    const nos = plain.replace(/\s/g, '').toLowerCase();
+    let best = null, bestSc = 0, bestTags = [];
+    for (const c of cats) {
+      let sc = 0; const tags = [];
+      for (let w of (c.words || [])) {
+        w = String(w || '').trim(); if (!w) continue;
+        if (w[0] === '~') {
+          const suf = w.slice(1).toLowerCase(); if (!suf) continue;
+          for (const tk of toks) { const b = stripJ(tk); if (b.length >= 3 && b.endsWith(suf)) { sc += 1; tags.push(b); break; } }
+          continue;
+        }
+        const lw = w.toLowerCase().replace(/\s/g, '');
+        if (lw.length >= 3 || /\s/.test(w)) { if (nos.includes(lw)) { sc += 1; tags.push(w); } continue; }
+        const tk = toks.find(x => x.startsWith(lw));   // 짧은 낱말은 말머리로만 찾고, 태그는 실제 말한 낱말로 (팔아 → 팔아보기)
+        if (tk) { sc += 1; const b = stripJ(tk); tags.push(b.length <= 8 ? b : w); }
+      }
+      if (c.id === 'work' && /(해야|하기|할\s*것|챙겨|챙기기)(?=\s)/.test(plain)) sc += 1;
+      if (sc > bestSc) { best = c; bestSc = sc; bestTags = tags; }
+    }
+    const etc = cats.find(c => c.id === 'etc') || cats[cats.length - 1];
+    return { cat: best ? best.id : etc.id, score: bestSc, tags: [...new Set(bestTags)].slice(0, 5) };
+  }
+  const EXPLICIT = /(\d{1,2}\s*(시|월|일)|오늘|내일|낼|모레|글피|요일|주말|정오|자정|\d+\s*(분|시간)\s*(뒤|후)|(^|\s)(열두|열한|열|아홉|여덟|일곱|여섯|다섯|네|세|두|한)\s?시(?![간작]))/;
+  function whenOf(body, now = new Date()) {
+    const s = String(body || '');
+    if (!EXPLICIT.test(s) || /(었|았|였|했)(다|음|어|네|어요)\s*[.!]?\s*$/.test(s)) return null;   // 지난 일 회상은 제안 안 함
+    const p = KoParse.parse(s, now);
+    if (!p.confident || !p.date) return null;
+    return { date: p.date, time: p.time, end: p.end, title: p.title, place: p.place };
+  }
+  function make(body, cats, now = new Date()) {
+    const c = classify(body, cats);
+    return { title: titleOf(body), cat: c.cat, tags: c.tags, when: whenOf(body, now) };
+  }
+  return { DEFAULT_CATS, clone, detect, parseQuery, classify, titleOf, whenOf, make, catAliases };
+})();
+
 </script>
 <script>
 (() => {
@@ -676,7 +898,9 @@ function render() {
   $('cUp').textContent = up.filter(e => !e.done).length || '';
   $('cNo').textContent = nodate.filter(e => !e.done).length || '';
   $('cPast').textContent = past.length || '';
+  $('cMemo').textContent = memos.size || '';
   const list = $('list');
+  if (tab === 'memo') { renderMemoTab(list); if (chkOpen) refreshCheck(); return; }
   list.textContent = '';
   if ((tab === 'up' || tab === 'cal') && all.length) list.appendChild(briefView(up));
   if (tab === 'cal') { list.appendChild(calView(all)); if (chkOpen) refreshCheck(); return; }
@@ -958,6 +1182,7 @@ function voiceChoice() {
 function setSpeaking(on) {
   speaking = on;
   const b = $('qSpeak'); b.classList.toggle('on', on); b.textContent = on ? '■ 멈춤' : '🔊 읽어주기';
+  const mb = mHead && mHead.querySelector('#mSpeak'); if (mb) { mb.classList.toggle('on', on); mb.textContent = on ? '■ 멈춤' : '🔊 읽어주기'; }
 }
 function stopSpeak() {
   if (tts) tts.stop().catch(() => {});
@@ -1068,9 +1293,23 @@ async function aiParse(text) {
   finally { clearTimeout(to); }
 }
 
-async function handleText(text, src) {
+async function handleText(text, src, asMemo) {
   text = (text || '').trim();
   if (!text) return;
+  // 💡 메모 모드(버튼·길게 누르기·키보드 메모) → 무조건 메모로 저장
+  if (asMemo) { const d = KoMemo.detect(text); saveMemo(d ? d.body : text, text, src); return; }
+  // 「아이디어 메모 보여줘」「이번주 메모 읽어줘」 → 메모 탭에서 보여 주기
+  const mq = KoMemo.parseQuery(text, memoCats);
+  if (mq) { openMemoQuery(mq, text, src === 'voice'); return; }
+  // 「메모 …」「아이디어 …」「기억해 …」 → 일정 대신 메모
+  const md = KoMemo.detect(text);
+  if (md) {
+    if (md.body) { saveMemo(md.body, text, src); return; }
+    setMic('idle');   // 「메모」만 말함 → 메모 모드로 이어 듣기
+    if (src === 'voice' && dict) { showToast('💡 메모 모드 — 이어서 말하세요', false); setTimeout(() => micClick('memo'), 350); }
+    else openKbMemo();
+    return;
+  }
   const q = KoParse.parseQuery(text);
   if (q) {
     setMic('idle');
@@ -1101,56 +1340,72 @@ async function handleText(text, src) {
 }
 
 // ---------- 음성 ----------
-let listening = false, finals = '', silenceT = null;
+let listening = false, finals = '', silenceT = null, memoMode = false, memoMaxT = null;
+const MEMO_PAUSE = 2800;   // 메모 모드: 말을 멈추고 약 3초 뒤 저장 (일정은 2초) — 길게 말해도 듣기는 끊기지 않음(keep)
+const MEMO_MAX = 180000;   // 메모 모드 한 번에 최대 3분
 function setMic(state) {
   const m = $('mic'), l = $('micLbl');
   m.classList.toggle('listening', state === 'listening');
   m.classList.toggle('busy', state === 'busy');
-  l.textContent = state === 'listening' ? (settings.auto ? '듣는 중 · 말 멈추면 자동 등록' : '듣는 중 · 다시 누르면 등록') : state === 'busy' ? '해석 중…' : '눌러서 말하기';
+  m.classList.toggle('memo', memoMode && (state === 'listening' || state === 'busy'));
+  $('btnMemo').classList.toggle('on', memoMode && state === 'listening');
+  if (memoMode) l.textContent = state === 'listening' ? (settings.auto ? '💡 메모 듣는 중 · 말 멈추고 3초 뒤 저장' : '💡 메모 듣는 중 · 다시 누르면 저장') : state === 'busy' ? '메모 저장 중…' : '눌러서 말하기 · 길게 누르면 💡 메모';
+  else l.textContent = state === 'listening' ? (settings.auto ? '듣는 중 · 말 멈추면 자동 등록' : '듣는 중 · 다시 누르면 등록') : state === 'busy' ? '해석 중…' : '눌러서 말하기 · 길게 누르면 💡 메모';
   if (state !== 'listening' && state !== 'busy') $('live').classList.remove('show');
 }
 function showLive() { $('live').classList.add('show'); $('liveF').textContent = finals; }
-async function micClick() {
-  if (!dict) { openKb(true); $('hint').classList.add('show'); $('txt').focus(); return; }
+async function micClick(kind) {
+  const asMemo = kind === 'memo';
+  if (!dict) { if (asMemo) openKbMemo(); else { kbMemo = false; syncKb(); openKb(true); $('txt').focus(); } $('hint').classList.add('show'); return; }
   if (listening) { stopDict(); return; }
-  finals = ''; $('liveP').textContent = ''; $('liveLbl').textContent = '듣는 중…'; showLive();
+  memoMode = asMemo; dict.keep = asMemo;
+  finals = ''; $('liveP').textContent = ''; $('liveLbl').textContent = asMemo ? '💡 메모 듣는 중… (길게 말해도 됨)' : '듣는 중…'; showLive();
   listening = true; setMic('listening');
+  clearTimeout(memoMaxT); if (asMemo) memoMaxT = setTimeout(() => { if (listening) stopDict(); }, MEMO_MAX);
   dict.start().catch(e => {
-    listening = false; setMic('idle');
+    listening = false; memoMode = false; clearTimeout(memoMaxT); setMic('idle');
     if (e && e.code === 'not_granted') { dict = null; openKb(true); $('hint').classList.add('show'); showToast('마이크 권한이 없어 직접 입력으로 바꿈', false); }
   });
 }
 async function stopDict() {
-  clearTimeout(silenceT);
+  clearTimeout(silenceT); clearTimeout(memoMaxT);
   if (!listening) return;
   listening = false; setMic('busy');
   try { await dict.stop(); } catch {}
+  const asMemo = memoMode;
   const text = (finals + ' ' + ($('liveP').textContent || '')).trim();
   finals = ''; $('liveP').textContent = '';
-  if (text) await handleText(text, 'voice'); else { setMic('idle'); showToast('말소리를 못 들었음. 다시 눌러 주세요', false); }
+  if (text) await handleText(text, 'voice', asMemo); else { memoMode = false; setMic('idle'); showToast('말소리를 못 들었음. 다시 눌러 주세요', false); }
+  if (!listening) { memoMode = false; dict.keep = false; setMic('idle'); }
 }
-function armSilence() { clearTimeout(silenceT); if (settings.auto) silenceT = setTimeout(stopDict, 2000); }
+function armSilence() { clearTimeout(silenceT); if (settings.auto) silenceT = setTimeout(stopDict, memoMode ? MEMO_PAUSE : 2000); }
 function webSpeechDict() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return null;
   let rec = null, ended = true, hP = () => {}, hF = () => {}, hS = () => {}, stopRes = null;
-  return {
+  let stopping = false, fatal = false, restarts = 0;   // keep: 메모 모드에서 휴대폰이 듣기를 끊어도 다시 이어 들음
+  const api = {
+    keep: false,
     onPartial(f) { hP = f; }, onFinal(f) { hF = f; }, onState(f) { hS = f; },
     start() {
       return new Promise((res, rej) => {
+        stopping = false; fatal = false; restarts = 0;
         rec = new SR(); rec.lang = 'ko-KR'; rec.interimResults = true; rec.continuous = true; ended = false;
         rec.onresult = e => {
           let interim = '';
           for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) hF({ text: r[0].transcript }); else interim += r[0].transcript; }
           hP({ text: interim });
         };
-        rec.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') rej({ code: 'not_granted' }); };
-        rec.onend = () => { ended = true; hS({ state: 'idle', reason: 'stopped' }); if (stopRes) { stopRes(); stopRes = null; } };
+        rec.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { fatal = true; rej({ code: 'not_granted' }); } else if (e.error === 'network' || e.error === 'audio-capture') fatal = true; };
+        rec.onend = () => {
+          if (api.keep && !stopping && !fatal && restarts < 40) { restarts++; try { rec.start(); return; } catch {} }
+          ended = true; hS({ state: 'idle', reason: 'stopped' }); if (stopRes) { stopRes(); stopRes = null; } };
         rec.onstart = () => { hS({ state: 'listening' }); res(); };
         try { rec.start(); } catch (err) { ended = true; rej({ code: 'dismissed' }); }
       });
     },
     stop() {
+      stopping = true;
       return new Promise(res => {
         if (!rec || ended) return res();
         stopRes = res; try { rec.stop(); } catch { res(); }
@@ -1158,6 +1413,7 @@ function webSpeechDict() {
       });
     }
   };
+  return api;
 }
 async function initDict() {
   if (STANDALONE) dict = webSpeechDict();
@@ -1170,12 +1426,30 @@ async function initDict() {
 
 // ---------- 입력·토스트·시트 ----------
 function openKb(force) { const r = $('inrow'); r.classList.toggle('show', force === true ? true : !r.classList.contains('show')); }
-$('btnKb').onclick = () => { openKb(); if ($('inrow').classList.contains('show')) $('txt').focus(); };
-$('inrow').addEventListener('submit', e => { e.preventDefault(); const v = $('txt').value; $('txt').value = ''; handleText(v, 'text'); });
-$('mic').onclick = micClick;
+let kbMemo = false;   // 키보드 입력을 메모로 저장할지
+function syncKb() {
+  $('txt').placeholder = kbMemo ? '💡 메모할 내용 (예: 윙스텝 구독형 렌탈로 팔아보기)' : '예: 내일 오후 3시 거래처 미팅';
+  $('kbSubmit').textContent = kbMemo ? '메모' : '등록';
+  $('inrow').classList.toggle('memo', kbMemo);
+}
+function openKbMemo() { kbMemo = true; syncKb(); openKb(true); $('txt').focus(); }
+$('btnKb').onclick = () => { if (kbMemo) { kbMemo = false; syncKb(); openKb(true); } else openKb(); if ($('inrow').classList.contains('show')) $('txt').focus(); };
+$('inrow').addEventListener('submit', e => { e.preventDefault(); const v = $('txt').value; $('txt').value = ''; const asMemo = kbMemo; if (asMemo && v.trim()) { kbMemo = false; syncKb(); } handleText(v, 'text', asMemo); });
+// 마이크: 누르면 일정 · 길게 누르면 💡 메모
+let lpT = null, lpFired = false;
+$('mic').addEventListener('pointerdown', () => {
+  if (listening) return;
+  lpFired = false; clearTimeout(lpT);
+  lpT = setTimeout(() => { lpFired = true; try { navigator.vibrate && navigator.vibrate(30); } catch {} micClick('memo'); }, 550);
+});
+['pointerup', 'pointerleave', 'pointercancel'].forEach(k => $('mic').addEventListener(k, () => clearTimeout(lpT)));
+$('mic').addEventListener('contextmenu', e => e.preventDefault());
+$('mic').onclick = () => { if (lpFired) { lpFired = false; return; } micClick(); };
+$('btnMemo').onclick = () => micClick('memo');
 
-let toastT = null;
+let toastT = null, toastMemo = null, toastUndoFn = null;
 function showToast(msg, withActions) {
+  toastMemo = null; toastUndoFn = null; $('toastSched').style.display = 'none';
   $('toastMsg').textContent = msg;
   $('toastEdit').style.display = withActions && lastNew.length === 1 ? '' : 'none';
   const one = withActions && lastNew.length === 1 ? events.get(lastNew[0]) : null;
@@ -1184,9 +1458,12 @@ function showToast(msg, withActions) {
   $('toast').classList.add('show');
   clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('show'), withActions ? 9000 : 3000);
 }
-$('toastUndo').onclick = async () => { const ids = lastNew; lastNew = []; $('toast').classList.remove('show'); for (const id of ids) await removeEvent(id); showToast('되돌림', false); };
+$('toastUndo').onclick = async () => {
+  if (toastUndoFn) { const f = toastUndoFn; toastUndoFn = null; $('toast').classList.remove('show'); await f(); return; }
+  const ids = lastNew; lastNew = []; $('toast').classList.remove('show'); for (const id of ids) await removeEvent(id); showToast('되돌림', false); };
 $('toastPhone').addEventListener('click', () => setTimeout(() => $('toast').classList.remove('show'), 300));
-$('toastEdit').onclick = () => { $('toast').classList.remove('show'); if (lastNew[0]) openEdit(lastNew[0]); };
+$('toastEdit').onclick = () => { $('toast').classList.remove('show'); if (toastMemo) { openMemoEdit(toastMemo); return; } if (lastNew[0]) openEdit(lastNew[0]); };
+$('toastSched').onclick = () => { $('toast').classList.remove('show'); if (toastMemo) memoToEvent(toastMemo); };
 
 let editId = null;
 const SHOW_PHONE = !/iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -1275,34 +1552,304 @@ $('swAi').onclick = async () => {
 };
 $('swSpk').onclick = () => { if (!canSpeak()) return; settings.speak = !settings.speak; syncSwitches(); saveSettings(); };
 $('swAuto').onclick = () => { settings.auto = !settings.auto; syncSwitches(); saveSettings(); };
-$('btnSet').onclick = () => { syncSwitches(); renderVoices(); $('setScrim').classList.add('show'); };
+$('btnSet').onclick = () => { syncSwitches(); renderVoices(); renderCatEditor(); $('setScrim').classList.add('show'); };
 $('setClose').onclick = () => $('setScrim').classList.remove('show');
 $('setScrim').addEventListener('click', e => { if (e.target === $('setScrim')) $('setScrim').classList.remove('show'); });
 
-function syncTabs() { document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === tab)); }
+function syncTabs() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+  const on = document.querySelector('.tab.on'); if (on && on.scrollIntoView) try { on.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch {}
+}
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => { tab = t.dataset.tab; syncTabs(); render(); });
 
 // ---------- 백업 ----------
 $('bkCopy').onclick = async () => {
-  const data = JSON.stringify({ app: 'malro-iljeong', v: 1, at: Date.now(), events: [...events.values()] });
-  try { await navigator.clipboard.writeText(data); showToast(`✅ 일정 ${events.size}건 백업을 복사함 — 옮길 곳에서 「백업 붙여넣기」`, false); }
+  // v2: 메모·메모 분류 추가 (v1 백업도 그대로 가져와짐)
+  const data = JSON.stringify({ app: 'malro-iljeong', v: 2, at: Date.now(), events: [...events.values()], memos: [...memos.values()], memoCats });
+  try { await navigator.clipboard.writeText(data); showToast(`✅ 일정 ${events.size}건 · 메모 ${memos.size}건 백업을 복사함 — 옮길 곳에서 「백업 붙여넣기」`, false); }
   catch { $('bkBox').style.display = ''; $('bkText').value = data; $('bkText').select(); showToast('복사가 막혀 있음 — 아래 글자를 길게 눌러 직접 복사', false); }
 };
 $('bkPasteBtn').onclick = () => { $('bkBox').style.display = ''; $('bkText').value = ''; $('bkText').focus(); };
 $('bkImport').onclick = async () => {
   let obj; try { obj = JSON.parse($('bkText').value.trim()); } catch { showToast('백업 내용이 올바르지 않음', false); return; }
   const list = Array.isArray(obj) ? obj : obj && Array.isArray(obj.events) ? obj.events : null;
-  if (!list) { showToast('백업 내용이 올바르지 않음', false); return; }
-  let n = 0;
-  for (const ev of list) { if (ev && typeof ev.id === 'string' && ev.id.startsWith('ev_') && !events.has(ev.id)) { await putEvent(Object.assign({}, ev)); n++; } }
+  const mlist = obj && !Array.isArray(obj) && Array.isArray(obj.memos) ? obj.memos : [];
+  if (!list && !mlist.length) { showToast('백업 내용이 올바르지 않음', false); return; }
+  let n = 0, mn = 0;
+  for (const ev of (list || [])) { if (ev && typeof ev.id === 'string' && ev.id.startsWith('ev_') && !events.has(ev.id)) { await putEvent(Object.assign({}, ev)); n++; } }
+  // 메모: 이미 있는 메모는 건드리지 않고 없는 것만 추가
+  for (const m of mlist) { if (m && typeof m.id === 'string' && m.id.startsWith('mm_') && typeof m.text === 'string' && !memos.has(m.id)) { memos.set(m.id, Object.assign({}, m)); mn++; } }
+  if (obj && Array.isArray(obj.memoCats)) { let added = 0; for (const c of obj.memoCats) { if (c && typeof c.id === 'string' && c.name && !memoCats.some(x => x.id === c.id)) { memoCats.splice(Math.max(0, memoCats.length - 1), 0, { id: c.id, emoji: String(c.emoji || ''), name: String(c.name), words: Array.isArray(c.words) ? c.words.map(String) : [] }); added++; } } if (added) saveCats(); }
+  if (mn) { saveMemos(); render(); }
   $('bkBox').style.display = 'none'; $('bkText').value = '';
-  showToast(`✅ ${n}건 가져옴` + (list.length - n ? ` (이미 있는 ${list.length - n}건 제외)` : ''), false);
+  const skip = (list ? list.length - n : 0) + (mlist.length - mn);
+  showToast(`✅ 일정 ${n}건` + (mlist.length ? ` · 메모 ${mn}건` : '') + ' 가져옴' + (skip ? ` (이미 있는 ${skip}건 제외)` : ''), false);
+};
+
+// ---------- 💡 메모 ----------
+// 저장 키가 일정과 따로임 — 기존 일정(LS_EV)·설정(LS_SET)은 읽기만 하고 건드리지 않음
+const LS_MEMO = 'leekoos.voice-schedule.memos.v1';
+const LS_MCAT = 'leekoos.voice-schedule.memo-cats.v1';
+let memos = new Map();                                   // id -> memo
+let memoCats = KoMemo.clone(KoMemo.DEFAULT_CATS);
+let memoF = { cat: 'all', q: '', from: null, to: null, label: '', spoken: '' };
+let memoHi = new Set(), memoEditId = null, mEditCat = null, mEditStar = false;
+let mHead = null, mBody = null;
+const nsp = s => String(s || '').replace(/\s/g, '');
+function loadMemos() {
+  const arr = lsGet(LS_MEMO, []);
+  memos = new Map((Array.isArray(arr) ? arr : []).filter(m => m && typeof m.id === 'string').map(m => [m.id, m]));
+  const cs = lsGet(LS_MCAT, null);
+  if (Array.isArray(cs) && cs.length) memoCats = cs.filter(c => c && c.id);
+  if (!memoCats.some(c => c.id === 'etc')) memoCats.push({ id: 'etc', emoji: '📝', name: '기타', words: [] });
+}
+const saveMemos = () => lsSet(LS_MEMO, [...memos.values()]);
+const saveCats = () => lsSet(LS_MCAT, memoCats);
+const newMemoId = () => 'mm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const catOf = id => memoCats.find(c => c.id === id) || memoCats.find(c => c.id === 'etc') || { id: 'etc', emoji: '📝', name: '기타', words: [] };
+const catLbl = id => { const c = catOf(id); return (c.emoji ? c.emoji + ' ' : '') + c.name; };
+function fmtAt(ts) { const d = new Date(ts); return (d.getMonth() + 1) + '/' + d.getDate() + '(' + WDN[d.getDay()] + ') ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function whenLbl(w) { if (!w || !w.date) return ''; const d = new Date(w.date + 'T00:00'); return (d.getMonth() + 1) + '/' + d.getDate() + '(' + WDN[d.getDay()] + ')' + (w.time ? ' ' + w.time : ''); }
+function putMemo(m) { m.updatedAt = Date.now(); memos.set(m.id, m); saveMemos(); render(); }
+
+function saveMemo(body, raw, src) {
+  body = String(body || '').trim();
+  if (!body) { setMic('idle'); showToast('💡 메모할 내용을 못 들었음. 다시 말해 주세요', false); return; }
+  const at = Date.now();
+  const k = KoMemo.make(body, memoCats, new Date(at));
+  const memo = { id: newMemoId(), v: 1, text: body, raw: raw || body, title: k.title, cat: k.cat, catAuto: k.cat, catBy: 'auto', tags: k.tags, star: false, when: k.when, eventId: null, src: src || 'text', createdAt: at, updatedAt: at };
+  memos.set(memo.id, memo); saveMemos();
+  tab = 'memo'; memoF = { cat: 'all', q: '', from: null, to: null, label: '', spoken: '' }; syncTabs();
+  memoHi = new Set([memo.id]);
+  setMic('idle'); render();
+  showMemoToast(`💡 메모 저장 · ${catLbl(memo.cat)} — ${memo.title}`, memo, async () => { memos.delete(memo.id); saveMemos(); render(); showToast('되돌림', false); });
+  setTimeout(() => memoHi.clear(), 2000);
+  const el = document.querySelector('.mcard.new'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function showMemoToast(msg, memo, undoFn) {
+  showToast(msg, false);
+  toastMemo = memo ? memo.id : null; toastUndoFn = undoFn || null;
+  $('toastEdit').style.display = memo ? '' : 'none';
+  $('toastUndo').style.display = undoFn ? '' : 'none';
+  $('toastSched').style.display = memo && memo.when ? '' : 'none';
+  clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('show'), 9000);
+}
+function deleteMemo(id) {
+  const m = memos.get(id); if (!m) return;
+  memos.delete(id); saveMemos(); render();
+  showMemoToast('🗑 메모 삭제함 — ' + (m.title || ''), null, async () => { memos.set(m.id, m); saveMemos(); render(); showToast('되돌림', false); });
+}
+async function memoToEvent(id) {
+  const m = memos.get(id); if (!m) return;
+  const w = m.when;
+  if (!w || !w.date) { showToast('메모에 날짜·시간이 없음', false); return; }
+  const ev = { id: newId(), title: w.title && w.title !== '일정' ? w.title : String(m.title || '메모').replace(/…$/, ''), date: w.date, time: w.time || null, end: w.end || null, place: w.place || '', memo: m.text, approx: false, done: false, raw: m.raw || m.text, src: 'memo', parser: 'local', memoId: m.id, createdAt: Date.now() };
+  lastNew = [ev.id]; highlight = new Set(lastNew);
+  await putEvent(ev);
+  putMemo(Object.assign({}, m, { eventId: ev.id }));
+  showToast(`📅 일정으로도 등록 — ${fmtShort(ev)} ${ev.title}`, true);
+  setTimeout(() => highlight.clear(), 2000);
+}
+
+// 메모 목록 거르기 (분류·고정·기간·검색어)
+function memoList(f) {
+  const words = String(f.q || '').split(/\s+/).filter(Boolean).map(w => w.toLowerCase());
+  return [...memos.values()].filter(m => {
+    if (f.cat === 'star' && !m.star) return false;
+    if (f.cat !== 'all' && f.cat !== 'star' && catOf(m.cat).id !== f.cat) return false;
+    if (f.from) { const k = ymd(new Date(m.createdAt)); if (k < f.from || k > f.to) return false; }
+    if (!words.length) return true;
+    const hay = nsp((m.title || '') + (m.text || '') + (m.tags || []).join('') + catOf(m.cat).name).toLowerCase();
+    return words.every(w => hay.includes(w));
+  }).sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0) || b.createdAt - a.createdAt);
+}
+function memoSubject() {
+  return [memoF.label, memoF.cat === 'star' ? '고정한' : memoF.cat !== 'all' ? catOf(memoF.cat).name : '', memoF.q ? `「${memoF.q}」 들어간` : ''].filter(Boolean).join(' ');
+}
+function memoSummary() {
+  const arr = memoList(memoF);
+  const head = (memoSubject() ? memoSubject() + ' ' : '') + '메모';
+  if (!arr.length) return head + '는 없습니다.';
+  return `${head}는 ${arr.length}건입니다. ` + arr.slice(0, 6).map(m => String(m.title || '').replace(/…$/, '')).join('. ') + '.' + (arr.length > 6 ? ` 외 ${arr.length - 6}건이 더 있습니다.` : '');
+}
+function openMemoQuery(mq, text, voice) {
+  if (chkOpen) closeCheck();
+  tab = 'memo'; syncTabs();
+  memoF = { cat: mq.star ? 'star' : (mq.cat || 'all'), q: mq.keyword || '', from: mq.from, to: mq.to, label: mq.label || '', spoken: text };
+  setMic('idle'); render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (voice || mq.speak) speakNow(memoSummary());
+}
+
+// 💡 메모 탭 화면
+function memoHeadEl() {
+  if (mHead) return mHead;
+  mHead = document.createElement('div'); mHead.className = 'mhead';
+  const form = document.createElement('form'); form.className = 'msearch';
+  const inp = document.createElement('input'); inp.type = 'search'; inp.id = 'mSearch'; inp.placeholder = '메모 검색: 윙스텝, 고객, 동헌이형…'; inp.autocomplete = 'off'; inp.setAttribute('enterkeyhint', 'search');
+  form.appendChild(inp);
+  form.addEventListener('submit', e => { e.preventDefault(); inp.blur(); });
+  inp.addEventListener('input', () => { memoF.q = inp.value.trim(); memoF.spoken = ''; renderMemoBody(); });
+  const chips = document.createElement('div'); chips.className = 'chips mchips'; chips.id = 'mChips';
+  const bar = document.createElement('div'); bar.className = 'mqbar'; bar.id = 'mQbar';
+  const tx = document.createElement('div'); tx.className = 'tx'; tx.id = 'mQtx';
+  const spk = document.createElement('button'); spk.className = 'spk'; spk.id = 'mSpeak'; spk.textContent = '🔊 읽어주기';
+  spk.onclick = async () => { if (!canSpeak()) return; if (speaking || (tts && tts.active())) { stopSpeak(); return; } await speakWith(memoSummary(), voiceChoice()); };
+  const x = document.createElement('button'); x.className = 'mqx'; x.textContent = '✕'; x.setAttribute('aria-label', '조건 지우기');
+  x.onclick = () => { memoF = { cat: 'all', q: '', from: null, to: null, label: '', spoken: '' }; inp.value = ''; renderMemoBody(); };
+  bar.append(tx, spk, x);
+  mHead.append(form, chips, bar);
+  mBody = document.createElement('div');
+  return mHead;
+}
+function renderMemoTab(list) {
+  const h = memoHeadEl();
+  if (list.firstChild !== h || list.children.length !== 2 || list.lastChild !== mBody) { list.textContent = ''; list.append(h, mBody); }
+  renderMemoBody();
+}
+function renderMemoBody() {
+  const inp = mHead.querySelector('#mSearch');
+  if (document.activeElement !== inp) inp.value = memoF.q;
+  // 분류 칩
+  const all = [...memos.values()];
+  const chips = mHead.querySelector('#mChips'); chips.textContent = '';
+  const chip = (key, label, n) => { const b = document.createElement('button'); b.textContent = label + (n ? ' ' + n : ''); b.classList.toggle('on', memoF.cat === key); b.onclick = () => { memoF.cat = key; memoF.spoken = ''; renderMemoBody(); }; chips.appendChild(b); };
+  chip('all', '전체', all.length);
+  chip('star', '⭐ 고정', all.filter(m => m.star).length);
+  memoCats.forEach(c => chip(c.id, (c.emoji ? c.emoji + ' ' : '') + c.name, all.filter(m => catOf(m.cat).id === c.id).length));
+  const arr = memoList(memoF);
+  // 말로 찾은 조건 표시
+  const bar = mHead.querySelector('#mQbar');
+  const cond = memoF.from || memoF.spoken;
+  bar.style.display = cond ? '' : 'none';
+  if (cond) mHead.querySelector('#mQtx').textContent = (memoF.spoken ? '🎙️ “' + memoF.spoken + '” → ' : '') + (memoSubject() || '전체') + ' 메모 ' + arr.length + '건';
+  mHead.querySelector('#mSpeak').style.display = canSpeak() ? '' : 'none';
+  // 목록
+  mBody.textContent = '';
+  if (!all.length) { mBody.appendChild(memoEmpty()); return; }
+  const cnt = document.createElement('div'); cnt.className = 'mcnt'; cnt.textContent = arr.length ? `메모 ${arr.length}건 · 최근 순 (고정 먼저)` : '조건에 맞는 메모 없음'; mBody.appendChild(cnt);
+  arr.forEach(m => mBody.appendChild(memoCard(m)));
+}
+function memoEmpty() {
+  const d = document.createElement('div'); d.className = 'empty';
+  const h = document.createElement('h3'); h.textContent = '💡 떠오른 생각을 말로 남겨 보세요';
+  const p = document.createElement('div'); p.textContent = '💡 메모 버튼(또는 마이크 길게 누르기)을 누르고 말하거나, 「메모 …」「아이디어 …」처럼 앞에 붙여 말하면 글로 바뀌어 저장되고 자동으로 분류됨.';
+  const ex = document.createElement('div'); ex.className = 'ex';
+  ['아이디어 윙스텝 구독형 렌탈로 팔아보기', '메모 브라켓 두께 줄여서 시제품 다시 뽑기', '기억해 줘 거래처에 견적 다시 보내기', '이번주 메모 읽어줘'].forEach(s => {
+    const b = document.createElement('button'); b.textContent = '“' + s + '”'; b.onclick = () => handleText(s, 'example'); ex.appendChild(b);
+  });
+  d.append(h, p, ex);
+  return d;
+}
+function memoCard(m) {
+  const el = document.createElement('div'); el.className = 'mcard' + (memoHi.has(m.id) ? ' new' : '');
+  const st = document.createElement('button'); st.className = 'star' + (m.star ? ' on' : ''); st.textContent = m.star ? '★' : '☆'; st.setAttribute('aria-label', m.star ? '고정 풀기' : '고정');
+  st.onclick = () => putMemo(Object.assign({}, m, { star: !m.star }));
+  const b = document.createElement('div'); b.className = 'mbody'; b.setAttribute('role', 'button'); b.tabIndex = 0;
+  const t = document.createElement('div'); t.className = 'mttl'; t.textContent = m.title || '메모'; b.appendChild(t);
+  if (nsp(m.text) !== nsp(String(m.title || '').replace(/…$/, ''))) { const x = document.createElement('div'); x.className = 'mtx'; x.textContent = m.text; b.appendChild(x); }
+  const meta = document.createElement('div'); meta.className = 'mmeta';
+  const cb = document.createElement('button'); cb.className = 'mcat'; cb.textContent = catLbl(m.cat); cb.setAttribute('aria-label', '분류 바꾸기');
+  cb.onclick = e => { e.stopPropagation(); openMemoEdit(m.id); };
+  const at = document.createElement('span'); at.textContent = fmtAt(m.createdAt);
+  meta.append(cb, at);
+  (m.tags || []).slice(0, 4).forEach(g => { const s = document.createElement('span'); s.textContent = '#' + g; meta.appendChild(s); });
+  const linked = m.eventId && events.has(m.eventId);
+  if (linked) { const s = document.createElement('span'); s.className = 'mdone'; s.textContent = '📅 일정 등록됨'; meta.appendChild(s); }
+  else if (m.when && m.when.date) { const s = document.createElement('button'); s.className = 'msch'; s.textContent = '📅 ' + whenLbl(m.when) + ' 일정으로도'; s.onclick = e => { e.stopPropagation(); memoToEvent(m.id); }; meta.appendChild(s); }
+  b.appendChild(meta);
+  b.onclick = () => openMemoEdit(m.id);
+  b.onkeydown = e => { if (e.key === 'Enter') openMemoEdit(m.id); };
+  el.append(st, b);
+  return el;
+}
+
+// 메모 수정 시트
+function openMemoEdit(id) {
+  const m = memos.get(id); if (!m) return;
+  memoEditId = id; mEditCat = catOf(m.cat).id; mEditStar = !!m.star;
+  $('mRaw').textContent = '🎙️ ' + (m.src === 'voice' ? '들은 말' : '입력한 말') + ': “' + (m.raw || m.text) + '” · ' + fmtAt(m.createdAt) + (m.catBy === 'manual' ? ' · 분류 직접 지정' : ' · 자동 분류');
+  $('mTitle').value = m.title || ''; $('mText').value = m.text || ''; $('mTags').value = (m.tags || []).join(', ');
+  $('mDel').classList.remove('arm');
+  renderMemoCatPick(); syncMemoSheet();
+  $('memoScrim').classList.add('show');
+}
+function renderMemoCatPick() {
+  const box = $('mCats'); box.textContent = '';
+  memoCats.forEach(c => { const b = document.createElement('button'); b.textContent = (c.emoji ? c.emoji + ' ' : '') + c.name; b.classList.toggle('on', c.id === mEditCat); b.onclick = () => { mEditCat = c.id; renderMemoCatPick(); }; box.appendChild(b); });
+}
+function syncMemoSheet() {
+  const m = memos.get(memoEditId); if (!m) return;
+  $('mStar').textContent = mEditStar ? '★ 고정됨' : '☆ 고정';
+  const linked = m.eventId && events.has(m.eventId) ? events.get(m.eventId) : null;
+  const w = $('mText').value.trim() === m.text ? m.when : KoMemo.whenOf($('mText').value, new Date(m.createdAt));
+  $('mWhen').style.display = linked || w ? '' : 'none';
+  $('mWhen').textContent = linked ? '📅 일정으로 등록됨 — ' + fmtShort(linked) + ' ' + linked.title : w ? '📅 메모에 날짜가 있음 — ' + whenLbl(w) + (w.title && w.title !== '일정' ? ' 「' + w.title + '」' : '') : '';
+  $('mSched').style.display = !linked && w ? '' : 'none';
+}
+function readMemo() {
+  const m = Object.assign({}, memos.get(memoEditId));
+  const text = $('mText').value.trim() || m.text;
+  const autoTitle = (m.title || '') === KoMemo.titleOf(m.text);
+  if (text !== m.text) { m.text = text; m.when = KoMemo.whenOf(text, new Date(m.createdAt)); }
+  const ti = $('mTitle').value.trim();
+  m.title = !ti || (autoTitle && ti === memos.get(memoEditId).title) ? KoMemo.titleOf(text) : ti;
+  if (mEditCat !== catOf(m.cat).id) { m.cat = mEditCat; m.catBy = 'manual'; }
+  m.tags = $('mTags').value.split(/[,，#\n]/).map(x => x.trim()).filter(Boolean).slice(0, 10);
+  m.star = mEditStar;
+  return m;
+}
+const closeMemoEdit = () => { $('memoScrim').classList.remove('show'); memoEditId = null; };
+$('mText').addEventListener('input', syncMemoSheet);
+$('mStar').onclick = () => { mEditStar = !mEditStar; syncMemoSheet(); };
+$('mSave').onclick = () => { if (!memoEditId) return; const m = readMemo(); closeMemoEdit(); putMemo(m); showToast('💡 메모 저장함 · ' + catLbl(m.cat), false); };
+$('mSched').onclick = () => { if (!memoEditId) return; const m = readMemo(); closeMemoEdit(); putMemo(m); memoToEvent(m.id); };
+$('mDel').onclick = () => { if (!memoEditId) return; const id = memoEditId; closeMemoEdit(); deleteMemo(id); };
+$('mClose').onclick = closeMemoEdit;
+$('memoScrim').addEventListener('click', e => { if (e.target === $('memoScrim')) closeMemoEdit(); });
+
+// 설정: 메모 분류 고치기 (분류를 지워도 메모 자체는 그대로 — 화면에서 「기타」로 보임)
+function renderCatEditor() {
+  const box = $('mcatList'); box.textContent = '';
+  memoCats.forEach((c, i) => {
+    const row = document.createElement('div'); row.className = 'mcrow';
+    const r1 = document.createElement('div'); r1.className = 'r1';
+    const em = document.createElement('input'); em.className = 'em'; em.value = c.emoji || ''; em.maxLength = 4; em.setAttribute('aria-label', '분류 그림');
+    const nm = document.createElement('input'); nm.className = 'nm'; nm.value = c.name || ''; nm.placeholder = '분류 이름'; nm.setAttribute('aria-label', '분류 이름');
+    r1.append(em, nm);
+    if (c.id === 'etc') { const f = document.createElement('span'); f.className = 'fix'; f.textContent = '기본'; r1.appendChild(f); }
+    else {
+      const x = document.createElement('button'); x.className = 'x'; x.textContent = '삭제';
+      x.onclick = () => { if (!x.classList.contains('arm')) { x.classList.add('arm'); x.textContent = '한 번 더'; return; } memoCats.splice(i, 1); saveCats(); renderCatEditor(); render(); };
+      r1.appendChild(x);
+    }
+    const ta = document.createElement('textarea'); ta.value = (c.words || []).map(w => String(w).replace(/^~/, '~\u2060')).join(', ');   // 「~씨」가 줄바꿈으로 쪼개지지 않게 ta.placeholder = c.id === 'etc' ? '(비워 두면 어디에도 안 맞는 메모가 여기로 감)' : '이 분류로 보낼 낱말 (쉼표로 구분)';
+    const commit = () => { c.emoji = em.value.trim(); c.name = nm.value.trim() || c.name || '분류'; c.words = ta.value.replace(/\u2060/g, '').split(/[,，\n]/).map(x => x.trim()).filter(Boolean); saveCats(); render(); };
+    em.addEventListener('change', commit); nm.addEventListener('change', commit); ta.addEventListener('change', commit);
+    row.append(r1, ta);
+    box.appendChild(row);
+    const fit = () => { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; };
+    ta.addEventListener('input', fit); requestAnimationFrame(fit);
+  });
+}
+$('mcatAdd').onclick = () => {
+  const at = memoCats.findIndex(c => c.id === 'etc');
+  memoCats.splice(at < 0 ? memoCats.length : at, 0, { id: 'c_' + Date.now().toString(36), emoji: '🏷', name: '새 분류', words: [] });
+  saveCats(); renderCatEditor(); render();
+  const ins = $('mcatList').querySelectorAll('.nm'); const t = ins[at < 0 ? ins.length - 1 : at]; if (t) { t.focus(); t.select(); }
+};
+$('mcatReset').onclick = () => {
+  const b = $('mcatReset');
+  if (!b.classList.contains('arm')) { b.classList.add('arm'); b.textContent = '한 번 더 누르면 기본값'; setTimeout(() => { b.classList.remove('arm'); b.textContent = '기본 분류로'; }, 4000); return; }
+  b.classList.remove('arm'); b.textContent = '기본 분류로';
+  memoCats = KoMemo.clone(KoMemo.DEFAULT_CATS); saveCats(); renderCatEditor(); render();
+  showToast('메모 분류를 기본값으로 되돌림 (메모는 그대로)', false);
 };
 
 // ---------- 시작 ----------
 const now = new Date();
 $('todayLbl').textContent = (now.getMonth() + 1) + '월 ' + now.getDate() + '일 ' + WDN[now.getDay()] + '요일 · 음성인식 일정관리';
-loadLocal(); setStatus(); syncSwitches(); render();
+loadLocal(); loadMemos(); setStatus(); syncSwitches(); render();
 setInterval(() => { if (!$('editScrim').classList.contains('show')) render(); }, 60 * 1000);
 if (window.claude && typeof claude.use === 'function') {
   initCloud();
